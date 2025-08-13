@@ -85,7 +85,7 @@ export default function CalendarioPage() {
               day: "Día",
               agenda: "Agenda",
               noEventsInRange: "No hay eventos en este rango.",
-              showMore: (total) => `+ Ver ${total} más`,
+              showMore: (total:Number) => `+ Ver ${total} más`,
             }}
           />
         </div>
