@@ -8,10 +8,10 @@ export interface Booking {
   cantDias: number;       // Nº de días (calculado desde start/end)
   cantPersonas: number;   // Nº de personas
   celular?: string;        // Teléfono de contacto
-  descuento?: boolean;     // ¿Aplica descuento? (bandera)
+  descuento: boolean;     // ¿Aplica descuento? (bandera)
   end: Date;              // Fecha fin (inclusive, fin del día)
   start: Date;            // Fecha inicio (inicio del día)
-  pago?: boolean;          // ¿Pagado?
+  pago: boolean;          // ¿Pagado?
   ubicacion?: string;      // Ubicación / sector de la cabaña
   valorNoche: number;     // Tarifa por noche
   valorTotal: number;     // Total = valorNoche * cantDias (puedes modificar la lógica si hay descuento)

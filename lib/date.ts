@@ -6,9 +6,9 @@ import { dateFnsLocalizer } from "react-big-calendar";
 const locales = { es } as const;
 
 export const localizer = dateFnsLocalizer({
-  format: (date, fmt) => format(date, fmt, { locale: es }),
-  parse: (value, fmt) => parse(value, fmt, new Date(), { locale: es }),
-  startOfWeek: (date) => startOfWeek(date, { weekStartsOn: 1 }), // lunes
+  format: (date: Date, fmt: string) => format(date, fmt, { locale: es }),
+  parse: (value: string, fmt: string) => parse(value, fmt, new Date(), { locale: es }),
+  startOfWeek: (date: Date) => startOfWeek(date, { weekStartsOn: 1 }), // lunes
   getDay,
   locales,
 });

@@ -10,6 +10,7 @@ export const nav = [
   { href: "/", label: "Inicio", icon: Home },
   { href: "/calendario", label: "Calendario", icon: CalendarDays },
   { href: "/estadisticas", label: "Estadísticas", icon: BarChart3 },
+  { href: "/pruebas", label: "Pruebas", icon: BarChart3 },
 ];
 
 export function Sidebar() {

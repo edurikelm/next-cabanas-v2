@@ -7,9 +7,8 @@ import { startOfDay, endOfDay, differenceInCalendarDays } from "date-fns";
 import { DateRange } from "react-day-picker";
 
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 import type { Booking } from "../lib/types/booking-types";
@@ -135,7 +134,19 @@ export function BookingForm({ open, onOpenChange, onSubmit, initial }: BookingFo
                 <FormItem>
                   <FormLabel>Personas</FormLabel>
                   <FormControl>
-                    <Input type="number" inputMode="numeric" min={1} step={1} placeholder="2" {...field} />
+                    <Input 
+                      type="number" 
+                      inputMode="numeric" 
+                      min={1} 
+                      step={1} 
+                      placeholder="2" 
+                      {...field}
+                      value={field.value || ""}
+                      onChange={(e) => {
+                        const value = e.target.value === "" ? 0 : parseInt(e.target.value, 10);
+                        field.onChange(value);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -177,7 +188,19 @@ export function BookingForm({ open, onOpenChange, onSubmit, initial }: BookingFo
                 <FormItem>
                   <FormLabel>Valor por noche</FormLabel>
                   <FormControl>
-                    <Input type="number" inputMode="decimal" min={0} step={1} placeholder="50000" {...field} />
+                    <Input 
+                      type="number" 
+                      inputMode="decimal" 
+                      min={0} 
+                      step={1} 
+                      placeholder="50000" 
+                      {...field}
+                      value={field.value || ""}
+                      onChange={(e) => {
+                        const value = e.target.value === "" ? 0 : parseFloat(e.target.value);
+                        field.onChange(value);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
