@@ -7,6 +7,7 @@ import { Menu } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { nav } from "./sidebar";
+import { cn } from "@/lib/utils";
 
 export function MobileNav() {
   const pathname = usePathname();
@@ -22,17 +23,22 @@ export function MobileNav() {
         <SheetHeader className="p-4">
           <SheetTitle>Arriendos</SheetTitle>
         </SheetHeader>
-        <nav className="p-2 space-y-1">
+        <nav className="p-4 space-y-2">
           {nav.map((item) => {
-            const active = pathname === item.href;
-            const Icon = item.icon as any;
+            const isActive = pathname === item.href;
+            const Icon = item.icon;
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 rounded-xl px-3 py-2 transition hover:bg-muted ${active ? "bg-muted font-medium" : ""}`}
+                className={cn(
+                  "flex items-center space-x-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                  isActive
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                )}
               >
-                <Icon className="size-5" />
+                <Icon className="h-4 w-4" />
                 <span>{item.label}</span>
               </Link>
             );

@@ -33,11 +33,13 @@ export default function CalendarioPage() {
     // Colores por cabaña
     if (event.resource?.cabana) {
       const cabana = event.resource.cabana.toLowerCase();
-      if (cabana.includes('regional cuatro')) backgroundColor = "#3b82f6"; // Azul
       if (cabana.includes('regional uno')) backgroundColor = "#f59e0b"; // Naranja
+      if (cabana.includes('regional cuatro')) backgroundColor = "#3b82f6"; // Azul
       if (cabana.includes('regional tres')) backgroundColor = "#8b5cf6"; // Púrpura
       if (cabana.includes('regional dos')) backgroundColor = "#ef4444"; // Rojo
-      if (cabana.includes('teja')) backgroundColor = "#10b981"; // Verde esmeralda
+      if (cabana.includes('teja uno')) backgroundColor = "#10b981"; // Verde esmeralda
+      if (cabana.includes('teja dos')) backgroundColor = "#f97316"; // Naranja oscuro
+      if (cabana.includes('teja tres')) backgroundColor = "#6b7280"; // Gris
     }
     
     return { 
