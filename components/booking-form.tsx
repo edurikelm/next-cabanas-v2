@@ -14,15 +14,18 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import type { Booking } from "../lib/types/booking-types";
 import { DateRangePicker } from "@/components/date-range-picker";
 import { bookingFormSchema, type BookingFormValues } from "@/lib/schemas/booking-schema";
+import { useArriendoOperaciones } from "@/lib/hooks/useFirestore";
 
 export interface BookingFormProps {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   onSubmit: (data: Omit<Booking, "id">) => void;
+  onReload?: () => void;
   initial?: Partial<Booking>;
 }
 
-export function BookingForm({ open, onOpenChange, onSubmit, initial }: BookingFormProps) {
+export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }: BookingFormProps) {
+  const { crear, actualizar, loading: operationLoading } = useArriendoOperaciones();
   const initialRange: DateRange | undefined =
     initial?.start && initial?.end ? { from: initial.start, to: initial.end } : undefined;
 
@@ -48,7 +51,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, initial }: BookingFo
   const cantDias = range?.from && range?.to ? Math.max(1, differenceInCalendarDays(endOfDay(range.to), startOfDay(range.from))) : 0;
   const valorTotal = Math.max(0, (valorNoche || 0) * (cantDias || 0));
 
-  const submit = (values: BookingFormValues) => {
+  const submit = async (values: BookingFormValues) => {
     const { from, to } = values.dateRange || {};
     if (!from || !to) return; // protegido por zod
 
@@ -59,9 +62,9 @@ export function BookingForm({ open, onOpenChange, onSubmit, initial }: BookingFo
     const payload: Omit<Booking, "id"> = {
       title: values.title,
       cabana: values.cabana,
-      ubicacion: values.ubicacion,
+      ubicacion: values.ubicacion || '',
       cantPersonas: values.cantPersonas,
-      celular: values.celular,
+      celular: values.celular || '',
       descuento: values.descuento,
       pago: values.pago,
       start,
@@ -71,8 +74,27 @@ export function BookingForm({ open, onOpenChange, onSubmit, initial }: BookingFo
       valorTotal,
     };
 
-    onSubmit(payload);
-    onOpenChange(false);
+    try {
+      if (initial?.id) {
+        // Editar arriendo existente
+        await actualizar(initial.id, payload);
+        console.log('Arriendo actualizado exitosamente');
+      } else {
+        // Crear nuevo arriendo
+        await crear(payload);
+        console.log('Arriendo creado exitosamente');
+      }
+      
+      onSubmit(payload);
+      onReload?.(); // Recargar datos
+      onOpenChange(false);
+      form.reset(); // Limpiar formulario
+      
+    } catch (error) {
+      console.error('Error al guardar arriendo:', error);
+      // Aquí podrías mostrar un toast de error
+      alert('Error al guardar el arriendo. Por favor, intenta nuevamente.');
+    }
   };
 
   return (
@@ -134,19 +156,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, initial }: BookingFo
                 <FormItem>
                   <FormLabel>Personas</FormLabel>
                   <FormControl>
-                    <Input 
-                      type="number" 
-                      inputMode="numeric" 
-                      min={1} 
-                      step={1} 
-                      placeholder="2" 
-                      {...field}
-                      value={field.value || ""}
-                      onChange={(e) => {
-                        const value = e.target.value === "" ? 0 : parseInt(e.target.value, 10);
-                        field.onChange(value);
-                      }}
-                    />
+                    <Input type="number" inputMode="numeric" min={1} step={1} placeholder="2" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -188,19 +198,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, initial }: BookingFo
                 <FormItem>
                   <FormLabel>Valor por noche</FormLabel>
                   <FormControl>
-                    <Input 
-                      type="number" 
-                      inputMode="decimal" 
-                      min={0} 
-                      step={1} 
-                      placeholder="50000" 
-                      {...field}
-                      value={field.value || ""}
-                      onChange={(e) => {
-                        const value = e.target.value === "" ? 0 : parseFloat(e.target.value);
-                        field.onChange(value);
-                      }}
-                    />
+                    <Input type="number" inputMode="decimal" min={0} step={1} placeholder="50000" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -243,8 +241,12 @@ export function BookingForm({ open, onOpenChange, onSubmit, initial }: BookingFo
             />
 
             <div className="md:col-span-2 flex justify-end gap-2">
-              <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>Cancelar</Button>
-              <Button type="submit">{initial?.id ? "Guardar cambios" : "Agregar"}</Button>
+              <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={operationLoading}>
+                {operationLoading ? 'Guardando...' : (initial?.id ? "Guardar cambios" : "Agregar")}
+              </Button>
             </div>
           </form>
         </Form>

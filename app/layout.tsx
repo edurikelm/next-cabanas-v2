@@ -2,7 +2,6 @@
 import type { Metadata } from "next";
 import "@/app/globals.css";
 import { Sidebar } from "@/components/sidebar";
-import { BookingsProvider } from "@/components/bookings-context";
 import { MobileNav } from "@/components/mobile-nav";
 
 export const metadata: Metadata = {
@@ -14,7 +13,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es">
       <body className="min-h-screen bg-gradient-to-b from-white to-slate-50 text-slate-900">
-        <BookingsProvider>
           {/* Topbar móvil */}
           <div className="md:hidden sticky top-0 z-40 border-b bg-white/70 backdrop-blur">
             <div className="flex items-center gap-3 p-3">
@@ -33,7 +31,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               {children}
             </main>
           </div>
-        </BookingsProvider>
       </body>
     </html>
   );

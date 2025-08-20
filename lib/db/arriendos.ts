@@ -1,0 +1,201 @@
+import { 
+  collection, 
+  doc, 
+  addDoc, 
+  updateDoc, 
+  deleteDoc, 
+  getDoc, 
+  getDocs, 
+  query, 
+  orderBy,
+  DocumentData,
+  QueryDocumentSnapshot,
+  Timestamp,
+  serverTimestamp
+} from 'firebase/firestore';
+import { db } from './firebase';
+import { Booking } from '../types/booking-types';
+
+const COLLECTION_NAME = 'arriendos';
+
+// Función para convertir DocumentData a Booking
+const convertDocToBooking = (doc: QueryDocumentSnapshot<DocumentData>): Booking => {
+  const data = doc.data();
+  
+  return {
+    id: doc.id,
+    title: data.title || '',
+    cabana: data.cabana || '',
+    cantDias: Number(data.cantDias) || 0,
+    cantPersonas: Number(data.cantPersonas) || 0,
+    celular: data.celular || '',
+    descuento: Boolean(data.descuento),
+    end: data.end instanceof Timestamp ? data.end.toDate() : new Date(data.end),
+    start: data.start instanceof Timestamp ? data.start.toDate() : new Date(data.start),
+    pago: Boolean(data.pago),
+    ubicacion: data.ubicacion || '',
+    valorNoche: Number(data.valorNoche) || 0,
+    valorTotal: Number(data.valorTotal) || 0,
+  };
+};
+
+// Función para convertir Booking a DocumentData
+const convertBookingToDoc = (booking: Omit<Booking, 'id'>): DocumentData => {
+  return {
+    title: booking.title,
+    cabana: booking.cabana,
+    cantDias: booking.cantDias,
+    cantPersonas: booking.cantPersonas,
+    celular: booking.celular || '',
+    descuento: booking.descuento,
+    end: Timestamp.fromDate(booking.end),
+    start: Timestamp.fromDate(booking.start),
+    pago: booking.pago,
+    ubicacion: booking.ubicacion || '',
+    valorNoche: booking.valorNoche,
+    valorTotal: booking.valorTotal,
+    fechaCreacion: serverTimestamp(),
+  };
+};
+
+// Crear un nuevo arriendo
+export const crearArriendo = async (booking: Omit<Booking, 'id'>): Promise<string> => {
+  try {
+    const docData = convertBookingToDoc(booking);
+    const docRef = await addDoc(collection(db, COLLECTION_NAME), docData);
+    console.log('Arriendo creado con ID:', docRef.id);
+    return docRef.id;
+  } catch (error) {
+    console.error('Error al crear arriendo:', error);
+    throw new Error('No se pudo crear el arriendo');
+  }
+};
+
+// Obtener todos los arriendos
+export const obtenerArriendos = async (): Promise<Booking[]> => {
+  try {
+    const q = query(
+      collection(db, COLLECTION_NAME),
+      orderBy('start', 'desc')
+    );
+    
+    const querySnapshot = await getDocs(q);
+    const arriendos: Booking[] = [];
+    
+    querySnapshot.forEach((doc) => {
+      arriendos.push(convertDocToBooking(doc));
+    });
+    
+    console.log(`Se obtuvieron ${arriendos.length} arriendos`);
+    return arriendos;
+  } catch (error) {
+    console.error('Error al obtener arriendos:', error);
+    throw new Error('No se pudieron cargar los arriendos');
+  }
+};
+
+// Obtener un arriendo por ID
+export const obtenerArriendoPorId = async (id: string): Promise<Booking | null> => {
+  try {
+    const docRef = doc(db, COLLECTION_NAME, id);
+    const docSnap = await getDoc(docRef);
+    
+    if (docSnap.exists()) {
+      return convertDocToBooking(docSnap as QueryDocumentSnapshot<DocumentData>);
+    } else {
+      console.log('No se encontró el arriendo con ID:', id);
+      return null;
+    }
+  } catch (error) {
+    console.error('Error al obtener arriendo:', error);
+    throw new Error('No se pudo cargar el arriendo');
+  }
+};
+
+// Actualizar un arriendo
+export const actualizarArriendo = async (
+  id: string, 
+  datos: Partial<Omit<Booking, 'id'>>
+): Promise<void> => {
+  try {
+    const docRef = doc(db, COLLECTION_NAME, id);
+    const updateData: Partial<DocumentData> = {};
+    
+    // Convertir solo los campos que se están actualizando
+    Object.entries(datos).forEach(([key, value]) => {
+      if (key === 'start' || key === 'end') {
+        updateData[key] = Timestamp.fromDate(value as Date);
+      } else {
+        updateData[key] = value;
+      }
+    });
+    
+    updateData.fechaActualizacion = serverTimestamp();
+    
+    await updateDoc(docRef, updateData);
+    console.log('Arriendo actualizado:', id);
+  } catch (error) {
+    console.error('Error al actualizar arriendo:', error);
+    throw new Error('No se pudo actualizar el arriendo');
+  }
+};
+
+// Eliminar un arriendo
+export const eliminarArriendo = async (id: string): Promise<void> => {
+  try {
+    const docRef = doc(db, COLLECTION_NAME, id);
+    await deleteDoc(docRef);
+    console.log('Arriendo eliminado:', id);
+  } catch (error) {
+    console.error('Error al eliminar arriendo:', error);
+    throw new Error('No se pudo eliminar el arriendo');
+  }
+};
+
+// Verificar disponibilidad de una cabaña en un rango de fechas
+export const verificarDisponibilidadCabana = async (
+  cabana: string,
+  fechaInicio: Date,
+  fechaFin: Date,
+  excluirId?: string
+): Promise<boolean> => {
+  try {
+    const arriendos = await obtenerArriendos();
+    
+    const conflictos = arriendos.filter(arriendo => {
+      // Excluir el arriendo actual si se está editando
+      if (excluirId && arriendo.id === excluirId) return false;
+      
+      // Solo verificar la misma cabaña
+      if (arriendo.cabana !== cabana) return false;
+      
+      // Verificar solapamiento de fechas
+      const inicioExistente = arriendo.start;
+      const finExistente = arriendo.end;
+      
+      return !(fechaFin < inicioExistente || fechaInicio > finExistente);
+    });
+    
+    return conflictos.length === 0;
+  } catch (error) {
+    console.error('Error al verificar disponibilidad:', error);
+    throw new Error('No se pudo verificar la disponibilidad');
+  }
+};
+
+// Función para convertir Booking a evento del calendario
+export const convertirBookingAEvento = (booking: Booking) => {
+  return {
+    id: booking.id,
+    title: booking.title,
+    start: booking.start,
+    end: booking.end,
+    allDay: true,
+    resource: {
+      ...booking,
+      // Datos adicionales para mostrar en el calendario
+      huespedes: booking.cantPersonas.toString(),
+      telefono: booking.celular,
+    }
+  };
+};
