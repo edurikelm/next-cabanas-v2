@@ -1,6 +1,7 @@
 // components/booking-form.tsx
 "use client";
 
+import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { startOfDay, endOfDay, differenceInCalendarDays } from "date-fns";
@@ -9,12 +10,14 @@ import { DateRange } from "react-day-picker";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 import type { Booking } from "../lib/types/booking-types";
 import { DateRangePicker } from "@/components/date-range-picker";
 import { bookingFormSchema, type BookingFormValues } from "@/lib/schemas/booking-schema";
 import { useArriendoOperaciones } from "@/lib/hooks/useFirestore";
+import cabanas from "@/lib/cabanas";
 
 export interface BookingFormProps {
   open: boolean;
@@ -44,6 +47,52 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
       dateRange: initialRange,
     },
   });
+
+  // Efecto para actualizar el formulario cuando cambien los datos iniciales
+  useEffect(() => {
+    // console.log('BookingForm: updating with initial data:', initial);
+    
+    const newInitialRange: DateRange | undefined =
+      initial?.start && initial?.end ? { from: initial.start, to: initial.end } : undefined;
+    
+    const resetData = {
+      title: initial?.title ?? "",
+      cabana: initial?.cabana ?? "",
+      ubicacion: initial?.ubicacion ?? "",
+      cantPersonas: initial?.cantPersonas ?? 1,
+      celular: initial?.celular ?? "",
+      valorNoche: initial?.valorNoche ?? 0,
+      descuento: initial?.descuento ?? false,
+      pago: initial?.pago ?? false,
+      dateRange: newInitialRange,
+    };
+    
+    // console.log('BookingForm: resetting form with:', resetData);
+    form.reset(resetData);
+  }, [initial, form]);
+
+  // Efecto adicional para cuando se abre el modal
+  useEffect(() => {
+    if (open && initial) {
+      // console.log('BookingForm: Modal opened with initial data, forcing reset');
+      const newInitialRange: DateRange | undefined =
+        initial?.start && initial?.end ? { from: initial.start, to: initial.end } : undefined;
+      
+      setTimeout(() => {
+        form.reset({
+          title: initial?.title ?? "",
+          cabana: initial?.cabana ?? "",
+          ubicacion: initial?.ubicacion ?? "",
+          cantPersonas: initial?.cantPersonas ?? 1,
+          celular: initial?.celular ?? "",
+          valorNoche: initial?.valorNoche ?? 0,
+          descuento: initial?.descuento ?? false,
+          pago: initial?.pago ?? false,
+          dateRange: newInitialRange,
+        });
+      }, 100);
+    }
+  }, [open, initial, form]);
 
   // Derivados en vivo para mostrar en la UI
   const range = form.watch("dateRange");
@@ -128,7 +177,18 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                 <FormItem>
                   <FormLabel>Cabaña</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ej: Cabaña del Bosque" {...field} />
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar cabaña" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {cabanas.map((cabana) => (
+                          <SelectItem key={cabana} value={cabana}>
+                            {cabana}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
