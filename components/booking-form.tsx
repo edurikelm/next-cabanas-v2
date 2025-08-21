@@ -156,7 +156,18 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                 <FormItem>
                   <FormLabel>Personas</FormLabel>
                   <FormControl>
-                    <Input type="number" inputMode="numeric" min={1} step={1} placeholder="2" {...field} />
+                    <Input 
+                      type="number" 
+                      inputMode="numeric" 
+                      min={1} 
+                      step={1} 
+                      placeholder="2" 
+                      value={field.value || ""}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value === "" ? 1 : Number(value));
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -198,7 +209,18 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                 <FormItem>
                   <FormLabel>Valor por noche</FormLabel>
                   <FormControl>
-                    <Input type="number" inputMode="decimal" min={0} step={1} placeholder="50000" {...field} />
+                    <Input 
+                      type="number" 
+                      inputMode="decimal" 
+                      min={0} 
+                      step={1} 
+                      placeholder="50000" 
+                      value={field.value || ""}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value === "" ? 0 : Number(value));
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

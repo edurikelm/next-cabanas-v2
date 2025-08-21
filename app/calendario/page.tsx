@@ -6,6 +6,7 @@ import { Calendar, Views } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { localizer } from "@/lib/date";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Booking } from "@/lib/types/booking-types";
 import { BookingForm } from "@/components/booking-form";
 import { BookingDetail } from "@/components/booking-detail";
@@ -20,12 +21,33 @@ export default function CalendarioPage() {
   const [editing, setEditing] = useState<Booking | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const [selected, setSelected] = useState<Booking | null>(null);
+  const [selectedCabana, setSelectedCabana] = useState<string>("todas");
 
-  // Convertir arriendos a eventos del calendario
+  // Lista de cabañas disponibles
+  const cabanas = [
+    { value: "todas", label: "Todas las cabañas" },
+    { value: "regional uno", label: "Regional Uno" },
+    { value: "regional dos", label: "Regional Dos" },
+    { value: "regional tres", label: "Regional Tres" },
+    { value: "regional cuatro", label: "Regional Cuatro" },
+    { value: "teja uno", label: "Teja Uno" },
+    { value: "teja dos", label: "Teja Dos" },
+    { value: "teja tres", label: "Teja Tres" },
+  ];
+
+  // Filtrar arriendos por cabaña seleccionada
+  const arriendosFiltrados = useMemo(() => {
+    if (!arriendos || selectedCabana === "todas") return arriendos;
+    return arriendos.filter(arriendo => 
+      arriendo.cabana.toLowerCase().includes(selectedCabana.toLowerCase())
+    );
+  }, [arriendos, selectedCabana]);
+
+  // Convertir arriendos filtrados a eventos del calendario
   const events = useMemo(() => {
-    if (!arriendos) return [];
-    return arriendos.map(convertirBookingAEvento);
-  }, [arriendos]);
+    if (!arriendosFiltrados) return [];
+    return arriendosFiltrados.map(convertirBookingAEvento);
+  }, [arriendosFiltrados]);
 
   const eventPropGetter = (event: any) => {
     let backgroundColor = "#22c55e"; // Verde por defecto
@@ -54,7 +76,7 @@ export default function CalendarioPage() {
   };
 
   const handleSelectEvent = (event: any) => {
-    const arriendo = arriendos?.find(a => a.id === event.id);
+    const arriendo = arriendosFiltrados?.find(a => a.id === event.id);
     if (arriendo) {
       setSelected(arriendo);
       setDetailOpen(true);
@@ -123,8 +145,9 @@ export default function CalendarioPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-semibold">Calendario</h2>
-          <p className="text-sm text-gray-600">
-            {arriendos ? `Mostrando ${arriendos.length} arriendos` : 'No hay arriendos'}
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            {arriendosFiltrados ? `Mostrando ${arriendosFiltrados.length} arriendos` : 'No hay arriendos'}
+            {selectedCabana !== "todas" && ` • Filtrado por: ${cabanas.find(c => c.value === selectedCabana)?.label}`}
           </p>
         </div>
         <div className="flex gap-2">
@@ -137,6 +160,32 @@ export default function CalendarioPage() {
         </div>
       </div>
 
+      {/* Filtro de cabañas */}
+      <div className="flex items-center gap-4">
+        <span className="text-sm font-medium">Filtrar por cabaña:</span>
+        <Select value={selectedCabana} onValueChange={setSelectedCabana}>
+          <SelectTrigger className="w-64">
+            <SelectValue placeholder="Seleccionar cabaña" />
+          </SelectTrigger>
+          <SelectContent>
+            {cabanas.map((cabana) => (
+              <SelectItem key={cabana.value} value={cabana.value}>
+                {cabana.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {selectedCabana !== "todas" && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setSelectedCabana("todas")}
+          >
+            Limpiar filtro
+          </Button>
+        )}
+      </div>
+
       <div className="rounded-2xl border bg-white p-3">
         <div className="h-[65dvh] sm:h-[70dvh] md:h-[75dvh] lg:h-[80dvh]">
           <Calendar
@@ -147,6 +196,10 @@ export default function CalendarioPage() {
             defaultView={Views.MONTH}
             style={{ height: "100%" }}
             popup
+            showAllEvents
+            doShowMoreDrillDown={false}
+            max={undefined}
+            eventLimit={false}
             onSelectEvent={handleSelectEvent}
             eventPropGetter={eventPropGetter}
             messages={{
