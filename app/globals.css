@@ -104,6 +104,37 @@
 .rbc-calendar { touch-action: pan-y; }
 .rbc-toolbar { gap: .5rem; flex-wrap: wrap; }
 
+/* Asegurar texto negro en calendario en modo oscuro */
+.dark .rbc-calendar {
+  color: #000 !important;
+}
+
+.dark .rbc-toolbar button {
+  color: #000 !important;
+  border-color: #d1d5db !important;
+}
+
+.dark .rbc-toolbar .rbc-toolbar-label {
+  color: #000 !important;
+}
+
+.dark .rbc-header {
+  color: #000 !important;
+  background-color: #f9fafb !important;
+}
+
+.dark .rbc-date-cell {
+  color: #000 !important;
+}
+
+.dark .rbc-off-range {
+  color: #6b7280 !important;
+}
+
+.dark .rbc-today {
+  background-color: #dbeafe !important;
+}
+
 /* Estilos para mostrar todos los eventos sin límite */
 .rbc-month-view .rbc-date-cell {
   min-height: auto !important;

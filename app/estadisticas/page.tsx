@@ -369,7 +369,7 @@ export default function EstadisticasPage() {
           ) : (
             <div className="space-y-4">
               {rankingCabanas.map((cabana, index) => (
-                <div key={cabana.nombre} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div key={cabana.nombre} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-50 dark:text-black rounded-lg">
                   <div className="flex items-center gap-3">
                     <Badge variant={index === 0 ? "default" : "secondary"}>
                       #{index + 1}

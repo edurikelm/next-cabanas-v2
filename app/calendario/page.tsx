@@ -186,8 +186,8 @@ export default function CalendarioPage() {
         )}
       </div>
 
-      <div className="rounded-2xl border bg-white p-3">
-        <div className="h-[65dvh] sm:h-[70dvh] md:h-[75dvh] lg:h-[80dvh]">
+      <div className="rounded-2xl border bg-white dark:bg-white p-3">
+        <div className="h-[65dvh] sm:h-[70dvh] md:h-[75dvh] lg:h-[80dvh] dark:text-black">
           <Calendar
             localizer={localizer}
             events={events}
