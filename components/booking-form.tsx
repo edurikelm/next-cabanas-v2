@@ -17,7 +17,7 @@ import type { Booking } from "../lib/types/booking-types";
 import { DateRangePicker } from "@/components/date-range-picker";
 import { bookingFormSchema, type BookingFormValues } from "@/lib/schemas/booking-schema";
 import { useArriendoOperaciones } from "@/lib/hooks/useFirestore";
-import cabanas from "@/lib/cabanas";
+import { useAvailableCabanas } from "@/lib/cabanas";
 
 export interface BookingFormProps {
   open: boolean;
@@ -29,6 +29,7 @@ export interface BookingFormProps {
 
 export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }: BookingFormProps) {
   const { crear, actualizar, loading: operationLoading } = useArriendoOperaciones();
+  const { cabanas, loading: cabanasLoading, error: cabanasError } = useAvailableCabanas();
   const initialRange: DateRange | undefined =
     initial?.start && initial?.end ? { from: initial.start, to: initial.end } : undefined;
 
@@ -179,14 +180,27 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                   <FormControl>
                     <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar cabaña" />
+                        <SelectValue 
+                          placeholder={
+                            cabanasLoading 
+                              ? "Cargando cabañas..." 
+                              : cabanasError 
+                                ? "Error cargando cabañas" 
+                                : "Seleccionar cabaña disponible"
+                          } 
+                        />
                       </SelectTrigger>
                       <SelectContent>
-                        {cabanas.map((cabana) => (
+                        {!cabanasLoading && !cabanasError && cabanas.map((cabana) => (
                           <SelectItem key={cabana} value={cabana}>
                             {cabana}
                           </SelectItem>
                         ))}
+                        {cabanasError && cabanas.length === 0 && (
+                          <div className="px-2 py-1 text-sm text-red-600">
+                            No hay cabañas disponibles
+                          </div>
+                        )}
                       </SelectContent>
                     </Select>
                   </FormControl>

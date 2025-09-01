@@ -12,10 +12,12 @@ import { BookingForm } from "@/components/booking-form";
 import { BookingDetail } from "@/components/booking-detail";
 import { useArriendos, useArriendoOperaciones } from "@/lib/hooks/useFirestore";
 import { convertirBookingAEvento } from "@/lib/db/arriendos";
+import { useAvailableCabanas } from "@/lib/cabanas";
 
 export default function CalendarioPage() {
   const { data: arriendos, loading, error, recargar } = useArriendos();
   const { eliminar } = useArriendoOperaciones();
+  const { cabanas: cabanasDisponibles, loading: cabanasLoading } = useAvailableCabanas();
 
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Booking | null>(null);
@@ -23,17 +25,21 @@ export default function CalendarioPage() {
   const [selected, setSelected] = useState<Booking | null>(null);
   const [selectedCabana, setSelectedCabana] = useState<string>("todas");
 
-  // Lista de cabañas disponibles
-  const cabanas = [
-    { value: "todas", label: "Todas las cabañas" },
-    { value: "regional uno", label: "Regional Uno" },
-    { value: "regional dos", label: "Regional Dos" },
-    { value: "regional tres", label: "Regional Tres" },
-    { value: "regional cuatro", label: "Regional Cuatro" },
-    { value: "teja uno", label: "Teja Uno" },
-    { value: "teja dos", label: "Teja Dos" },
-    { value: "teja tres", label: "Teja Tres" },
-  ];
+  // Lista de cabañas disponibles para el filtro
+  const cabanas = useMemo(() => {
+    const opciones = [{ value: "todas", label: "Todas las cabañas" }];
+    
+    if (cabanasDisponibles && cabanasDisponibles.length > 0) {
+      cabanasDisponibles.forEach(cabana => {
+        opciones.push({
+          value: cabana.toLowerCase(),
+          label: cabana
+        });
+      });
+    }
+    
+    return opciones;
+  }, [cabanasDisponibles]);
 
   // Filtrar arriendos por cabaña seleccionada
   const arriendosFiltrados = useMemo(() => {

@@ -3,14 +3,17 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { CalendarDays, Home, BarChart3 } from 'lucide-react';
+import { CalendarDays, Home, BarChart3, Cog, UserRound  } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 
 export const nav = [
   { href: '/', label: 'Inicio', icon: Home },
   { href: '/calendario', label: 'Calendario', icon: CalendarDays },
+  { href: '/cabanas', label: 'Cabañas', icon: Home },
   { href: '/estadisticas', label: 'Estadísticas', icon: BarChart3 },
+  { href: '/arrendatarios', label: 'Arrendatarios', icon: UserRound },
+  { href: '/configuraciones', label: 'Configuraciones', icon: Cog },
 ];
 
 export function Sidebar() {

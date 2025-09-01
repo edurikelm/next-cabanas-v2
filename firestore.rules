@@ -1,0 +1,36 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Reglas para la colección arriendos
+    match /arriendos/{document} {
+      allow read, write: if true; // Permitir acceso completo por ahora
+    }
+    
+    // Reglas para la colección cabanas
+    match /cabanas/{document} {
+      allow read, write: if true; // Permitir acceso completo por ahora
+    }
+    
+    // Reglas para otras colecciones futuras
+    match /{document=**} {
+      allow read, write: if false; // Denegar acceso por defecto
+    }
+  }
+}
+
+// NOTA: Estas reglas son permisivas para desarrollo.
+// En producción, considera implementar autenticación y reglas más estrictas:
+//
+// rules_version = '2';
+// service cloud.firestore {
+//   match /databases/{database}/documents {
+//     // Requiere autenticación para acceder a los datos
+//     match /arriendos/{document} {
+//       allow read, write: if request.auth != null;
+//     }
+//     
+//     match /cabanas/{document} {
+//       allow read, write: if request.auth != null;
+//     }
+//   }
+// }
