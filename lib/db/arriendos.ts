@@ -41,6 +41,34 @@ const convertDocToBooking = (doc: QueryDocumentSnapshot<DocumentData>): Booking 
 
 // Función para convertir Booking a DocumentData
 const convertBookingToDoc = (booking: Omit<Booking, 'id'>): DocumentData => {
+  // Función auxiliar para validar y convertir fechas
+  const convertToTimestamp = (date: any): Timestamp => {
+    if (date instanceof Date) {
+      if (isNaN(date.getTime())) {
+        throw new Error(`Fecha inválida: ${date}`);
+      }
+      return Timestamp.fromDate(date);
+    }
+    
+    if (typeof date === 'string') {
+      const parsedDate = new Date(date);
+      if (isNaN(parsedDate.getTime())) {
+        throw new Error(`No se pudo parsear la fecha: ${date}`);
+      }
+      return Timestamp.fromDate(parsedDate);
+    }
+    
+    if (typeof date === 'number') {
+      const dateFromNumber = new Date(date);
+      if (isNaN(dateFromNumber.getTime())) {
+        throw new Error(`Timestamp inválido: ${date}`);
+      }
+      return Timestamp.fromDate(dateFromNumber);
+    }
+    
+    throw new Error(`Tipo de fecha no soportado: ${typeof date}, valor: ${date}`);
+  };
+
   return {
     title: booking.title,
     cabana: booking.cabana,
@@ -48,8 +76,8 @@ const convertBookingToDoc = (booking: Omit<Booking, 'id'>): DocumentData => {
     cantPersonas: booking.cantPersonas,
     celular: booking.celular || '',
     descuento: booking.descuento,
-    end: Timestamp.fromDate(booking.end),
-    start: Timestamp.fromDate(booking.start),
+    end: convertToTimestamp(booking.end),
+    start: convertToTimestamp(booking.start),
     pago: booking.pago,
     ubicacion: booking.ubicacion || '',
     valorNoche: booking.valorNoche,

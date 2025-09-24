@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import type { Booking } from "@/lib/types/booking-types";
 import { BookingForm } from "@/components/booking-form";
 import { BookingDetail } from "@/components/booking-detail";
+import { ICalendarSync } from "@/components/icalendar-sync";
 import { useArriendos, useArriendoOperaciones } from "@/lib/hooks/useFirestore";
 import { convertirBookingAEvento } from "@/lib/db/arriendos";
 import { useAvailableCabanas } from "@/lib/cabanas";
@@ -160,6 +161,7 @@ export default function CalendarioPage() {
           <Button variant="outline" onClick={recargar}>
             Recargar
           </Button>
+          <ICalendarSync />
           <Button onClick={() => { setEditing(null); setFormOpen(true); }}>
             Agregar arriendo
           </Button>
