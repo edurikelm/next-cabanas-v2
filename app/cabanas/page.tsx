@@ -9,11 +9,32 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCabanas } from "@/lib/hooks/useCabanas";
+import { useArriendos } from "@/lib/hooks/useFirestore";
 import type { Cabana } from "@/lib/types/cabana-types";
+import type { Booking } from "@/lib/types/booking-types";
 
 export default function CabanasPage() {
   const { data: cabanas, loading, error, recargar } = useCabanas();
+  const { data: arriendos, loading: loadingArriendos, error: errorArriendos } = useArriendos();
   const [busqueda, setBusqueda] = useState("");
+
+  // Obtener arriendos actuales (que están en curso hoy)
+  const getArriendosActuales = () => {
+    if (!arriendos) return [];
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    
+    return arriendos.filter(arriendo => {
+      const inicio = new Date(arriendo.start);
+      const fin = new Date(arriendo.end);
+      inicio.setHours(0, 0, 0, 0);
+      fin.setHours(23, 59, 59, 999);
+      
+      return hoy >= inicio && hoy <= fin;
+    });
+  };
+
+  const arriendosActuales = getArriendosActuales();
 
   // Filtrar cabañas por búsqueda
   const cabanasFiltradas = cabanas?.filter(cabana => 
@@ -148,6 +169,102 @@ export default function CabanasPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Arriendos Actuales */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Personas Actualmente Arrendando
+          </CardTitle>
+          <CardDescription>
+            {arriendosActuales.length} {arriendosActuales.length === 1 ? 'persona está' : 'personas están'} arrendando hoy
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {loadingArriendos ? (
+            <div className="flex items-center justify-center h-32">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                <p className="text-sm text-gray-600">Cargando arriendos...</p>
+              </div>
+            </div>
+          ) : errorArriendos ? (
+            <div className="text-center py-8">
+              <p className="text-red-600 mb-2">Error al cargar arriendos:</p>
+              <p className="text-sm text-gray-600">{errorArriendos}</p>
+            </div>
+          ) : arriendosActuales.length === 0 ? (
+            <div className="text-center py-8">
+              <Users className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-600">No hay arriendos activos hoy</p>
+              <p className="text-sm text-gray-400 mt-1">Las cabañas están disponibles</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {arriendosActuales.map((arriendo) => {
+                const inicio = new Date(arriendo.start);
+                const fin = new Date(arriendo.end);
+                const diasRestantes = Math.ceil((fin.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+                
+                return (
+                  <div key={arriendo.id} className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-gray-900 dark:text-gray-100">{arriendo.title}</h4>
+                        <p className="text-sm text-blue-700 dark:text-blue-300 font-medium">{arriendo.cabana}</p>
+                      </div>
+                      <Badge variant={diasRestantes <= 1 ? "destructive" : diasRestantes <= 3 ? "default" : "secondary"}>
+                        {diasRestantes <= 0 ? 'Finaliza hoy' : `${diasRestantes} día${diasRestantes > 1 ? 's' : ''} restantes`}
+                      </Badge>
+                    </div>
+                    
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4 text-gray-500" />
+                        <span className="text-gray-700 dark:text-gray-300">{arriendo.ubicacion || arriendo.cabana}</span>
+                      </div>
+                      
+                      {arriendo.celular && (
+                        <div className="flex items-center gap-2">
+                          <span className="h-4 w-4 text-center text-xs font-medium text-gray-500">📱</span>
+                          <span className="text-gray-700 dark:text-gray-300">{arriendo.celular}</span>
+                        </div>
+                      )}
+                      
+                      <div className="flex items-center gap-2">
+                        <Users className="h-4 w-4 text-gray-500" />
+                        <span className="text-gray-700 dark:text-gray-300">{arriendo.cantPersonas} persona{arriendo.cantPersonas > 1 ? 's' : ''}</span>
+                      </div>
+                      
+                      <div className="flex items-center justify-between pt-2 border-t border-blue-200 dark:border-blue-800">
+                        <div className="text-xs text-gray-600 dark:text-gray-400">
+                          <span>{format(inicio, 'dd MMM', { locale: es })} - {format(fin, 'dd MMM yyyy', { locale: es })}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <DollarSign className="h-3 w-3 text-green-600" />
+                          <span className="text-sm font-medium text-green-700 dark:text-green-400">
+                            ${arriendo.valorTotal.toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center justify-between pt-1">
+                        <Badge variant={arriendo.pago ? "outline" : "destructive"} className="text-xs">
+                          {arriendo.pago ? '✓ Pagado' : '⚠ Pendiente'}
+                        </Badge>
+                        <span className="text-xs text-gray-500">
+                          ${arriendo.valorNoche.toLocaleString()}/noche
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Lista de cabañas */}
       <div className="space-y-4">
