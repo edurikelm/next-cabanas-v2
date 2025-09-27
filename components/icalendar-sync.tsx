@@ -13,6 +13,24 @@ import { Upload, Calendar, Download, AlertCircle, CheckCircle, Link2 } from 'luc
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useArriendoOperaciones } from '@/lib/hooks/useFirestore';
+import { useAvailableCabanas } from '@/lib/cabanas';
+import { Booking } from '@/lib/types/booking-types';
+
+interface AirbnbReservation {
+  id: string;
+  cabana: string;
+  cliente: string;
+  celular: string;
+  email?: string;
+  start: Date | string;
+  end: Date | string;
+  valorNoche: number;
+  valorTotal: number;
+  observaciones?: string;
+  fuente: 'airbnb' | 'local';
+  airbnbId?: string;
+  sincronizadoEn: Date | string;
+}
 
 interface SyncResult {
   total: number;
@@ -33,372 +51,368 @@ export function ICalendarSync() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { crear } = useArriendoOperaciones();
+  const { cabanas: availableCabanas } = useAvailableCabanas();
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    if (!file.name.endsWith('.ics')) {
-      setError('Por favor selecciona un archivo .ics válido');
-      return;
+  // Función para convertir AirbnbReservation a Booking
+  const convertToBooking = (airbnbRes: AirbnbReservation): Omit<Booking, 'id'> => {
+    // Asegurar que las fechas sean objetos Date
+    const startDate = typeof airbnbRes.start === 'string' ? new Date(airbnbRes.start) : airbnbRes.start;
+    const endDate = typeof airbnbRes.end === 'string' ? new Date(airbnbRes.end) : airbnbRes.end;
+    
+    // Validar fechas
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      throw new Error(`Fechas inválidas: ${airbnbRes.start} - ${airbnbRes.end}`);
     }
-
-    await processFile(file);
+    
+    const cantDias = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+    
+    return {
+      title: airbnbRes.cliente,
+      cabana: airbnbRes.cabana,
+      cantDias: cantDias,
+      cantPersonas: 2, // Valor por defecto ya que Airbnb no siempre proporciona esta info
+      celular: airbnbRes.celular || '',
+      descuento: false,
+      end: endDate,
+      start: startDate,
+      pago: true, // Asumimos que reservas de Airbnb están pagadas
+      ubicacion: airbnbRes.cabana,
+      valorNoche: airbnbRes.valorNoche,
+      valorTotal: airbnbRes.valorTotal
+    };
   };
 
-  const handleUrlSync = async () => {
-    if (!icalUrl.trim()) {
-      setError('Por favor ingresa una URL válida');
-      return;
-    }
+  const resetDialog = () => {
+    setStep('upload');
+    setLoading(false);
+    setProgress(0);
+    setICalUrl('');
+    setPreviewData(null);
+    setSyncResult(null);
+    setError('');
+  };
 
+  const handleFileUpload = async (file: File) => {
     setLoading(true);
     setError('');
 
     try {
-      const response = await fetch('/api/sync-icalendar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ icalUrl: icalUrl.trim() })
-      });
-
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || 'Error al sincronizar desde URL');
-      }
-
-      setPreviewData(data);
-      setStep('preview');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al procesar la URL');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const processFile = async (file: File) => {
-    setLoading(true);
-    setError('');
-    setProgress(25);
-
-    try {
-      const fileContent = await file.text();
-      setProgress(50);
+      const formData = new FormData();
+      formData.append('file', file);
 
       const response = await fetch('/api/sync-icalendar', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ icalContent: fileContent })
+        body: formData,
       });
 
-      const data = await response.json();
-      setProgress(75);
-      
       if (!response.ok) {
-        throw new Error(data.error || 'Error al procesar el archivo');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al procesar el archivo');
       }
 
-      setPreviewData(data);
-      setProgress(100);
+      const data = await response.json();
+      
+      if (data.reservations.length === 0) {
+        throw new Error('No se encontraron reservaciones válidas en el archivo');
+      }
+
+      setPreviewData({
+        filename: file.name,
+        totalReservations: data.reservations.length,
+        reservations: data.reservations
+      });
+      
       setStep('preview');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al procesar el archivo');
     } finally {
       setLoading(false);
-      setProgress(0);
+    }
+  };
+
+  const handleUrlSync = async () => {
+    if (!icalUrl.trim()) return;
+
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('/api/sync-icalendar', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url: icalUrl }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'No se pudo descargar el archivo desde la URL');
+      }
+
+      const data = await response.json();
+      
+      if (data.reservations.length === 0) {
+        throw new Error('No se encontraron reservaciones válidas en el archivo');
+      }
+
+      setPreviewData({
+        filename: 'Archivo desde URL',
+        totalReservations: data.reservations.length,
+        reservations: data.reservations
+      });
+      
+      setStep('preview');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al descargar el archivo');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleSync = async () => {
-    if (!previewData?.data?.bookings) return;
+    if (!previewData) return;
 
     setLoading(true);
     setStep('sync');
     setProgress(0);
 
-    const bookings = previewData.data.bookings;
-    const results: SyncResult = {
-      total: bookings.length,
+    const result: SyncResult = {
+      total: previewData.reservations.length,
       success: 0,
       errors: [],
       reservations: []
     };
 
     try {
-      for (let i = 0; i < bookings.length; i++) {
-        const booking = bookings[i];
-        setProgress((i / bookings.length) * 100);
+      for (let i = 0; i < previewData.reservations.length; i++) {
+        const airbnbReservation = previewData.reservations[i] as AirbnbReservation;
+        setProgress(((i + 1) / previewData.reservations.length) * 100);
 
         try {
-          // Validar y normalizar las fechas antes de crear el arriendo
-          const normalizedBooking = {
-            ...booking,
-            start: new Date(booking.start),
-            end: new Date(booking.end),
-          };
-
-          // Verificar que las fechas sean válidas
-          if (isNaN(normalizedBooking.start.getTime())) {
-            throw new Error(`Fecha de inicio inválida: ${booking.start}`);
-          }
-          
-          if (isNaN(normalizedBooking.end.getTime())) {
-            throw new Error(`Fecha de fin inválida: ${booking.end}`);
-          }
-
-          console.log('Creando arriendo con fechas:', {
-            title: normalizedBooking.title,
-            start: normalizedBooking.start,
-            end: normalizedBooking.end,
-            startType: typeof normalizedBooking.start,
-            endType: typeof normalizedBooking.end
-          });
-
-          const createdBooking = await crear(normalizedBooking);
-          results.success++;
-          results.reservations.push(createdBooking);
-        } catch (error) {
-          const errorMsg = `Error en reserva ${booking.title}: ${error instanceof Error ? error.message : 'Error desconocido'}`;
-          results.errors.push(errorMsg);
-          console.error('Error creating booking:', error);
+          // Convertir de AirbnbReservation a Booking con validación de fechas
+          const bookingData = convertToBooking(airbnbReservation);
+          console.log(airbnbReservation);
+          const docId = await crear(bookingData);
+          result.success++;
+          result.reservations.push({ ...airbnbReservation, id: docId });
+        } catch (err) {
+          const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+          console.error(`Error procesando reservación ${i + 1}:`, err);
+          console.error('Datos de la reservación:', airbnbReservation);
+          result.errors.push(`Error en reservación ${i + 1}: ${errorMessage}`);
         }
       }
 
-      setProgress(100);
-      setSyncResult(results);
+      setSyncResult(result);
       setStep('complete');
-    } catch (error) {
-      setError('Error durante la sincronización');
-      console.error('Sync error:', error);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error durante la sincronización');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const resetForm = () => {
-    setStep('upload');
-    setPreviewData(null);
-    setSyncResult(null);
-    setError('');
-    setProgress(0);
-    setICalUrl('');
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
     }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => {
       setIsOpen(open);
-      if (!open) resetForm();
+      if (!open) resetDialog();
     }}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="gap-2">
-          <Calendar className="h-4 w-4" />
-          Sincronizar Airbnb
+        <Button variant="outline" size="sm" className="gap-2">
+          <Download className="w-4 h-4" />
+          Sincronizar iCalendar
         </Button>
       </DialogTrigger>
-
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Sincronizar reservas de Airbnb</DialogTitle>
+          <DialogTitle>Sincronización iCalendar</DialogTitle>
           <DialogDescription>
-            Importa reservas desde un archivo iCalendar (.ics) de Airbnb
+            Importa reservaciones desde un archivo iCalendar (.ics) de Airbnb
           </DialogDescription>
         </DialogHeader>
 
         {error && (
-          <div className="flex items-center gap-2 p-3 bg-red-50 text-red-700 rounded-lg">
-            <AlertCircle className="h-5 w-5" />
-            <span>{error}</span>
+          <div className="flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+            <AlertCircle className="w-4 h-4 text-destructive" />
+            <p className="text-sm text-destructive">{error}</p>
           </div>
         )}
 
+        {/* Paso 1: Cargar archivo */}
         {step === 'upload' && (
-          <div className="space-y-4">
+          <div className="space-y-6">
+            {/* Cargar archivo */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Upload className="h-5 w-5" />
-                  Subir archivo .ics
+                  <Upload className="w-5 h-5" />
+                  Cargar archivo iCalendar
                 </CardTitle>
                 <CardDescription>
-                  Descarga el archivo iCalendar desde tu panel de Airbnb
+                  Selecciona el archivo .ics descargado desde Airbnb
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <Input
+              <CardContent className="space-y-4">
+                <input
                   ref={fileInputRef}
                   type="file"
                   accept=".ics"
-                  onChange={handleFileUpload}
-                  disabled={loading}
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleFileUpload(file);
+                  }}
                 />
-                {loading && progress > 0 && (
-                  <div className="mt-3">
-                    <Progress value={progress} className="h-2" />
-                    <p className="text-sm text-gray-600 mt-1">Procesando archivo...</p>
-                  </div>
-                )}
+                <Button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={loading}
+                  className="w-full"
+                  variant="outline"
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  {loading ? 'Procesando...' : 'Seleccionar archivo .ics'}
+                </Button>
               </CardContent>
             </Card>
 
-            <div className="text-center text-gray-500">
-              <span>O</span>
-            </div>
-
+            {/* O sincronizar desde URL */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Link2 className="h-5 w-5" />
+                  <Link2 className="w-5 h-5" />
                   Sincronizar desde URL
                 </CardTitle>
                 <CardDescription>
-                  URL de iCalendar de Airbnb para sincronización automática
+                  Ingresa la URL del calendario iCalendar de Airbnb
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-4">
                 <div>
-                  <Label htmlFor="ical-url">URL de iCalendar</Label>
+                  <Label htmlFor="ical-url">URL del calendario</Label>
                   <Input
                     id="ical-url"
-                    placeholder="https://airbnb.com/calendar/ical/..."
+                    placeholder="https://www.airbnb.com/calendar/ical/..."
                     value={icalUrl}
                     onChange={(e) => setICalUrl(e.target.value)}
-                    disabled={loading}
                   />
                 </div>
-                <Button 
-                  onClick={handleUrlSync} 
+                <Button
+                  onClick={handleUrlSync}
                   disabled={loading || !icalUrl.trim()}
                   className="w-full"
                 >
-                  {loading ? 'Sincronizando...' : 'Sincronizar desde URL'}
+                  <Download className="w-4 h-4 mr-2" />
+                  {loading ? 'Descargando...' : 'Sincronizar desde URL'}
                 </Button>
               </CardContent>
             </Card>
           </div>
         )}
 
+        {/* Paso 2: Vista previa */}
         {step === 'preview' && previewData && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Previsualización</h3>
-              <Badge variant="outline">
-                {previewData.data.summary.total} reservas encontradas
+              <h3 className="text-lg font-semibold">Vista previa</h3>
+              <Badge variant="secondary">
+                {previewData.totalReservations} reservaciones
               </Badge>
             </div>
 
             <Card>
-              <CardContent className="p-4">
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="font-medium">Total de reservas:</span> {previewData.data.summary.total}
-                  </div>
-                  <div>
-                    <span className="font-medium">Cabañas:</span> {previewData.data.summary.cabanas.length}
-                  </div>
-                </div>
-                
-                {previewData.data.summary.cabanas.length > 0 && (
-                  <div className="mt-3">
-                    <span className="font-medium text-sm">Cabañas encontradas:</span>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {previewData.data.summary.cabanas.map((cabana: string) => (
-                        <Badge key={cabana} variant="secondary" className="text-xs">
-                          {cabana}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <div className="max-h-60 overflow-y-auto space-y-2">
-              {previewData.data.reservations.slice(0, 10).map((reservation: any, index: number) => (
-                <Card key={index} className="border-l-4 border-l-blue-500">
-                  <CardContent className="p-3">
-                    <div className="flex justify-between items-start">
+              <CardHeader>
+                <CardTitle>Archivo: {previewData.filename}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="max-h-60 overflow-y-auto space-y-2">
+                  {previewData.reservations.map((reservation: AirbnbReservation, index: number) => (
+                    <div key={index} className="flex justify-between items-center p-2 bg-muted rounded">
                       <div>
-                        <h4 className="font-medium">{reservation.cliente}</h4>
-                        <p className="text-sm text-gray-600">{reservation.cabana}</p>
-                        <p className="text-xs text-gray-500">
-                          {format(new Date(reservation.start), 'dd/MM/yyyy', { locale: es })} - {' '}
-                          {format(new Date(reservation.end), 'dd/MM/yyyy', { locale: es })}
+                        <p className="font-medium">{reservation.cliente}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {reservation.cabana || 'Sin cabaña asignada'}
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-medium">${reservation.valorTotal.toLocaleString()}</p>
-                        <p className="text-xs text-gray-500">
-                          ${reservation.valorNoche.toLocaleString()}/noche
+                        <p className="text-sm">
+                          {format(new Date(reservation.start), 'dd MMM', { locale: es })} - {' '}
+                          {format(new Date(reservation.end), 'dd MMM yyyy', { locale: es })}
                         </p>
+                        <Badge variant="outline" className="text-xs">
+                          ${reservation.valorTotal?.toLocaleString()}
+                        </Badge>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-              {previewData.data.reservations.length > 10 && (
-                <p className="text-center text-sm text-gray-500">
-                  ... y {previewData.data.reservations.length - 10} reservas más
-                </p>
-              )}
-            </div>
-
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={resetForm} className="flex-1">
-                Cancelar
-              </Button>
-              <Button onClick={handleSync} className="flex-1">
-                Sincronizar Reservas
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {step === 'sync' && (
-          <div className="space-y-4 text-center">
-            <div className="flex items-center justify-center gap-2">
-              <Download className="h-6 w-6 animate-pulse" />
-              <h3 className="text-lg font-semibold">Sincronizando reservas...</h3>
-            </div>
-            <Progress value={progress} className="h-3" />
-            <p className="text-sm text-gray-600">
-              Importando reservas a tu calendario
-            </p>
-          </div>
-        )}
-
-        {step === 'complete' && syncResult && (
-          <div className="space-y-4">
-            <div className="text-center">
-              <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-2" />
-              <h3 className="text-lg font-semibold">Sincronización completada</h3>
-            </div>
-
-            <Card>
-              <CardContent className="p-4">
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="font-medium">Total procesadas:</span> {syncResult.total}
-                  </div>
-                  <div>
-                    <span className="font-medium text-green-600">Sincronizadas:</span> {syncResult.success}
-                  </div>
+                  ))}
                 </div>
-                {syncResult.errors.length > 0 && (
-                  <div className="mt-3">
-                    <span className="font-medium text-red-600">Errores:</span> {syncResult.errors.length}
-                    <div className="mt-1 text-xs text-red-600 max-h-20 overflow-y-auto">
-                      {syncResult.errors.map((error, i) => (
-                        <div key={i}>• {error}</div>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </CardContent>
             </Card>
+
+            <div className="flex gap-2">
+              <Button onClick={() => setStep('upload')} variant="outline">
+                Volver
+              </Button>
+              <Button onClick={handleSync} className="flex-1">
+                <Calendar className="w-4 h-4 mr-2" />
+                Sincronizar reservaciones
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Paso 3: Sincronización */}
+        {step === 'sync' && (
+          <div className="space-y-4">
+            <div className="text-center">
+              <h3 className="text-lg font-semibold mb-2">Sincronizando...</h3>
+              <Progress value={progress} className="w-full" />
+              <p className="text-sm text-muted-foreground mt-2">
+                {Math.round(progress)}% completado
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Paso 4: Resultados */}
+        {step === 'complete' && syncResult && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <CheckCircle className="w-6 h-6 text-green-600" />
+              <h3 className="text-lg font-semibold">Sincronización completa</h3>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="p-3 bg-muted rounded">
+                <p className="text-2xl font-bold">{syncResult.total}</p>
+                <p className="text-sm text-muted-foreground">Total</p>
+              </div>
+              <div className="p-3 bg-green-50 border border-green-200 rounded">
+                <p className="text-2xl font-bold text-green-600">{syncResult.success}</p>
+                <p className="text-sm text-green-600">Exitosas</p>
+              </div>
+              <div className="p-3 bg-red-50 border border-red-200 rounded">
+                <p className="text-2xl font-bold text-red-600">{syncResult.errors.length}</p>
+                <p className="text-sm text-red-600">Errores</p>
+              </div>
+            </div>
+
+            {syncResult.errors.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-red-600">Errores encontrados</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="max-h-40 overflow-y-auto">
+                    {syncResult.errors.map((error, index) => (
+                      <p key={index} className="text-sm text-red-600 mb-1">
+                        • {error}
+                      </p>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             <Button onClick={() => setIsOpen(false)} className="w-full">
               Cerrar
