@@ -36,6 +36,18 @@ const convertDocToBooking = (doc: QueryDocumentSnapshot<DocumentData>): Booking 
     ubicacion: data.ubicacion || '',
     valorNoche: Number(data.valorNoche) || 0,
     valorTotal: Number(data.valorTotal) || 0,
+    
+    // Nuevos campos opcionales
+    esMensual: Boolean(data.esMensual),
+    archivos: data.archivos ? data.archivos.map((archivo: any) => ({
+      ...archivo,
+      fechaSubida: archivo.fechaSubida instanceof Timestamp ? archivo.fechaSubida.toDate() : new Date(archivo.fechaSubida)
+    })) : undefined,
+    imagenes: data.imagenes ? data.imagenes.map((imagen: any) => ({
+      ...imagen,
+      fechaSubida: imagen.fechaSubida instanceof Timestamp ? imagen.fechaSubida.toDate() : new Date(imagen.fechaSubida)
+    })) : undefined,
+    comentarios: data.comentarios || undefined,
   };
 };
 
@@ -83,6 +95,22 @@ const convertBookingToDoc = (booking: Omit<Booking, 'id'>): DocumentData => {
     valorNoche: booking.valorNoche,
     valorTotal: booking.valorTotal,
     fechaCreacion: serverTimestamp(),
+    
+    // Nuevos campos opcionales
+    esMensual: booking.esMensual,
+    ...(booking.archivos && { 
+      archivos: booking.archivos.map(archivo => ({
+        ...archivo,
+        fechaSubida: convertToTimestamp(archivo.fechaSubida)
+      }))
+    }),
+    ...(booking.imagenes && { 
+      imagenes: booking.imagenes.map(imagen => ({
+        ...imagen,
+        fechaSubida: convertToTimestamp(imagen.fechaSubida)
+      }))
+    }),
+    ...(booking.comentarios && { comentarios: booking.comentarios }),
   };
 };
 

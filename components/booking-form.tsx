@@ -12,12 +12,15 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Checkbox } from "@/components/ui/checkbox";
 
 import type { Booking } from "../lib/types/booking-types";
 import { DateRangePicker } from "@/components/date-range-picker";
 import { bookingFormSchema, type BookingFormValues } from "@/lib/schemas/booking-schema";
 import { useArriendoOperaciones } from "@/lib/hooks/useFirestore";
 import { useAvailableCabanas } from "@/lib/cabanas";
+import { FileUploader } from "@/components/file-uploader";
+import { ComentariosField } from "@/components/booking-fields-extra";
 
 export interface BookingFormProps {
   open: boolean;
@@ -30,8 +33,11 @@ export interface BookingFormProps {
 export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }: BookingFormProps) {
   const { crear, actualizar, loading: operationLoading } = useArriendoOperaciones();
   const { cabanas, loading: cabanasLoading, error: cabanasError } = useAvailableCabanas();
-  const initialRange: DateRange | undefined =
-    initial?.start && initial?.end ? { from: initial.start, to: initial.end } : undefined;
+  
+  // Asegurar que initialRange tenga una estructura válida
+  const initialRange: DateRange = initial?.start && initial?.end 
+    ? { from: initial.start, to: initial.end } 
+    : { from: undefined, to: undefined };
 
   const form = useForm<BookingFormValues>({
     resolver: zodResolver(bookingFormSchema),
@@ -46,6 +52,10 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
       descuento: initial?.descuento ?? false,
       pago: initial?.pago ?? false,
       dateRange: initialRange,
+      esMensual: initial?.esMensual ?? false,
+      archivos: initial?.archivos ?? [],
+      imagenes: initial?.imagenes ?? [],
+      comentarios: initial?.comentarios ?? "",
     },
   });
 
@@ -53,8 +63,9 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
   useEffect(() => {
     // console.log('BookingForm: updating with initial data:', initial);
     
-    const newInitialRange: DateRange | undefined =
-      initial?.start && initial?.end ? { from: initial.start, to: initial.end } : undefined;
+    const newInitialRange: DateRange = initial?.start && initial?.end 
+      ? { from: initial.start, to: initial.end } 
+      : { from: undefined, to: undefined };
     
     const resetData = {
       title: initial?.title ?? "",
@@ -66,6 +77,10 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
       descuento: initial?.descuento ?? false,
       pago: initial?.pago ?? false,
       dateRange: newInitialRange,
+      esMensual: initial?.esMensual ?? false,
+      archivos: initial?.archivos ?? [],
+      imagenes: initial?.imagenes ?? [],
+      comentarios: initial?.comentarios ?? "",
     };
     
     // console.log('BookingForm: resetting form with:', resetData);
@@ -76,8 +91,9 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
   useEffect(() => {
     if (open && initial) {
       // console.log('BookingForm: Modal opened with initial data, forcing reset');
-      const newInitialRange: DateRange | undefined =
-        initial?.start && initial?.end ? { from: initial.start, to: initial.end } : undefined;
+      const newInitialRange: DateRange = initial?.start && initial?.end 
+        ? { from: initial.start, to: initial.end } 
+        : { from: undefined, to: undefined };
       
       setTimeout(() => {
         form.reset({
@@ -90,6 +106,10 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
           descuento: initial?.descuento ?? false,
           pago: initial?.pago ?? false,
           dateRange: newInitialRange,
+          esMensual: initial?.esMensual ?? false,
+          archivos: initial?.archivos ?? [],
+          imagenes: initial?.imagenes ?? [],
+          comentarios: initial?.comentarios ?? "",
         });
       }, 100);
     }
@@ -98,6 +118,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
   // Derivados en vivo para mostrar en la UI
   const range = form.watch("dateRange");
   const valorNoche = form.watch("valorNoche") ?? 0;
+  const esMensual = form.watch("esMensual") ?? false;
   const cantDias = range?.from && range?.to ? Math.max(1, differenceInCalendarDays(endOfDay(range.to), startOfDay(range.from))) : 0;
   const valorTotal = Math.max(0, (valorNoche || 0) * (cantDias || 0));
 
@@ -122,6 +143,13 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
       cantDias,
       valorNoche: values.valorNoche,
       valorTotal,
+      // Incluir nuevos campos
+      esMensual: values.esMensual,
+      ...(values.esMensual && {
+        archivos: values.archivos,
+        imagenes: values.imagenes,
+        comentarios: values.comentarios,
+      }),
     };
 
     try {
@@ -149,14 +177,40 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] sm:max-w-2xl">
+      <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{initial?.id ? "Editar arriendo" : "Nuevo arriendo"}</DialogTitle>
-          <DialogDescription>Completa los datos de la reserva.</DialogDescription>
+          <DialogDescription>
+            Completa los datos de la reserva. {esMensual ? "Los campos adicionales aparecen porque seleccionaste arriendo mensual." : "Marca 'Arriendo Mensual' para campos adicionales."}
+          </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(submit)} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Checkbox para Arriendo Mensual */}
+            <FormField
+              control={form.control}
+              name="esMensual"
+              render={({ field }) => (
+                <FormItem className="md:col-span-2 flex flex-row items-center gap-3 p-4 border rounded-lg bg-blue-50">
+                  <FormControl>
+                    <Checkbox 
+                      checked={field.value ?? false} 
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div>
+                    <FormLabel className="text-base font-medium cursor-pointer">
+                      Arriendo Mensual
+                    </FormLabel>
+                    <p className="text-sm text-gray-600">
+                      Marcar si este es un arriendo por mes (habilitará campos adicionales)
+                    </p>
+                  </div>
+                </FormItem>
+              )}
+            />
+            
             <FormField
               control={form.control}
               name="title"
@@ -164,7 +218,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                 <FormItem className="md:col-span-2">
                   <FormLabel>Título</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ej: Eduardo - Cabaña del Bosque" {...field} />
+                    <Input placeholder="Ej: Eduardo - Cabaña del Bosque" value={field.value || ""} onChange={field.onChange} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -178,7 +232,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                 <FormItem>
                   <FormLabel>Cabaña</FormLabel>
                   <FormControl>
-                    <Select value={field.value} onValueChange={field.onChange}>
+                    <Select value={field.value || ""} onValueChange={field.onChange}>
                       <SelectTrigger>
                         <SelectValue 
                           placeholder={
@@ -216,7 +270,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                 <FormItem>
                   <FormLabel>Ubicación</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ej: Pucón" {...field} />
+                    <Input placeholder="Ej: Pucón" value={field.value || ""} onChange={field.onChange} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -255,7 +309,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                 <FormItem>
                   <FormLabel>Celular</FormLabel>
                   <FormControl>
-                    <Input inputMode="tel" placeholder="+56 9 1234 5678" {...field} />
+                    <Input inputMode="tel" placeholder="+56 9 1234 5678" value={field.value || ""} onChange={field.onChange} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -335,6 +389,73 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                 </FormItem>
               )}
             />
+
+            {/* Campos condicionales para arriendos mensuales */}
+            {esMensual && (
+              <>
+                {/* Separador visual */}
+                <div className="md:col-span-2 border-t pt-4">
+                  <h3 className="text-lg font-semibold mb-4 text-blue-700">
+                    📋 Información Adicional (Arriendo Mensual)
+                  </h3>
+                </div>
+
+                {/* Subida de archivos */}
+                <div className="md:col-span-2">
+                  <FormField
+                    control={form.control}
+                    name="archivos"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FileUploader
+                          bookingId={initial?.id || 'temp'}
+                          tipo="archivos"
+                          archivosExistentes={field.value || []}
+                          onArchivosSubidos={field.onChange}
+                          maxArchivos={5}
+                        />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Subida de imágenes */}
+                <div className="md:col-span-2">
+                  <FormField
+                    control={form.control}
+                    name="imagenes"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FileUploader
+                          bookingId={initial?.id || 'temp'}
+                          tipo="imagenes"
+                          archivosExistentes={field.value || []}
+                          onArchivosSubidos={field.onChange}
+                          maxArchivos={5}
+                        />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Campo de comentarios */}
+                <div className="md:col-span-2">
+                  <FormField
+                    control={form.control}
+                    name="comentarios"
+                    render={({ field }) => (
+                      <FormItem>
+                        <ComentariosField
+                          value={field.value || ''}
+                          onChange={field.onChange}
+                          placeholder="Agregar observaciones sobre el arriendo mensual..."
+                        />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </>
+            )}
 
             <div className="md:col-span-2 flex justify-end gap-2">
               <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>
