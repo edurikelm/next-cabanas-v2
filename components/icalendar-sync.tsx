@@ -78,7 +78,11 @@ export function ICalendarSync() {
       pago: true, // Asumimos que reservas de Airbnb están pagadas
       ubicacion: airbnbRes.cabana,
       valorNoche: airbnbRes.valorNoche,
-      valorTotal: airbnbRes.valorTotal
+      valorTotal: airbnbRes.valorTotal,
+      esMensual: false, // Reservas de Airbnb son típicamente por días, no mensuales
+      archivos: [], // Reservas de Airbnb no incluyen archivos adjuntos
+      imagenes: [], // Reservas de Airbnb no incluyen imágenes adjuntas
+      comentarios: '' // Sin comentarios adicionales por defecto
     };
   };
 

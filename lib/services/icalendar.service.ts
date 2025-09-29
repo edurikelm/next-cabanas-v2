@@ -466,6 +466,10 @@ export class ICalendarService {
       ubicacion: mappedCabanaName,
       valorNoche: airbnbReservation.valorNoche,
       valorTotal: airbnbReservation.valorTotal,
+      esMensual: false, // Reservas de iCalendar son típicamente por días, no mensuales
+      archivos: [], // Reservas de iCalendar no incluyen archivos adjuntos
+      imagenes: [], // Reservas de iCalendar no incluyen imágenes adjuntas
+      comentarios: '' // Sin comentarios adicionales por defecto
     };
   }
 }

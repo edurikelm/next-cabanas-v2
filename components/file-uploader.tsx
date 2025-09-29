@@ -182,6 +182,7 @@ export function FileUploader({
                   </div>
                   <div className="flex items-center gap-1">
                     <Button
+                      type="button"
                       size="sm"
                       variant="outline"
                       onClick={() => window.open(archivo.url, '_blank')}
@@ -189,6 +190,7 @@ export function FileUploader({
                       Ver
                     </Button>
                     <Button
+                      type="button"
                       size="sm"
                       variant="ghost"
                       onClick={() => eliminarArchivo(archivo.id)}
@@ -206,6 +208,7 @@ export function FileUploader({
         {/* Botón para subir más archivos */}
         {!subiendo && archivos.length < maxArchivos && (
           <Button
+            type="button"
             onClick={() => inputRef.current?.click()}
             variant="outline"
             className="w-full"
