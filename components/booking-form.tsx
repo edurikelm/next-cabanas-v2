@@ -1,7 +1,7 @@
 // components/booking-form.tsx
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { startOfDay, endOfDay, differenceInCalendarDays } from "date-fns";
@@ -14,13 +14,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
 
-import type { Booking } from "../lib/types/booking-types";
+import type { Booking, ArchivoAdjunto, ImagenAdjunta } from "../lib/types/booking-types";
 import { DateRangePicker } from "@/components/date-range-picker";
 import { bookingFormSchema, type BookingFormValues } from "@/lib/schemas/booking-schema";
 import { useArriendoOperaciones } from "@/lib/hooks/useFirestore";
 import { useAvailableCabanas } from "@/lib/cabanas";
-import { FileUploader } from "@/components/file-uploader";
+import { FileUploader, type FileUploaderRef } from "@/components/file-uploader";
 import { ComentariosField } from "@/components/booking-fields-extra";
+import { eliminarMultiplesArchivos } from "@/lib/utils/archivo-utils";
 
 export interface BookingFormProps {
   open: boolean;
@@ -33,6 +34,10 @@ export interface BookingFormProps {
 export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }: BookingFormProps) {
   const { crear, actualizar, loading: operationLoading } = useArriendoOperaciones();
   const { cabanas, loading: cabanasLoading, error: cabanasError } = useAvailableCabanas();
+  
+  // Referencias para los uploaders de archivos e imágenes
+  const archivosUploaderRef = useRef<FileUploaderRef>(null);
+  const imagenesUploaderRef = useRef<FileUploaderRef>(null);
   
   // Asegurar que initialRange tenga una estructura válida
   const initialRange: DateRange = initial?.start && initial?.end 
@@ -130,47 +135,95 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
     const end = endOfDay(to);
     const cantDias = Math.max(1, differenceInCalendarDays(end, start));
 
-    const payload: Omit<Booking, "id"> = {
-      title: values.title,
-      cabana: values.cabana,
-      ubicacion: values.ubicacion || '',
-      cantPersonas: values.cantPersonas,
-      celular: values.celular || '',
-      descuento: values.descuento,
-      pago: values.pago,
-      start,
-      end,
-      cantDias,
-      valorNoche: values.valorNoche,
-      valorTotal,
-      // Incluir nuevos campos
-      esMensual: values.esMensual,
-      ...(values.esMensual && {
-        archivos: values.archivos,
-        imagenes: values.imagenes,
-        comentarios: values.comentarios,
-      }),
-    };
-
     try {
+      let finalBookingId: string;
+      
+      // Crear o actualizar el booking primero para obtener un ID
+      const basePayload: Omit<Booking, "id"> = {
+        title: values.title,
+        cabana: values.cabana,
+        ubicacion: values.ubicacion || '',
+        cantPersonas: values.cantPersonas,
+        celular: values.celular || '',
+        descuento: values.descuento,
+        pago: values.pago,
+        start,
+        end,
+        cantDias,
+        valorNoche: values.valorNoche,
+        valorTotal,
+        esMensual: values.esMensual,
+        archivos: values.archivos || [],
+        imagenes: values.imagenes || [],
+        comentarios: values.comentarios || "",
+      };
+
       if (initial?.id) {
         // Editar arriendo existente
-        await actualizar(initial.id, payload);
+        await actualizar(initial.id, basePayload);
+        finalBookingId = initial.id;
         console.log('Arriendo actualizado exitosamente');
       } else {
         // Crear nuevo arriendo
-        await crear(payload);
+        const bookingId = await crear(basePayload);
+        finalBookingId = bookingId;
         console.log('Arriendo creado exitosamente');
       }
-      
-      onSubmit(payload);
+
+      // Subir archivos pendientes solo si es arriendo mensual
+      if (values.esMensual) {
+        try {
+          // Eliminar archivos que fueron eliminados del formulario
+          const archivosEliminados = archivosUploaderRef.current?.obtenerArchivosEliminados() || [];
+          const imagenesEliminadas = imagenesUploaderRef.current?.obtenerArchivosEliminados() || [];
+          
+          if (archivosEliminados.length > 0 || imagenesEliminadas.length > 0) {
+            console.log('Eliminando archivos del Storage:', { archivosEliminados, imagenesEliminadas });
+            
+            // Eliminar archivos del Storage
+            if (archivosEliminados.length > 0) {
+              await eliminarMultiplesArchivos(archivosEliminados);
+            }
+            if (imagenesEliminadas.length > 0) {
+              await eliminarMultiplesArchivos(imagenesEliminadas);
+            }
+            
+            console.log('Archivos eliminados del Storage exitosamente');
+          }
+          
+          // Subir archivos pendientes
+          const archivosFinales = await archivosUploaderRef.current?.subirArchivosPendientes(finalBookingId) || [];
+          const imagenesFinales = await imagenesUploaderRef.current?.subirArchivosPendientes(finalBookingId) || [];
+
+          // Actualizar el booking con los archivos subidos
+          if (archivosFinales.length > 0 || imagenesFinales.length > 0) {
+            const payloadConArchivos: Omit<Booking, "id"> = {
+              ...basePayload,
+              archivos: archivosFinales as ArchivoAdjunto[],
+              imagenes: imagenesFinales as ImagenAdjunta[],
+            };
+            
+            await actualizar(finalBookingId, payloadConArchivos);
+            console.log('Archivos subidos y booking actualizado');
+          }
+        } catch (uploadError) {
+          console.error('Error subiendo archivos:', uploadError);
+          // El booking ya fue creado, solo falla la subida de archivos
+          alert('El arriendo fue guardado, pero hubo un error subiendo algunos archivos. Puedes editarlo para volver a intentar.');
+        }
+      }
+
+      onSubmit(basePayload);
       onReload?.(); // Recargar datos
       onOpenChange(false);
       form.reset(); // Limpiar formulario
       
+      // Limpiar archivos pendientes de los uploaders
+      archivosUploaderRef.current?.limpiarArchivosPendientes();
+      imagenesUploaderRef.current?.limpiarArchivosPendientes();
+      
     } catch (error) {
       console.error('Error al guardar arriendo:', error);
-      // Aquí podrías mostrar un toast de error
       alert('Error al guardar el arriendo. Por favor, intenta nuevamente.');
     }
   };
@@ -408,10 +461,11 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                     render={({ field }) => (
                       <FormItem>
                         <FileUploader
+                          ref={archivosUploaderRef}
                           bookingId={initial?.id || 'temp'}
                           tipo="archivos"
                           archivosExistentes={field.value || []}
-                          onArchivosSubidos={field.onChange}
+                          onArchivosChange={field.onChange}
                           maxArchivos={5}
                         />
                       </FormItem>
@@ -427,10 +481,11 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                     render={({ field }) => (
                       <FormItem>
                         <FileUploader
+                          ref={imagenesUploaderRef}
                           bookingId={initial?.id || 'temp'}
                           tipo="imagenes"
                           archivosExistentes={field.value || []}
-                          onArchivosSubidos={field.onChange}
+                          onArchivosChange={field.onChange}
                           maxArchivos={5}
                         />
                       </FormItem>

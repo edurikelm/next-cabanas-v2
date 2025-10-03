@@ -42,10 +42,16 @@ export default function CalendarioPage() {
     return opciones;
   }, [cabanasDisponibles]);
 
-  // Filtrar arriendos por cabaña seleccionada
+  // Filtrar arriendos por cabaña seleccionada y excluir arriendos mensuales
   const arriendosFiltrados = useMemo(() => {
-    if (!arriendos || selectedCabana === "todas") return arriendos;
-    return arriendos.filter(arriendo => 
+    if (!arriendos) return [];
+    
+    // Primero filtrar arriendos mensuales (excluir esMensual = true)
+    const arriendosDiarios = arriendos.filter(arriendo => !arriendo.esMensual);
+    
+    // Luego filtrar por cabaña si no es "todas"
+    if (selectedCabana === "todas") return arriendosDiarios;
+    return arriendosDiarios.filter(arriendo => 
       arriendo.cabana.toLowerCase().includes(selectedCabana.toLowerCase())
     );
   }, [arriendos, selectedCabana]);
