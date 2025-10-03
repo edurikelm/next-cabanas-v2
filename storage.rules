@@ -1,0 +1,41 @@
+rules_version = '2';
+
+// Reglas de seguridad para Firebase Storage
+// Documentación: https://firebase.google.com/docs/storage/security
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Reglas para archivos de arriendos
+    match /arriendos/{arriendoId}/{allPaths=**} {
+      // Permitir lectura y escritura para usuarios autenticados
+      allow read, write: if request.auth != null;
+      
+      // Validar tamaño de archivos (máximo 10MB)
+      allow write: if request.resource.size < 10 * 1024 * 1024;
+      
+      // Validar tipos de archivos permitidos
+      allow write: if request.resource.contentType.matches(
+        'image/.*|application/pdf|text/.*|application/msword|application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      );
+    }
+    
+    // Reglas para archivos temporales y de prueba
+    match /temp/{allPaths=**} {
+      allow read, write: if request.auth != null;
+      // Auto-eliminación después de 24 horas
+      allow write: if request.time < resource.timeCreated + duration.value(1, 'd');
+    }
+    
+    // Reglas para archivos de prueba (solo en desarrollo)
+    match /test/{allPaths=**} {
+      // Solo permitir en desarrollo o para usuarios autenticados
+      allow read, write: if request.auth != null || 
+        (request.auth == null && resource.metadata.environment == 'development');
+    }
+    
+    // Reglas por defecto - denegar acceso
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

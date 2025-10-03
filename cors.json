@@ -1,0 +1,24 @@
+[
+  {
+    "origin": [
+      "http://localhost:3000",
+      "http://localhost:3001",
+      "https://*.vercel.app",
+      "https://next-cabanas-v2.vercel.app",
+      "https://app-cabanas.web.app",
+      "https://app-cabanas.firebaseapp.com"
+    ],
+    "method": ["GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"],
+    "maxAgeSeconds": 3600,
+    "responseHeader": [
+      "Content-Type",
+      "Authorization",
+      "Content-Length",
+      "User-Agent",
+      "X-Requested-With",
+      "If-Modified-Since",
+      "Cache-Control",
+      "Range"
+    ]
+  }
+]

@@ -8,7 +8,15 @@
     "start": "next start",
     "lint": "next lint",
     "verify-firebase": "node scripts/verify-firebase.js",
-    "pre-deploy": "npm run verify-firebase && npm run build"
+    "pre-deploy": "npm run verify-firebase && npm run build",
+    "setup-firebase": "node scripts/setup-firebase-storage.js",
+    "deploy:vercel": "bash scripts/deploy-to-vercel.sh",
+    "deploy:preview": "vercel",
+    "deploy:prod": "vercel --prod",
+    "env:check": "vercel env ls",
+    "storage:test": "curl https://your-domain.vercel.app/api/test-storage",
+    "firebase:emulator": "firebase emulators:start",
+    "firebase:deploy": "firebase deploy --project app-cabanas"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
