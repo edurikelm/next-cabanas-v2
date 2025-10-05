@@ -230,33 +230,34 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{initial?.id ? "Editar arriendo" : "Nuevo arriendo"}</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[95vh] overflow-y-auto p-3 sm:p-6">
+        <DialogHeader className="mb-4 sm:mb-6">
+          <DialogTitle className="text-lg sm:text-xl">{initial?.id ? "Editar arriendo" : "Nuevo arriendo"}</DialogTitle>
+          <DialogDescription className="text-sm sm:text-base">
             Completa los datos de la reserva. {esMensual ? "Los campos adicionales aparecen porque seleccionaste arriendo mensual." : "Marca 'Arriendo Mensual' para campos adicionales."}
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(submit)} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <form onSubmit={form.handleSubmit(submit)} className="booking-form grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
             {/* Checkbox para Arriendo Mensual */}
             <FormField
               control={form.control}
               name="esMensual"
               render={({ field }) => (
-                <FormItem className="md:col-span-2 flex flex-row items-center gap-3 p-4 border rounded-lg bg-blue-50">
+                <FormItem className="lg:col-span-2 flex flex-row items-start sm:items-center gap-3 p-3 sm:p-4 border rounded-lg bg-blue-50 dark:bg-blue-950/30">
                   <FormControl>
                     <Checkbox 
                       checked={field.value ?? false} 
                       onCheckedChange={field.onChange}
+                      className="mt-1 sm:mt-0 h-5 w-5"
                     />
                   </FormControl>
-                  <div>
-                    <FormLabel className="text-base font-medium cursor-pointer">
+                  <div className="flex-1">
+                    <FormLabel className="text-base font-medium cursor-pointer leading-tight">
                       Arriendo Mensual
                     </FormLabel>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                       Marcar si este es un arriendo por mes (habilitará campos adicionales)
                     </p>
                   </div>
@@ -268,10 +269,15 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
               control={form.control}
               name="title"
               render={({ field }) => (
-                <FormItem className="md:col-span-2">
-                  <FormLabel>Título</FormLabel>
+                <FormItem className="lg:col-span-2">
+                  <FormLabel className="text-sm sm:text-base font-medium">Título</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ej: Eduardo - Cabaña del Bosque" value={field.value || ""} onChange={field.onChange} />
+                    <Input 
+                      placeholder="Ej: Eduardo - Cabaña del Bosque" 
+                      value={field.value || ""} 
+                      onChange={field.onChange}
+                      className="h-10 sm:h-11 text-base"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -283,10 +289,10 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
               name="cabana"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Cabaña</FormLabel>
+                  <FormLabel className="text-sm sm:text-base font-medium">Cabaña</FormLabel>
                   <FormControl>
                     <Select value={field.value || ""} onValueChange={field.onChange}>
-                      <SelectTrigger>
+                      <SelectTrigger className="h-10 sm:h-11 text-base">
                         <SelectValue 
                           placeholder={
                             cabanasLoading 
@@ -299,12 +305,12 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                       </SelectTrigger>
                       <SelectContent>
                         {!cabanasLoading && !cabanasError && cabanas.map((cabana) => (
-                          <SelectItem key={cabana} value={cabana}>
+                          <SelectItem key={cabana} value={cabana} className="text-base py-2">
                             {cabana}
                           </SelectItem>
                         ))}
                         {cabanasError && cabanas.length === 0 && (
-                          <div className="px-2 py-1 text-sm text-red-600">
+                          <div className="px-3 py-2 text-sm text-red-600">
                             No hay cabañas disponibles
                           </div>
                         )}
@@ -321,9 +327,14 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
               name="ubicacion"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Ubicación</FormLabel>
+                  <FormLabel className="text-sm sm:text-base font-medium">Ubicación</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ej: Pucón" value={field.value || ""} onChange={field.onChange} />
+                    <Input 
+                      placeholder="Ej: Pucón" 
+                      value={field.value || ""} 
+                      onChange={field.onChange}
+                      className="h-10 sm:h-11 text-base"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -335,7 +346,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
               name="cantPersonas"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Personas</FormLabel>
+                  <FormLabel className="text-sm sm:text-base font-medium">Personas</FormLabel>
                   <FormControl>
                     <Input 
                       type="number" 
@@ -348,6 +359,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                         const value = e.target.value;
                         field.onChange(value === "" ? 1 : Number(value));
                       }}
+                      className="h-10 sm:h-11 text-base"
                     />
                   </FormControl>
                   <FormMessage />
@@ -360,9 +372,15 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
               name="celular"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Celular</FormLabel>
+                  <FormLabel className="text-sm sm:text-base font-medium">Celular</FormLabel>
                   <FormControl>
-                    <Input inputMode="tel" placeholder="+56 9 1234 5678" value={field.value || ""} onChange={field.onChange} />
+                    <Input 
+                      inputMode="tel" 
+                      placeholder="+56 9 1234 5678" 
+                      value={field.value || ""} 
+                      onChange={field.onChange}
+                      className="h-10 sm:h-11 text-base"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -373,8 +391,8 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
               control={form.control}
               name="dateRange"
               render={({ field }) => (
-                <FormItem className="md:col-span-2">
-                  <FormLabel>Fechas (Check-in / Check-out)</FormLabel>
+                <FormItem className="lg:col-span-2">
+                  <FormLabel className="text-sm sm:text-base font-medium">Fechas (Check-in / Check-out)</FormLabel>
                   <FormControl>
                     <DateRangePicker value={field.value as DateRange | undefined} onChange={field.onChange} />
                   </FormControl>
@@ -388,7 +406,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
               name="valorNoche"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Valor por noche</FormLabel>
+                  <FormLabel className="text-sm sm:text-base font-medium">Valor por noche</FormLabel>
                   <FormControl>
                     <Input 
                       type="number" 
@@ -401,6 +419,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                         const value = e.target.value;
                         field.onChange(value === "" ? 0 : Number(value));
                       }}
+                      className="h-10 sm:h-11 text-base"
                     />
                   </FormControl>
                   <FormMessage />
@@ -410,9 +429,14 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
 
             {/* Campo derivado solo de lectura */}
             <FormItem>
-              <FormLabel>Total</FormLabel>
+              <FormLabel className="text-sm sm:text-base font-medium">Total</FormLabel>
               <FormControl>
-                <Input value={valorTotal.toString()} disabled readOnly />
+                <Input 
+                  value={valorTotal.toLocaleString()} 
+                  disabled 
+                  readOnly
+                  className="h-10 sm:h-11 text-base font-semibold bg-muted"
+                />
               </FormControl>
             </FormItem>
 
@@ -421,11 +445,15 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
               control={form.control}
               name="descuento"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-center gap-2">
+                <FormItem className="flex flex-row items-center gap-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
                   <FormControl>
-                    <input type="checkbox" checked={!!field.value} onChange={(e) => field.onChange(e.target.checked)} />
+                    <Checkbox 
+                      checked={!!field.value} 
+                      onCheckedChange={field.onChange}
+                      className="h-5 w-5"
+                    />
                   </FormControl>
-                  <FormLabel className="m-0">Descuento</FormLabel>
+                  <FormLabel className="text-sm sm:text-base font-medium cursor-pointer flex-1">Descuento aplicado</FormLabel>
                 </FormItem>
               )}
             />
@@ -434,11 +462,15 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
               control={form.control}
               name="pago"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-center gap-2">
+                <FormItem className="flex flex-row items-center gap-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
                   <FormControl>
-                    <input type="checkbox" checked={!!field.value} onChange={(e) => field.onChange(e.target.checked)} />
+                    <Checkbox 
+                      checked={!!field.value} 
+                      onCheckedChange={field.onChange}
+                      className="h-5 w-5"
+                    />
                   </FormControl>
-                  <FormLabel className="m-0">Pago realizado</FormLabel>
+                  <FormLabel className="text-sm sm:text-base font-medium cursor-pointer flex-1">Pago realizado</FormLabel>
                 </FormItem>
               )}
             />
@@ -447,9 +479,10 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
             {esMensual && (
               <>
                 {/* Separador visual */}
-                <div className="md:col-span-2 border-t pt-4">
-                  <h3 className="text-lg font-semibold mb-4 text-blue-700">
-                    📋 Información Adicional (Arriendo Mensual)
+                <div className="lg:col-span-2 border-t pt-4 mt-4">
+                  <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-blue-700 dark:text-blue-400 flex items-center gap-2">
+                    📋 Información Adicional
+                    <span className="text-sm font-normal text-muted-foreground">(Arriendo Mensual)</span>
                   </h3>
                 </div>
 
@@ -512,11 +545,20 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
               </>
             )}
 
-            <div className="md:col-span-2 flex justify-end gap-2">
-              <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>
+            <div className="lg:col-span-2 flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => onOpenChange(false)}
+                className="w-full sm:w-auto h-11 text-base font-medium"
+              >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={operationLoading}>
+              <Button 
+                type="submit" 
+                disabled={operationLoading}
+                className="w-full sm:w-auto h-11 text-base font-medium min-w-[140px]"
+              >
                 {operationLoading ? 'Guardando...' : (initial?.id ? "Guardar cambios" : "Agregar")}
               </Button>
             </div>

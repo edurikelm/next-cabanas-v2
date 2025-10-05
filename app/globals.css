@@ -236,3 +236,68 @@
     max-width: calc(100vw - 2rem);
   }
 }
+
+/* Mejoras específicas para formularios en móviles */
+@media (max-width: 640px) {
+  /* Inputs más grandes en móviles */
+  .booking-form input,
+  .booking-form select,
+  .booking-form textarea {
+    min-height: 44px;
+    font-size: 16px; /* Previene zoom en iOS */
+  }
+  
+  /* Checkboxes más grandes */
+  .booking-form input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+  }
+  
+  /* Labels más visibles */
+  .booking-form label {
+    font-weight: 500;
+    color: hsl(var(--foreground));
+  }
+  
+  /* Botones más grandes */
+  .booking-form button {
+    min-height: 44px;
+    font-size: 16px;
+    font-weight: 500;
+  }
+  
+  /* Espaciado mejorado */
+  .booking-form .form-item {
+    margin-bottom: 1rem;
+  }
+  
+  /* Select mejorado */
+  .booking-form [role="combobox"] {
+    min-height: 44px;
+  }
+}
+
+/* Mejoras para touch en formularios */
+@media (hover: none) and (pointer: coarse) {
+  .booking-form input,
+  .booking-form button,
+  .booking-form select {
+    -webkit-appearance: none;
+    appearance: none;
+    border-radius: 8px;
+  }
+  
+  .booking-form button:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+  
+  /* Mejor contraste para inputs en móviles */
+  .booking-form input:focus,
+  .booking-form select:focus,
+  .booking-form textarea:focus {
+    border-color: hsl(var(--primary));
+    box-shadow: 0 0 0 2px hsl(var(--primary) / 0.2);
+    outline: none;
+  }
+}
