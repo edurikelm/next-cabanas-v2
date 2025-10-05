@@ -1,15 +1,16 @@
 // Componente para subir archivos e imágenes
 "use client";
 
-import { useState, useRef, useImperativeHandle, forwardRef } from 'react';
+import { useState, useRef, useImperativeHandle, forwardRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Upload, X, FileText, Image, Loader2, Clock } from 'lucide-react';
+import { Upload, X, FileText, Image, Loader2, Clock, Camera } from 'lucide-react';
 import { subirMultiplesArchivos, validarTamañoArchivo, validarTipoArchivo, TIPOS_ARCHIVOS_PERMITIDOS, TAMAÑOS_MAXIMOS } from '@/lib/utils/archivo-utils';
 import type { ArchivoAdjunto, ImagenAdjunta } from '@/lib/types/booking-types';
+import { CameraCapture } from './camera-capture';
 
 // Tipo para archivos pendientes de subir
 interface ArchivoPendiente {
@@ -48,11 +49,27 @@ export const FileUploader = forwardRef<FileUploaderRef, FileUploaderProps>(({
   const [subiendo, setSubiendo] = useState(false);
   const [progreso, setProgreso] = useState(0);
   const [archivoActual, setArchivoActual] = useState('');
+  const [showCamera, setShowCamera] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const esImagen = tipo === 'imagenes';
   const tiposPermitidos = esImagen ? TIPOS_ARCHIVOS_PERMITIDOS.imagenes : TIPOS_ARCHIVOS_PERMITIDOS.documentos;
   const tamañoMaximo = esImagen ? TAMAÑOS_MAXIMOS.imagen : TAMAÑOS_MAXIMOS.archivo;
+
+  // Detectar si es dispositivo móvil
+  useEffect(() => {
+    const checkMobile = () => {
+      const userAgent = navigator.userAgent;
+      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+      const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const supportsCamera = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+      
+      setIsMobile(isMobileDevice && hasTouch && supportsCamera);
+    };
+    
+    checkMobile();
+  }, []);
 
   // Función para subir archivos pendientes (llamada desde el formulario)
   const subirArchivosPendientes = async (finalBookingId: string): Promise<(ArchivoAdjunto | ImagenAdjunta)[]> => {
@@ -113,6 +130,42 @@ export const FileUploader = forwardRef<FileUploaderRef, FileUploaderProps>(({
     obtenerArchivosFinales,
     obtenerArchivosEliminados
   }));
+
+  // Función para manejar captura de cámara
+  const handleCameraCapture = async (file: File) => {
+    // Validar archivo capturado
+    if (!validarTamañoArchivo(file, tamañoMaximo)) {
+      alert(`La imagen capturada es muy grande. Máximo ${tamañoMaximo}MB`);
+      return;
+    }
+
+    if (!validarTipoArchivo(file, tiposPermitidos)) {
+      alert('Tipo de archivo no permitido');
+      return;
+    }
+
+    const totalArchivos = archivosSubidos.length + archivosPendientes.length + 1;
+    if (totalArchivos > maxArchivos) {
+      alert(`Máximo ${maxArchivos} archivos permitidos`);
+      return;
+    }
+
+    // Crear archivo pendiente
+    const archivoPendiente: ArchivoPendiente = {
+      id: `camera-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      file,
+      nombre: file.name,
+      tamaño: file.size
+    };
+
+    setArchivosPendientes(prev => [...prev, archivoPendiente]);
+    
+    // Notificar cambios
+    const archivosActualizados = [...archivosSubidos];
+    onArchivosChange?.(archivosActualizados);
+    
+    setShowCamera(false);
+  };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
@@ -208,30 +261,54 @@ export const FileUploader = forwardRef<FileUploaderRef, FileUploaderProps>(({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Input de archivos */}
-        <div className="space-y-2">
-          <Label htmlFor={`file-input-${tipo}`}>
-            {esImagen ? 'Seleccionar imágenes' : 'Seleccionar archivos'}
+        {/* Botones de selección */}
+        <div className="space-y-3">
+          <Label className="text-sm font-medium">
+            {esImagen ? 'Añadir imágenes' : 'Añadir archivos'}
           </Label>
-          <div className="flex items-center gap-2">
-            <Input
-              id={`file-input-${tipo}`}
-              ref={inputRef}
-              type="file"
-              multiple
-              accept={tiposPermitidos.join(',')}
-              onChange={handleFileSelect}
+          
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => inputRef.current?.click()}
               disabled={subiendo || totalArchivos >= maxArchivos}
-              className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-            />
-            <span className="text-sm text-gray-500">
-              {totalArchivos}/{maxArchivos}
-            </span>
+              className="flex-1"
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              Seleccionar {esImagen ? 'imágenes' : 'archivos'}
+            </Button>
+            
+            {esImagen && isMobile && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowCamera(true)}
+                disabled={subiendo || totalArchivos >= maxArchivos}
+                className="flex-1 sm:flex-initial camera-button"
+              >
+                <Camera className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">Cámara</span>
+                <span className="sm:hidden">📷 Foto</span>
+              </Button>
+            )}
           </div>
-          <p className="text-xs text-gray-500">
-            Máximo {tamañoMaximo}MB por archivo. Tipos permitidos: {tiposPermitidos.join(', ')}
-          </p>
+          
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>Máximo {tamañoMaximo}MB por archivo</span>
+            <span>{totalArchivos}/{maxArchivos} archivos</span>
+          </div>
         </div>
+
+        {/* Input oculto */}
+        <input
+          ref={inputRef}
+          type="file"
+          multiple
+          accept={tiposPermitidos.join(',')}
+          onChange={handleFileSelect}
+          className="hidden"
+        />
 
         {/* Progreso de subida */}
         {subiendo && (
@@ -366,6 +443,15 @@ export const FileUploader = forwardRef<FileUploaderRef, FileUploaderProps>(({
           </div>
         )}
       </CardContent>
+      
+      {/* Componente de captura de cámara */}
+      {esImagen && (
+        <CameraCapture
+          isOpen={showCamera}
+          onCapture={handleCameraCapture}
+          onCancel={() => setShowCamera(false)}
+        />
+      )}
     </Card>
   );
 });

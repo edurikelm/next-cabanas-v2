@@ -388,7 +388,7 @@ export default function CabanasPage() {
               <p className="text-sm text-gray-400 mt-1">Los arriendos mensuales aparecerán aquí</p>
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {arriendosMensuales.map((arriendo) => {
                 const inicio = new Date(arriendo.start);
                 const fin = new Date(arriendo.end);
@@ -511,7 +511,7 @@ export default function CabanasPage() {
                     {/* Archivos e Imágenes */}
                     {(hasArchivos || hasImagenes) && (
                       <div className="space-y-4 border-t border-green-200 dark:border-green-800 pt-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-4">
                           {hasArchivos && (
                             <div>
                               <ArchivosViewer archivos={arriendo.archivos || []} />

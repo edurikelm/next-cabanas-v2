@@ -170,3 +170,69 @@
   .rbc-month-row { min-height: 100px; }
   .rbc-month-view .rbc-day-bg { min-height: 100px; }
 }
+
+/* Estilos para funcionalidad de cámara */
+.camera-button {
+  transition: all 0.2s ease-in-out;
+}
+
+.camera-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Prioridad del botón de cámara SOLO en dispositivos móviles reales */
+@media (max-width: 640px) and (pointer: coarse) {
+  .mobile-camera-priority {
+    order: -1;
+  }
+  
+  .camera-button {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    border: none;
+    color: white;
+  }
+  
+  .camera-button:hover {
+    background: linear-gradient(135deg, #4338ca, #6d28d9);
+    color: white;
+  }
+}
+
+/* Solo aplicar estilos especiales en dispositivos con touch */
+@media (hover: none) and (pointer: coarse) {
+  .camera-button {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    border: none;
+    color: white;
+  }
+}
+
+/* Animación para feedback visual al capturar */
+@keyframes capture-flash {
+  0% { background-color: white; opacity: 0; }
+  50% { background-color: white; opacity: 0.8; }
+  100% { background-color: white; opacity: 0; }
+}
+
+.capture-flash {
+  animation: capture-flash 0.3s ease-in-out;
+}
+
+/* Mejorar visualización del video de cámara */
+.camera-video {
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* Optimización para pantallas pequeñas */
+@media (max-width: 480px) {
+  .rbc-month-view .rbc-day-bg {
+    min-height: 80px;
+  }
+  
+  .camera-capture-dialog {
+    margin: 1rem;
+    max-width: calc(100vw - 2rem);
+  }
+}
