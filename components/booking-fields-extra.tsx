@@ -63,16 +63,16 @@ interface ComentariosFieldProps {
 
 export function ComentariosField({ value = '', onChange, placeholder }: ComentariosFieldProps) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <MessageSquare className="h-5 w-5" />
+    <Card className="border-muted">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+          <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5" />
           Comentarios y Notas
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-2">
-          <Label htmlFor="comentarios">
+      <CardContent className="pt-0">
+        <div className="space-y-3">
+          <Label htmlFor="comentarios" className="text-sm sm:text-base font-medium">
             Observaciones adicionales (opcional)
           </Label>
           <Textarea
@@ -82,11 +82,11 @@ export function ComentariosField({ value = '', onChange, placeholder }: Comentar
             onChange={(e) => onChange(e.target.value)}
             rows={4}
             maxLength={1000}
-            className="resize-none"
+            className="resize-none min-h-[100px] text-base leading-relaxed"
           />
-          <div className="flex justify-between text-xs text-gray-500">
+          <div className="flex justify-between text-xs sm:text-sm text-muted-foreground">
             <span>Máximo 1000 caracteres</span>
-            <span>{value.length}/1000</span>
+            <span className="font-mono">{value.length}/1000</span>
           </div>
         </div>
       </CardContent>

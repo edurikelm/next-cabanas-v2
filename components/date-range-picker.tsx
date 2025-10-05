@@ -37,7 +37,7 @@ export function DateRangePicker({ value, onChange, placeholder = "Seleccionar fe
   const months = numberOfMonths ?? (typeof window !== "undefined" && window.innerWidth < 768 ? 1 : 2);
 
   const btnClass = [
-    "w-full justify-start text-left font-normal",
+    "w-full justify-start text-left font-normal h-10 sm:h-11 text-sm sm:text-base",
     !value?.from ? "text-muted-foreground" : "",
     className ?? "",
   ].join(" ");
@@ -46,11 +46,11 @@ export function DateRangePicker({ value, onChange, placeholder = "Seleccionar fe
     <Popover>
       <PopoverTrigger asChild>
         <Button variant="outline" className={btnClass}>
-          <CalendarIcon className="mr-2 h-4 w-4" />
-          {label}
+          <CalendarIcon className="mr-2 h-4 w-4 flex-shrink-0" />
+          <span className="truncate">{label}</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="p-0 w-full" align="start">
+      <PopoverContent className="p-0 w-auto" align="start" side="bottom" sideOffset={4}>
         <Calendar
           mode="range"
           selected={value}
@@ -59,6 +59,7 @@ export function DateRangePicker({ value, onChange, placeholder = "Seleccionar fe
           initialFocus
           locale={es}
           disabled={disabled}
+          className="rounded-md border"
         />
       </PopoverContent>
     </Popover>

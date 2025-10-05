@@ -244,36 +244,36 @@ export const FileUploader = forwardRef<FileUploaderRef, FileUploaderProps>(({
   const totalArchivos = archivosSubidos.length + archivosPendientes.length;
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+    <Card className="w-full border-muted">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
           {esImagen ? (
             <>
-              <Image className="h-5 w-5" />
+              <Image className="h-4 w-4 sm:h-5 sm:w-5" />
               Subir Imágenes
             </>
           ) : (
             <>
-              <FileText className="h-5 w-5" />
+              <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
               Subir Archivos
             </>
           )}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 pt-0">
         {/* Botones de selección */}
         <div className="space-y-3">
-          <Label className="text-sm font-medium">
+          <Label className="text-sm sm:text-base font-medium">
             {esImagen ? 'Añadir imágenes' : 'Añadir archivos'}
           </Label>
           
-          <div className="flex flex-col sm:flex-row gap-2">
+          <div className="flex flex-col sm:flex-row gap-3">
             <Button
               type="button"
               variant="outline"
               onClick={() => inputRef.current?.click()}
               disabled={subiendo || totalArchivos >= maxArchivos}
-              className="flex-1"
+              className="flex-1 h-10 sm:h-11 text-base"
             >
               <Upload className="h-4 w-4 mr-2" />
               Seleccionar {esImagen ? 'imágenes' : 'archivos'}
@@ -285,7 +285,7 @@ export const FileUploader = forwardRef<FileUploaderRef, FileUploaderProps>(({
                 variant="outline"
                 onClick={() => setShowCamera(true)}
                 disabled={subiendo || totalArchivos >= maxArchivos}
-                className="flex-1 sm:flex-initial camera-button"
+                className="flex-1 sm:flex-initial camera-button h-10 sm:h-11"
               >
                 <Camera className="h-4 w-4 mr-2" />
                 <span className="hidden sm:inline">Cámara</span>

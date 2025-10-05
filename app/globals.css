@@ -245,6 +245,7 @@
   .booking-form textarea {
     min-height: 44px;
     font-size: 16px; /* Previene zoom en iOS */
+    padding: 12px 16px;
   }
   
   /* Checkboxes más grandes */
@@ -257,6 +258,8 @@
   .booking-form label {
     font-weight: 500;
     color: hsl(var(--foreground));
+    margin-bottom: 8px;
+    display: block;
   }
   
   /* Botones más grandes */
@@ -264,16 +267,49 @@
     min-height: 44px;
     font-size: 16px;
     font-weight: 500;
+    padding: 12px 16px;
   }
   
   /* Espaciado mejorado */
   .booking-form .form-item {
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
   }
   
   /* Select mejorado */
   .booking-form [role="combobox"] {
     min-height: 44px;
+    font-size: 16px;
+  }
+  
+  /* DatePicker más grande */
+  .booking-form [data-radix-popper-content-wrapper] {
+    width: 100vw !important;
+    max-width: calc(100vw - 2rem);
+  }
+  
+  /* Cards con mejor espaciado */
+  .booking-form .card {
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  /* TextArea más grande */
+  .booking-form textarea {
+    min-height: 120px;
+    line-height: 1.5;
+    padding: 16px;
+  }
+  
+  /* File uploader mejorado */
+  .booking-form .file-uploader {
+    padding: 1rem;
+  }
+  
+  /* Dialog responsive */
+  [data-radix-dialog-content] {
+    margin: 0.5rem;
+    max-height: calc(100vh - 1rem);
+    width: calc(100vw - 1rem);
   }
 }
 
