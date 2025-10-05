@@ -354,6 +354,76 @@
   }
 }
 
+/* Estilos base para cards de arriendos mensuales */
+.arriendos-mensuales-card {
+  min-height: auto !important;
+}
+
+/* Asegurar que las secciones de archivos e imágenes sean visibles en desktop */
+@media (min-width: 641px) {
+  .arriendos-mensuales-card .max-h-none {
+    max-height: none !important;
+  }
+  
+  .arriendos-mensuales-card .space-y-2,
+  .arriendos-mensuales-card .space-y-3 {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+}
+
+/* Mejoras específicas para cards de arriendos mensuales en móviles */
+@media (max-width: 640px) {
+  .arriendos-mensuales-card {
+    height: auto !important;
+  }
+  
+  .arriendos-mensuales-card .card-header {
+    padding-bottom: 0.75rem;
+  }
+  
+  .arriendos-mensuales-card .card-content {
+    padding: 0.75rem;
+  }
+  
+  /* Botones compactos en cards */
+  .arriendos-mensuales-card button {
+    min-height: 28px;
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+  
+  /* Badges más pequeños */
+  .arriendos-mensuales-card .badge {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+  
+  /* Texto más compacto */
+  .arriendos-mensuales-card .text-xs {
+    font-size: 10px;
+  }
+  
+  .arriendos-mensuales-card .text-sm {
+    font-size: 12px;
+  }
+  
+  /* Grid de imágenes más compacto */
+  .arriendos-mensuales-card .grid-cols-3 {
+    gap: 2px;
+  }
+  
+  /* Separadores más sutiles */
+  .arriendos-mensuales-card .separator {
+    margin: 0.5rem 0;
+  }
+  
+  /* Mantener limitaciones de altura en móviles */
+  .arriendos-mensuales-card .max-h-none {
+    max-height: 3rem !important;
+  }
+}
+
 /* Mejoras para touch en formularios */
 @media (hover: none) and (pointer: coarse) {
   .booking-form input,
