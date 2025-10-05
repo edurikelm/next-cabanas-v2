@@ -64,29 +64,30 @@ interface ComentariosFieldProps {
 export function ComentariosField({ value = '', onChange, placeholder }: ComentariosFieldProps) {
   return (
     <Card className="border-muted">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-          <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5" />
-          Comentarios y Notas
+      <CardHeader className="pb-2 sm:pb-3">
+        <CardTitle className="flex items-center gap-2 text-sm sm:text-lg">
+          <MessageSquare className="h-3 w-3 sm:h-5 sm:w-5" />
+          <span className="text-xs sm:text-base">Comentarios</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-0">
-        <div className="space-y-3">
-          <Label htmlFor="comentarios" className="text-sm sm:text-base font-medium">
+        <div className="space-y-2 sm:space-y-3">
+          <Label htmlFor="comentarios" className="text-xs sm:text-base font-medium hidden sm:block">
             Observaciones adicionales (opcional)
           </Label>
           <Textarea
             id="comentarios"
-            placeholder={placeholder || "Agregar cualquier información adicional sobre el arriendo..."}
+            placeholder={placeholder || "Agregar información adicional..."}
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            rows={4}
+            rows={3}
             maxLength={1000}
-            className="resize-none min-h-[100px] text-base leading-relaxed"
+            className="resize-none min-h-[60px] sm:min-h-[100px] text-sm sm:text-base leading-relaxed"
           />
-          <div className="flex justify-between text-xs sm:text-sm text-muted-foreground">
-            <span>Máximo 1000 caracteres</span>
-            <span className="font-mono">{value.length}/1000</span>
+          <div className="flex justify-between text-xs text-muted-foreground">
+            <span className="hidden sm:inline">Máximo 1000 caracteres</span>
+            <span className="sm:hidden">Max 1000</span>
+            <span className="font-mono text-xs">{value.length}/1000</span>
           </div>
         </div>
       </CardContent>

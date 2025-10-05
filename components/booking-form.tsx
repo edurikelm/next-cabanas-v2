@@ -230,16 +230,16 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[95vh] overflow-y-auto p-3 sm:p-6">
-        <DialogHeader className="mb-4 sm:mb-6">
-          <DialogTitle className="text-lg sm:text-xl">{initial?.id ? "Editar arriendo" : "Nuevo arriendo"}</DialogTitle>
-          <DialogDescription className="text-sm sm:text-base">
+      <DialogContent className="max-w-[98vw] sm:max-w-4xl max-h-[98vh] overflow-y-auto p-2 sm:p-6">
+        <DialogHeader className="mb-3 sm:mb-6">
+          <DialogTitle className="text-base sm:text-xl">{initial?.id ? "Editar arriendo" : "Nuevo arriendo"}</DialogTitle>
+          <DialogDescription className="text-xs sm:text-base hidden sm:block">
             Completa los datos de la reserva. {esMensual ? "Los campos adicionales aparecen porque seleccionaste arriendo mensual." : "Marca 'Arriendo Mensual' para campos adicionales."}
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(submit)} className="booking-form grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
+          <form onSubmit={form.handleSubmit(submit)} className="booking-form grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-4">
             {/* Checkbox para Arriendo Mensual */}
             <FormField
               control={form.control}
@@ -479,10 +479,10 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
             {esMensual && (
               <>
                 {/* Separador visual */}
-                <div className="lg:col-span-2 border-t pt-4 mt-4">
-                  <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-blue-700 dark:text-blue-400 flex items-center gap-2">
+                <div className="lg:col-span-2 border-t pt-2 sm:pt-4 mt-2 sm:mt-4">
+                  <h3 className="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 text-blue-700 dark:text-blue-400 flex items-center gap-2">
                     📋 Información Adicional
-                    <span className="text-sm font-normal text-muted-foreground">(Arriendo Mensual)</span>
+                    <span className="text-xs font-normal text-muted-foreground hidden sm:inline">(Arriendo Mensual)</span>
                   </h3>
                 </div>
 

@@ -245,38 +245,39 @@ export const FileUploader = forwardRef<FileUploaderRef, FileUploaderProps>(({
 
   return (
     <Card className="w-full border-muted">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+      <CardHeader className="pb-2 sm:pb-3">
+        <CardTitle className="flex items-center gap-2 text-sm sm:text-lg">
           {esImagen ? (
             <>
-              <Image className="h-4 w-4 sm:h-5 sm:w-5" />
-              Subir Imágenes
+              <Image className="h-3 w-3 sm:h-5 sm:w-5" />
+              <span className="text-xs sm:text-base">Subir Imágenes</span>
             </>
           ) : (
             <>
-              <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
-              Subir Archivos
+              <FileText className="h-3 w-3 sm:h-5 sm:w-5" />
+              <span className="text-xs sm:text-base">Subir Archivos</span>
             </>
           )}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4 pt-0">
+      <CardContent className="space-y-2 sm:space-y-4 pt-0">
         {/* Botones de selección */}
-        <div className="space-y-3">
-          <Label className="text-sm sm:text-base font-medium">
+        <div className="space-y-2 sm:space-y-3">
+          <Label className="text-xs sm:text-base font-medium">
             {esImagen ? 'Añadir imágenes' : 'Añadir archivos'}
           </Label>
           
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col sm:flex-row gap-2">
             <Button
               type="button"
               variant="outline"
               onClick={() => inputRef.current?.click()}
               disabled={subiendo || totalArchivos >= maxArchivos}
-              className="flex-1 h-10 sm:h-11 text-base"
+              className="flex-1 h-8 sm:h-11 text-xs sm:text-base"
             >
-              <Upload className="h-4 w-4 mr-2" />
-              Seleccionar {esImagen ? 'imágenes' : 'archivos'}
+              <Upload className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Seleccionar {esImagen ? 'imágenes' : 'archivos'}</span>
+              <span className="sm:hidden">{esImagen ? 'Imágenes' : 'Archivos'}</span>
             </Button>
             
             {esImagen && isMobile && (
@@ -285,18 +286,19 @@ export const FileUploader = forwardRef<FileUploaderRef, FileUploaderProps>(({
                 variant="outline"
                 onClick={() => setShowCamera(true)}
                 disabled={subiendo || totalArchivos >= maxArchivos}
-                className="flex-1 sm:flex-initial camera-button h-10 sm:h-11"
+                className="flex-1 sm:flex-initial camera-button h-8 sm:h-11"
               >
-                <Camera className="h-4 w-4 mr-2" />
+                <Camera className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                 <span className="hidden sm:inline">Cámara</span>
-                <span className="sm:hidden">📷 Foto</span>
+                <span className="sm:hidden">📷</span>
               </Button>
             )}
           </div>
           
           <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>Máximo {tamañoMaximo}MB por archivo</span>
-            <span>{totalArchivos}/{maxArchivos} archivos</span>
+            <span className="hidden sm:inline">Máximo {tamañoMaximo}MB por archivo</span>
+            <span className="sm:hidden">Max {tamañoMaximo}MB</span>
+            <span>{totalArchivos}/{maxArchivos}</span>
           </div>
         </div>
 
@@ -334,22 +336,22 @@ export const FileUploader = forwardRef<FileUploaderRef, FileUploaderProps>(({
               <Clock className="h-4 w-4" />
               Archivos pendientes de subir ({archivosPendientes.length})
             </h4>
-            <div className="space-y-2">
+            <div className="space-y-1 sm:space-y-2">
               {archivosPendientes.map((archivo) => (
-                <div key={archivo.id} className="flex items-center justify-between p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                  <div className="flex items-center gap-2 flex-1">
-                    <div className="p-2 bg-amber-100 rounded">
+                <div key={archivo.id} className="file-list-item flex items-center justify-between p-2 sm:p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <div className="flex items-center gap-1 sm:gap-2 flex-1 min-w-0">
+                    <div className="p-1 sm:p-2 bg-amber-100 rounded">
                       {esImagen ? (
-                        <Image className="h-4 w-4 text-amber-600" />
+                        <Image className="h-3 w-3 sm:h-4 sm:w-4 text-amber-600" />
                       ) : (
-                        <FileText className="h-4 w-4 text-amber-600" />
+                        <FileText className="h-3 w-3 sm:h-4 sm:w-4 text-amber-600" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">{archivo.nombre}</p>
+                      <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">{archivo.nombre}</p>
                       <p className="text-xs text-gray-500">{formatearTamaño(archivo.tamaño)}</p>
                     </div>
-                    <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-300">
+                    <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-300 text-xs px-1 py-0">
                       Pendiente
                     </Badge>
                   </div>
@@ -357,9 +359,9 @@ export const FileUploader = forwardRef<FileUploaderRef, FileUploaderProps>(({
                     variant="ghost"
                     size="sm"
                     onClick={() => eliminarArchivoPendiente(archivo.id)}
-                    className="text-amber-600 hover:text-amber-800 hover:bg-amber-100"
+                    className="text-amber-600 hover:text-amber-800 hover:bg-amber-100 h-6 w-6 sm:h-8 sm:w-8 p-0"
                   >
-                    <X className="h-4 w-4" />
+                    <X className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
                 </div>
               ))}
@@ -369,55 +371,57 @@ export const FileUploader = forwardRef<FileUploaderRef, FileUploaderProps>(({
 
         {/* Lista de archivos subidos */}
         {archivosSubidos.length > 0 && (
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium text-green-700 flex items-center gap-2">
+          <div className="space-y-1 sm:space-y-2">
+            <h4 className="text-xs sm:text-sm font-medium text-green-700 flex items-center gap-1 sm:gap-2">
               {esImagen ? (
                 <>
-                  <Image className="h-4 w-4" />
-                  Imágenes subidas ({archivosSubidos.length})
+                  <Image className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Imágenes subidas ({archivosSubidos.length})</span>
+                  <span className="sm:hidden">Imágenes ({archivosSubidos.length})</span>
                 </>
               ) : (
                 <>
-                  <FileText className="h-4 w-4" />
-                  Archivos subidos ({archivosSubidos.length})
+                  <FileText className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Archivos subidos ({archivosSubidos.length})</span>
+                  <span className="sm:hidden">Archivos ({archivosSubidos.length})</span>
                 </>
               )}
             </h4>
-            <div className="space-y-2">
+            <div className="space-y-1 sm:space-y-2">
               {archivosSubidos.map((archivo) => (
-                <div key={archivo.id} className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
-                  <div className="flex items-center gap-2 flex-1">
-                    <div className="p-2 bg-green-100 rounded">
+                <div key={archivo.id} className="file-list-item flex items-center justify-between p-2 sm:p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-center gap-1 sm:gap-2 flex-1 min-w-0">
+                    <div className="p-1 sm:p-2 bg-green-100 rounded">
                       {esImagen ? (
-                        <Image className="h-4 w-4 text-green-600" />
+                        <Image className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
                       ) : (
-                        <FileText className="h-4 w-4 text-green-600" />
+                        <FileText className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">{archivo.nombre}</p>
+                      <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">{archivo.nombre}</p>
                       <p className="text-xs text-gray-500">{formatearTamaño(archivo.tamaño)}</p>
                     </div>
-                    <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">
+                    <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300 text-xs px-1 py-0">
                       Subido
                     </Badge>
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-0.5 sm:gap-1">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => window.open(archivo.url, '_blank')}
-                      className="text-green-600 hover:text-green-800 hover:bg-green-100"
+                      className="text-green-600 hover:text-green-800 hover:bg-green-100 h-6 w-6 sm:h-8 sm:w-8 p-0"
                     >
-                      <Upload className="h-4 w-4" />
+                      <Upload className="h-3 w-3 sm:h-4 sm:w-4" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => eliminarArchivoSubido(archivo.id)}
-                      className="text-red-600 hover:text-red-800 hover:bg-red-100"
+                      className="text-red-600 hover:text-red-800 hover:bg-red-100 h-6 w-6 sm:h-8 sm:w-8 p-0"
                     >
-                      <X className="h-4 w-4" />
+                      <X className="h-3 w-3 sm:h-4 sm:w-4" />
                     </Button>
                   </div>
                 </div>

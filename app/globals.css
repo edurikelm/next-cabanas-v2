@@ -243,73 +243,114 @@
   .booking-form input,
   .booking-form select,
   .booking-form textarea {
-    min-height: 44px;
+    min-height: 36px;
     font-size: 16px; /* Previene zoom en iOS */
-    padding: 12px 16px;
+    padding: 8px 12px;
   }
   
   /* Checkboxes más grandes */
   .booking-form input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
   }
   
   /* Labels más visibles */
   .booking-form label {
     font-weight: 500;
     color: hsl(var(--foreground));
-    margin-bottom: 8px;
+    margin-bottom: 4px;
     display: block;
   }
   
-  /* Botones más grandes */
+  /* Botones más compactos pero usables */
   .booking-form button {
-    min-height: 44px;
-    font-size: 16px;
+    min-height: 36px;
+    font-size: 14px;
     font-weight: 500;
-    padding: 12px 16px;
+    padding: 8px 12px;
   }
   
-  /* Espaciado mejorado */
+  /* Espaciado compacto */
   .booking-form .form-item {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
   }
   
   /* Select mejorado */
   .booking-form [role="combobox"] {
-    min-height: 44px;
-    font-size: 16px;
+    min-height: 36px;
+    font-size: 14px;
   }
   
-  /* DatePicker más grande */
+  /* DatePicker más compacto */
   .booking-form [data-radix-popper-content-wrapper] {
     width: 100vw !important;
-    max-width: calc(100vw - 2rem);
+    max-width: calc(100vw - 1rem);
   }
   
-  /* Cards con mejor espaciado */
+  /* Cards con espaciado compacto */
   .booking-form .card {
-    padding: 1rem;
-    margin-bottom: 1rem;
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
   }
   
-  /* TextArea más grande */
+  /* TextArea más compacto */
   .booking-form textarea {
-    min-height: 120px;
-    line-height: 1.5;
-    padding: 16px;
+    min-height: 80px;
+    line-height: 1.4;
+    padding: 8px 12px;
   }
   
-  /* File uploader mejorado */
+  /* File uploader compacto */
   .booking-form .file-uploader {
-    padding: 1rem;
+    padding: 0.75rem;
   }
   
-  /* Dialog responsive */
+  /* Dialog ultra compacto */
   [data-radix-dialog-content] {
-    margin: 0.5rem;
-    max-height: calc(100vh - 1rem);
-    width: calc(100vw - 1rem);
+    margin: 0.25rem;
+    max-height: calc(100vh - 0.5rem);
+    width: calc(100vw - 0.5rem);
+    padding: 0.5rem !important;
+  }
+  
+  /* Títulos más pequeños */
+  .booking-form h1,
+  .booking-form h2,
+  .booking-form h3 {
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+  }
+  
+  /* Espaciado entre elementos */
+  .booking-form > * + * {
+    margin-top: 0.75rem;
+  }
+  
+  /* Listas de archivos compactas */
+  .booking-form .file-list-item {
+    padding: 0.5rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+  
+  .booking-form .file-list-item .text-sm {
+    font-size: 0.75rem !important;
+  }
+  
+  .booking-form .file-list-item .text-xs {
+    font-size: 0.65rem !important;
+  }
+  
+  /* Botones de archivo más pequeños */
+  .booking-form .file-list-item button {
+    min-height: 24px !important;
+    width: 24px !important;
+    padding: 0 !important;
+  }
+  
+  /* Iconos más pequeños en listas de archivos */
+  .booking-form .file-list-item svg {
+    width: 12px !important;
+    height: 12px !important;
   }
 }
 
