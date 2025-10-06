@@ -53,25 +53,119 @@ export default function CabanasPage() {
   const ArchivosViewer = ({ archivos }: { archivos: ArchivoAdjunto[] }) => {
     if (!archivos || archivos.length === 0) return null;
 
+    const getFileIcon = (fileName: string) => {
+      const extension = fileName.split('.').pop()?.toLowerCase();
+      switch (extension) {
+        case 'pdf':
+          return '📄';
+        case 'docx':
+        case 'doc':
+          return '📝';
+        case 'xlsx':
+        case 'xls':
+          return '📊';
+        case 'pptx':
+        case 'ppt':
+          return '📽️';
+        default:
+          return '📎';
+      }
+    };
+
+    const canPreview = (fileName: string) => {
+      const extension = fileName.split('.').pop()?.toLowerCase();
+      return ['pdf', 'docx', 'doc'].includes(extension || '');
+    };
+
+    const getPreviewUrl = (archivo: ArchivoAdjunto) => {
+      const extension = archivo.nombre.split('.').pop()?.toLowerCase();
+      if (extension === 'pdf') {
+        return archivo.url;
+      } else if (['docx', 'doc'].includes(extension || '')) {
+        // Usar Google Docs Viewer para archivos de Word
+        return `https://docs.google.com/gviewapi=v1&embedded=true&url=${encodeURIComponent(archivo.url)}`;
+      }
+      return null;
+    };
+
     return (
       <div className="space-y-2">
         <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
           <FileText className="h-4 w-4" />
           Archivos adjuntos ({archivos.length})
         </h5>
-        <div className="flex flex-wrap gap-2">
-          {archivos.map((archivo) => (
-            <Button
-              key={archivo.id}
-              variant="outline"
-              size="sm"
-              className="text-xs h-8"
-              onClick={() => window.open(archivo.url, '_blank')}
-            >
-              <Download className="h-3 w-3 mr-1" />
-              {archivo.nombre}
-            </Button>
-          ))}
+        <div className="space-y-1">
+          {archivos.map((archivo) => {
+            const previewUrl = getPreviewUrl(archivo);
+            
+            return (
+              <div key={archivo.id} className="flex items-center gap-2 p-2 hover:bg-muted/50 rounded transition-colors">
+                <span className="text-lg">{getFileIcon(archivo.nombre)}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{archivo.nombre}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {(archivo.tamaño / 1024 / 1024).toFixed(2)} MB
+                  </p>
+                </div>
+                <div className="flex gap-1">
+                  {canPreview(archivo.nombre) && (
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs h-7 w-7 flex items-center justify-center p-0"
+                        >
+                          <Eye className="h-3 w-3" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-6xl h-[80vh]">
+                        <DialogHeader>
+                          <DialogTitle className="flex items-center gap-2">
+                            <span className="text-lg">{getFileIcon(archivo.nombre)}</span>
+                            {archivo.nombre}
+                          </DialogTitle>
+                          <DialogDescription>
+                            Previsualización del archivo - Tamaño: {(archivo.tamaño / 1024 / 1024).toFixed(2)} MB
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="flex-1 min-h-0">
+                          {previewUrl && (
+                            <iframe
+                              src={previewUrl}
+                              className="w-full h-full border rounded"
+                              title={`Preview de ${archivo.nombre}`}
+                            />
+                          )}
+                        </div>
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="outline"
+                            onClick={() => window.open(archivo.url, '_blank')}
+                          >
+                            <ExternalLink className="h-4 w-4 mr-2" />
+                            Abrir en nueva pestaña
+                          </Button>
+                          <Button onClick={() => window.open(archivo.url, '_blank')}>
+                            <Download className="h-4 w-4 mr-2" />
+                            Descargar
+                          </Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-xs h-7 w-7 flex items-center justify-center p-0"
+                    onClick={() => window.open(archivo.url, '_blank')}
+                  >
+                    <Download className="h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     );
