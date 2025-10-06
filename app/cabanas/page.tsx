@@ -573,32 +573,7 @@ export default function CabanasPage() {
                               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Archivos</p>
                               <div className="max-h-none sm:max-h-24 overflow-y-auto space-y-1 sm:space-y-2">
                                 {hasArchivos && (
-                                  <div className="space-y-1">
-                                    <p className="text-xs text-muted-foreground flex items-center gap-1">
-                                      <span>📄</span>
-                                      {arriendo.archivos!.length} doc{arriendo.archivos!.length > 1 ? 's' : ''}
-                                    </p>
-                                    <div className="space-y-0.5 sm:space-y-1">
-                                      {arriendo.archivos!.slice(0, 2).map((archivo, index) => (
-                                        <a
-                                          key={index}
-                                          href={archivo.url}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="flex items-center gap-1 sm:gap-2 p-1 sm:p-1.5 hover:bg-muted/50 rounded text-xs text-muted-foreground hover:text-foreground transition-colors group"
-                                        >
-                                          <span className="shrink-0 text-xs">📄</span>
-                                          <span className="truncate group-hover:text-foreground text-xs">{archivo.nombre}</span>
-                                          <ExternalLink className="h-2.5 w-2.5 sm:h-3 sm:w-3 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                        </a>
-                                      ))}
-                                      {arriendo.archivos!.length > 2 && (
-                                        <p className="text-xs text-muted-foreground pl-4 sm:pl-6">
-                                          +{arriendo.archivos!.length - 2} más...
-                                        </p>
-                                      )}
-                                    </div>
-                                  </div>
+                                  <ArchivosViewer archivos={arriendo.archivos!} />
                                 )}
                                 
                                 {hasImagenes && (
@@ -607,28 +582,66 @@ export default function CabanasPage() {
                                       <span>🖼️</span>
                                       {arriendo.imagenes!.length} img{arriendo.imagenes!.length > 1 ? 's' : ''}
                                     </p>
-                                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-1">
-                                      {arriendo.imagenes!.slice(0, 3).map((imagen, index) => (
-                                        <a
-                                          key={index}
-                                          href={imagen.url}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="group relative block aspect-square"
-                                        >
-                                          <img
-                                            src={imagen.urlThumbnail || imagen.url}
-                                            alt={imagen.nombre}
-                                            className="w-full h-full object-cover rounded border border-border group-hover:opacity-80 transition-opacity"
-                                          />
-                                          {index === 2 && arriendo.imagenes!.length > 3 && (
-                                            <div className="absolute inset-0 bg-black/60 rounded flex items-center justify-center">
-                                              <span className="text-white text-xs font-medium">
-                                                +{arriendo.imagenes!.length - 2}
-                                              </span>
+                                    <div className="grid grid-cols-4 sm:grid-cols-6 gap-1">
+                                      {arriendo.imagenes!.slice(0, 5).map((imagen, index) => (
+                                        <Dialog key={imagen.id}>
+                                          <DialogTrigger asChild>
+                                            <button className="group relative block aspect-square bg-muted rounded border border-border overflow-hidden">
+                                              <img
+                                                src={imagen.urlThumbnail || imagen.url}
+                                                alt={imagen.nombre}
+                                                className="w-full h-full object-cover group-hover:opacity-80 transition-opacity"
+                                                onLoad={(e) => {
+                                                  const target = e.target as HTMLImageElement;
+                                                  target.style.display = 'block';
+                                                  const fallback = target.parentElement?.querySelector('.fallback-icon') as HTMLElement;
+                                                  if (fallback) fallback.style.display = 'none';
+                                                }}
+                                                onError={(e) => {
+                                                  console.log('Error loading image:', imagen.url, imagen.urlThumbnail);
+                                                  const target = e.target as HTMLImageElement;
+                                                  target.style.display = 'none';
+                                                  const fallback = target.parentElement?.querySelector('.fallback-icon') as HTMLElement;
+                                                  if (fallback) fallback.style.display = 'flex';
+                                                }}
+                                              />
+                                              <div className="fallback-icon absolute inset-0 bg-muted rounded flex items-center justify-center" style={{ display: 'none' }}>
+                                                <Image className="h-4 w-4 text-muted-foreground" />
+                                              </div>
+                                              {index === 4 && arriendo.imagenes!.length > 5 && (
+                                                <div className="absolute inset-0 bg-black/60 rounded flex items-center justify-center">
+                                                  <span className="text-white text-xs font-medium">
+                                                    +{arriendo.imagenes!.length - 4}
+                                                  </span>
+                                                </div>
+                                              )}
+                                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all rounded flex items-center justify-center">
+                                                <Eye className="h-3 w-3 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                                              </div>
+                                            </button>
+                                          </DialogTrigger>
+                                          <DialogContent className="max-w-4xl">
+                                            <DialogHeader>
+                                              <DialogTitle>{imagen.nombre}</DialogTitle>
+                                              <DialogDescription>
+                                                Tamaño: {(imagen.tamaño / 1024 / 1024).toFixed(2)} MB
+                                              </DialogDescription>
+                                            </DialogHeader>
+                                            <div className="flex justify-center">
+                                              <img
+                                                src={imagen.url}
+                                                alt={imagen.nombre}
+                                                className="max-w-full max-h-[70vh] object-contain"
+                                              />
                                             </div>
-                                          )}
-                                        </a>
+                                            <div className="flex justify-end">
+                                              <Button onClick={() => window.open(imagen.url, '_blank')}>
+                                                <ExternalLink className="h-4 w-4 mr-2" />
+                                                Abrir en nueva pestaña
+                                              </Button>
+                                            </div>
+                                          </DialogContent>
+                                        </Dialog>
                                       ))}
                                     </div>
                                   </div>
