@@ -1,11 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Home, Users, DollarSign, MapPin, Settings, Plus, Edit, Trash2, Eye, FileText, Image, Download, ExternalLink } from "lucide-react";
+import { Home, Users, PhoneCall, DollarSign, MapPin, Settings, Plus, Edit, Trash2, Eye, FileText, Image, Download, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -13,7 +12,6 @@ import { Separator } from "@/components/ui/separator";
 import { useCabanas } from "@/lib/hooks/useCabanas";
 import { useArriendos, useArriendoOperaciones } from "@/lib/hooks/useFirestore";
 import { BookingForm } from "@/components/booking-form";
-import type { Cabana } from "@/lib/types/cabana-types";
 import type { Booking, ArchivoAdjunto, ImagenAdjunta } from "@/lib/types/booking-types";
 
 export default function CabanasPage() {
@@ -404,17 +402,63 @@ export default function CabanasPage() {
                       <div className="space-y-2 sm:space-y-4">
                         {/* Título y ubicación */}
                         <div className="space-y-1 sm:space-y-2">
-                          <CardTitle className="text-base sm:text-lg font-semibold text-foreground line-clamp-2 min-h-[2.5rem] sm:min-h-[3.5rem] leading-tight">
-                            {arriendo.title}
-                          </CardTitle>
+                          <div className="flex items-start justify-between gap-2">
+                            <CardTitle className="text-base sm:text-lg font-semibold text-foreground line-clamp-2 min-h-[2.5rem] sm:min-h-[3.5rem] leading-tight flex-1">
+                              {arriendo.cabana}
+                            </CardTitle>
+                            {/* Botones de acción - ubicados al final */}
+                            <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setEditing(arriendo);
+                                  setFormOpen(true);
+                                }}
+                                className="h-7 px-2 sm:h-8 sm:px-3 text-xs hover:bg-accent hover:text-accent-foreground transition-colors"
+                              >
+                                <Edit className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1 sm:mr-1.5" />
+                                <span className="hidden sm:inline">Editar</span>
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={async () => {
+                                  if (confirm(`¿Está seguro que desea eliminar el arriendo "${arriendo.title}"?`)) {
+                                    try {
+                                      setEliminando(arriendo.id);
+                                      await eliminar(arriendo.id);
+                                      await recargarArriendos();
+                                    } catch (error) {
+                                      console.error('Error al eliminar arriendo:', error);
+                                      alert('Error al eliminar el arriendo. Inténtelo nuevamente.');
+                                    } finally {
+                                      setEliminando(null);
+                                    }
+                                  }
+                                }}
+                                disabled={eliminando === arriendo.id}
+                                className="h-7 px-2 sm:h-8 sm:px-3 text-xs opacity-80 hover:opacity-100 transition-opacity"
+                              >
+                                <Trash2 className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1 sm:mr-1.5" />
+                                {eliminando === arriendo.id ? (
+                                  <span className="sm:hidden">...</span>
+                                ) : (
+                                  <>
+                                    <span className="hidden sm:inline">Eliminar</span>
+                                  </>
+                                )}
+                              </Button>
+                            </div>
+                          </div>
                           <div className="flex items-center gap-2 text-muted-foreground">
                             <Home className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
-                            <span className="text-xs sm:text-sm font-medium truncate">{arriendo.cabana}</span>
+                            <span className="text-xs sm:text-sm font-medium truncate">{arriendo.title}</span>
                           </div>
-                          {arriendo.ubicacion ? (
+                          {arriendo.esMensual ? (
                             <div className="flex items-center gap-2 text-muted-foreground">
                               <MapPin className="h-2.5 w-2.5 sm:h-3 sm:w-3 shrink-0" />
-                              <span className="text-xs truncate">{arriendo.ubicacion}</span>
+                              <span className="text-xs truncate">{arriendo.esMensual ? 'Mensual' : 'Diario'}</span>
                             </div>
                           ) : (
                             <div className="h-3 sm:h-4"></div>
@@ -425,19 +469,6 @@ export default function CabanasPage() {
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                           {/* Estados */}
                           <div className="flex flex-wrap items-center gap-1 sm:gap-2">
-                            <Badge 
-                              variant={enCurso ? "default" : "secondary"}
-                              className={`text-xs ${
-                                enCurso 
-                                  ? 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800' 
-                                  : 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
-                              }`}
-                            >
-                              <div className={`w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full mr-1 sm:mr-1.5 ${
-                                enCurso ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'
-                              }`}></div>
-                              {enCurso ? 'En curso' : 'Finalizado'}
-                            </Badge>
                             <Badge 
                               variant={arriendo.pago ? "outline" : "destructive"}
                               className={`text-xs ${
@@ -460,52 +491,8 @@ export default function CabanasPage() {
                             </Badge>
                           </div>
                           
-                          {/* Botones de acción - compactos en móviles */}
-                          <div className="flex items-center gap-1 sm:gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                setEditing(arriendo);
-                                setFormOpen(true);
-                              }}
-                              className="h-7 px-2 sm:h-8 sm:px-3 text-xs flex-1 sm:flex-none hover:bg-accent hover:text-accent-foreground transition-colors"
-                            >
-                              <Edit className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1 sm:mr-1.5" />
-                              <span className="hidden sm:inline">Editar</span>
-                              <span className="sm:hidden">Edit</span>
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={async () => {
-                                if (confirm(`¿Está seguro que desea eliminar el arriendo "${arriendo.title}"?`)) {
-                                  try {
-                                    setEliminando(arriendo.id);
-                                    await eliminar(arriendo.id);
-                                    await recargarArriendos();
-                                  } catch (error) {
-                                    console.error('Error al eliminar arriendo:', error);
-                                    alert('Error al eliminar el arriendo. Inténtelo nuevamente.');
-                                  } finally {
-                                    setEliminando(null);
-                                  }
-                                }
-                              }}
-                              disabled={eliminando === arriendo.id}
-                              className="h-7 px-2 sm:h-8 sm:px-3 text-xs flex-1 sm:flex-none opacity-80 hover:opacity-100 transition-opacity"
-                            >
-                              <Trash2 className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1 sm:mr-1.5" />
-                              {eliminando === arriendo.id ? (
-                                <span className="sm:hidden">...</span>
-                              ) : (
-                                <>
-                                  <span className="hidden sm:inline">Eliminar</span>
-                                  <span className="sm:hidden">Del</span>
-                                </>
-                              )}
-                            </Button>
-                          </div>
+                          
+                          
                         </div>
                       </div>
                     </CardHeader>
@@ -516,16 +503,12 @@ export default function CabanasPage() {
                         {/* Contacto */}
                         <div className="flex items-start gap-2 sm:gap-3">
                           <div className="p-1 sm:p-1.5 bg-muted rounded-md">
-                            <Users className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-muted-foreground" />
+                            <PhoneCall className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-muted-foreground" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Personas</p>
-                            <p className="text-sm text-foreground">
-                              {arriendo.cantPersonas} persona{arriendo.cantPersonas > 1 ? 's' : ''}
-                            </p>
                             {arriendo.celular && (
                               <p className="text-xs text-muted-foreground mt-1 truncate">
-                                📱 {arriendo.celular}
+                                +56 9 {arriendo.celular}
                               </p>
                             )}
                           </div>
@@ -540,9 +523,6 @@ export default function CabanasPage() {
                             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Valor</p>
                             <p className="text-base sm:text-lg font-bold text-foreground">
                               ${arriendo.valorTotal.toLocaleString()}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              ${arriendo.valorNoche.toLocaleString()}/noche
                             </p>
                             {arriendo.descuento && (
                               <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
@@ -559,19 +539,12 @@ export default function CabanasPage() {
                           <span className="text-xs text-muted-foreground">📅</span>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Período</p>
+                          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Contrato</p>
                           <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
                             <p className="text-sm text-foreground">
                               {format(inicio, 'dd MMM yyyy', { locale: es })}
                             </p>
-                            <span className="hidden sm:inline text-muted-foreground">hasta</span>
-                            <p className="text-sm text-foreground">
-                              {format(fin, 'dd MMM yyyy', { locale: es })}
-                            </p>
                           </div>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {arriendo.cantDias} día{arriendo.cantDias > 1 ? 's' : ''}
-                          </p>
                         </div>
                       </div>
                       
