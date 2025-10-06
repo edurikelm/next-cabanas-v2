@@ -168,7 +168,7 @@ export default function CalendarioPage() {
           <Button variant="outline" onClick={recargar}>
             Recargar
           </Button>
-          <ICalendarSync />
+          {/* <ICalendarSync /> */}
           <Button onClick={() => { setEditing(null); setFormOpen(true); }}>
             <Plus className="h-4 w-4" />
             Arriendo
