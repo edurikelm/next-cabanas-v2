@@ -14,6 +14,7 @@ import { ICalendarSync } from "@/components/icalendar-sync";
 import { useArriendos, useArriendoOperaciones } from "@/lib/hooks/useFirestore";
 import { convertirBookingAEvento } from "@/lib/db/arriendos";
 import { useAvailableCabanas } from "@/lib/cabanas";
+import { Plus } from "lucide-react";
 
 export default function CalendarioPage() {
   const { data: arriendos, loading, error, recargar } = useArriendos();
@@ -169,7 +170,8 @@ export default function CalendarioPage() {
           </Button>
           <ICalendarSync />
           <Button onClick={() => { setEditing(null); setFormOpen(true); }}>
-            Agregar arriendo
+            <Plus className="h-4 w-4" />
+            Arriendo
           </Button>
         </div>
       </div>

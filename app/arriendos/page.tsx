@@ -18,12 +18,11 @@ export default function CabanasPage() {
   const { data: cabanas, loading, error, recargar } = useCabanas();
   const { data: arriendos, loading: loadingArriendos, error: errorArriendos, recargar: recargarArriendos } = useArriendos();
   const { eliminar } = useArriendoOperaciones();
-  const [busqueda, setBusqueda] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Booking | null>(null);
   const [eliminando, setEliminando] = useState<string | null>(null);
 
-  // Obtener arriendos actuales (que están en curso hoy)
+  // Obtener arriendos actuales (que están en curso hoy) - solo diarios
   const getArriendosActuales = () => {
     if (!arriendos) return [];
     const hoy = new Date();
@@ -35,7 +34,8 @@ export default function CabanasPage() {
       inicio.setHours(0, 0, 0, 0);
       fin.setHours(23, 59, 59, 999);
       
-      return hoy >= inicio && hoy <= fin;
+      // Filtrar solo arriendos diarios (no mensuales) que están en curso hoy
+      return hoy >= inicio && hoy <= fin && !arriendo.esMensual;
     });
   };
 
@@ -171,76 +171,6 @@ export default function CabanasPage() {
     );
   };
 
-  // Componente para mostrar galería de imágenes
-  const ImagenesViewer = ({ imagenes }: { imagenes: ImagenAdjunta[] }) => {
-    if (!imagenes || imagenes.length === 0) return null;
-
-    return (
-      <div className="space-y-2">
-        <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
-          <Image className="h-4 w-4" />
-          Imágenes ({imagenes.length})
-        </h5>
-        <div className="flex flex-wrap gap-2">
-          {imagenes.map((imagen) => (
-            <Dialog key={imagen.id}>
-              <DialogTrigger asChild>
-                <button className="relative group">
-                  <img
-                    src={imagen.urlThumbnail || imagen.url}
-                    alt={imagen.nombre}
-                    className="w-16 h-16 object-cover rounded border border-gray-200 dark:border-gray-700 hover:opacity-80 transition-opacity"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all rounded flex items-center justify-center">
-                    <Eye className="h-4 w-4 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </div>
-                </button>
-              </DialogTrigger>
-              <DialogContent className="max-w-4xl">
-                <DialogHeader>
-                  <DialogTitle>{imagen.nombre}</DialogTitle>
-                  <DialogDescription>
-                    Tamaño: {(imagen.tamaño / 1024 / 1024).toFixed(2)} MB
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="flex justify-center">
-                  <img
-                    src={imagen.url}
-                    alt={imagen.nombre}
-                    className="max-w-full max-h-[70vh] object-contain"
-                  />
-                </div>
-                <div className="flex justify-end">
-                  <Button onClick={() => window.open(imagen.url, '_blank')}>
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Abrir en nueva pestaña
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
-  // Filtrar cabañas por búsqueda
-  const cabanasFiltradas = cabanas?.filter(cabana => 
-    cabana.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-    cabana.arrendatario.toLowerCase().includes(busqueda.toLowerCase()) ||
-    cabana.estado.toLowerCase().includes(busqueda.toLowerCase()) ||
-    cabana.periodo.toLowerCase().includes(busqueda.toLowerCase())
-  ) || [];
-
-  // Estadísticas
-  const estadisticas = {
-    total: cabanas?.length || 0,
-    disponibles: cabanas?.filter(c => c.estado === 'disponible').length || 0,
-    ocupadas: cabanas?.filter(c => c.estado === 'ocupada').length || 0,
-    valorTotal: cabanas?.reduce((sum, c) => sum + c.valor, 0) || 0,
-    promedioValor: cabanas?.length ? Math.round(cabanas.reduce((sum, c) => sum + c.valor, 0) / cabanas.length) : 0
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -273,9 +203,6 @@ export default function CabanasPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-semibold">Gestión de Cabañas</h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            {cabanasFiltradas.length} cabañas registradas
-          </p>
         </div>
         <div className="flex gap-2">
           <Button onClick={() => {
@@ -285,73 +212,10 @@ export default function CabanasPage() {
             Recargar
           </Button>
           <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            Nueva Cabaña
+            <Plus className="h-4 w-4" />
+            Arriendo
           </Button>
         </div>
-      </div>
-
-      {/* Estadísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Home className="h-4 w-4 text-blue-600" />
-              <div>
-                <p className="text-sm text-gray-600">Total</p>
-                <p className="text-xl font-semibold">{estadisticas.total}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-              <div>
-                <p className="text-sm text-gray-600">Disponibles</p>
-                <p className="text-xl font-semibold">{estadisticas.disponibles}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-              <div>
-                <p className="text-sm text-gray-600">Ocupadas</p>
-                <p className="text-xl font-semibold">{estadisticas.ocupadas}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <DollarSign className="h-4 w-4 text-purple-600" />
-              <div>
-                <p className="text-sm text-gray-600">Valor Total</p>
-                <p className="text-xl font-semibold">${estadisticas.valorTotal.toLocaleString()}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <DollarSign className="h-4 w-4 text-green-600" />
-              <div>
-                <p className="text-sm text-gray-600">Valor Promedio</p>
-                <p className="text-xl font-semibold">${estadisticas.promedioValor.toLocaleString()}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Arriendos Actuales */}
@@ -359,10 +223,10 @@ export default function CabanasPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
-            Personas Actualmente Arrendando
+            Arriendos Diarios Activos
           </CardTitle>
           <CardDescription>
-            {arriendosActuales.length} {arriendosActuales.length === 1 ? 'persona está' : 'personas están'} arrendando hoy
+            {arriendosActuales.length} {arriendosActuales.length === 1 ? 'arriendo diario activo' : 'arriendos diarios activos'} hoy
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -381,8 +245,8 @@ export default function CabanasPage() {
           ) : arriendosActuales.length === 0 ? (
             <div className="text-center py-8">
               <Users className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-600">No hay arriendos activos hoy</p>
-              <p className="text-sm text-gray-400 mt-1">Las cabañas están disponibles</p>
+              <p className="text-gray-600">No hay arriendos diarios activos hoy</p>
+              <p className="text-sm text-gray-400 mt-1">Las cabañas están disponibles para arriendos diarios</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -490,7 +354,7 @@ export default function CabanasPage() {
                 const hasImagenes = arriendo.imagenes && arriendo.imagenes.length > 0;
                 
                 return (
-                  <Card key={arriendo.id} className="arriendos-mensuales-card h-auto flex flex-col overflow-visible transition-all duration-200 hover:shadow-lg border-border/50 bg-card">
+                  <Card key={arriendo.id} className="arriendos-mensuales-card h-auto flex flex-col overflow-visible transition-all duration-200 hover:shadow-lg border-border/50 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
                     {/* Header compacto para móviles */}
                     <CardHeader className="pb-3 sm:pb-4 flex-shrink-0 border-b border-border/50">
                       <div className="space-y-2 sm:space-y-4">

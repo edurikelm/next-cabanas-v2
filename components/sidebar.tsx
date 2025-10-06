@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 export const nav = [
   { href: '/', label: 'Inicio', icon: Home },
   { href: '/calendario', label: 'Calendario', icon: CalendarDays },
-  { href: '/cabanas', label: 'Cabañas', icon: Home },
+  { href: '/arriendos', label: 'Arriendos', icon: Home },
   { href: '/estadisticas', label: 'Estadísticas', icon: BarChart3 },
   { href: '/arrendatarios', label: 'Arrendatarios', icon: UserRound },
   { href: '/configuraciones', label: 'Configuraciones', icon: Cog },
