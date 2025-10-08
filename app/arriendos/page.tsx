@@ -355,7 +355,7 @@ export default function CabanasPage() {
               <p className="text-sm text-gray-400 mt-1">Los arriendos mensuales aparecerán aquí</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
               {arriendosMensuales.map((arriendo) => {
                 const inicio = new Date(arriendo.start);
                 const fin = new Date(arriendo.end);
@@ -366,12 +366,12 @@ export default function CabanasPage() {
                 return (
                   <Card key={arriendo.id} className="arriendos-mensuales-card h-auto flex flex-col overflow-visible transition-all duration-200 hover:shadow-lg border-border/50 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
                     {/* Header compacto para móviles */}
-                    <CardHeader className="pb-3 sm:pb-4 flex-shrink-0 border-b border-border/50">
+                    <CardHeader className="pb-2 sm:pb-4 px-3 sm:px-6 pt-3 sm:pt-6 flex-shrink-0 border-b border-border/50">
                       <div className="space-y-2 sm:space-y-4">
                         {/* Título y ubicación */}
                         <div className="space-y-1 sm:space-y-2">
                           <div className="flex items-start justify-between gap-2">
-                            <CardTitle className="text-base sm:text-lg font-semibold text-foreground line-clamp-2 min-h-[2.5rem] sm:min-h-[3.5rem] leading-tight flex-1">
+                            <CardTitle className="text-sm sm:text-lg font-semibold text-foreground line-clamp-1 sm:line-clamp-2 min-h-[1.25rem] sm:min-h-[3.5rem] leading-tight flex-1">
                               {arriendo.cabana}
                             </CardTitle>
                             {/* Botones de acción - ubicados al final */}
@@ -384,9 +384,9 @@ export default function CabanasPage() {
                                   setNuevoArriendomMensual(false); // Limpiar estado de nuevo arriendo mensual
                                   setFormOpen(true);
                                 }}
-                                className="h-7 px-2 sm:h-8 sm:px-3 text-xs hover:bg-accent hover:text-accent-foreground transition-colors"
+                                className="h-6 w-6 p-0 sm:h-8 sm:w-auto sm:px-3 text-xs hover:bg-accent hover:text-accent-foreground transition-colors"
                               >
-                                <Edit className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1 sm:mr-1.5" />
+                                <Edit className="h-2.5 w-2.5 sm:h-3 sm:w-3 sm:mr-1.5" />
                                 <span className="hidden sm:inline">Editar</span>
                               </Button>
                               <Button
@@ -408,15 +408,13 @@ export default function CabanasPage() {
                                   }
                                 }}
                                 disabled={eliminando === arriendo.id}
-                                className="h-7 px-2 sm:h-8 sm:px-3 text-xs opacity-80 hover:opacity-100 transition-opacity"
+                                className="h-6 w-6 p-0 sm:h-8 sm:w-auto sm:px-3 text-xs opacity-80 hover:opacity-100 transition-opacity"
                               >
-                                <Trash2 className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1 sm:mr-1.5" />
+                                <Trash2 className="h-2.5 w-2.5 sm:h-3 sm:w-3 sm:mr-1.5" />
                                 {eliminando === arriendo.id ? (
-                                  <span className="sm:hidden">...</span>
+                                  <span className="hidden sm:inline">...</span>
                                 ) : (
-                                  <>
-                                    <span className="hidden sm:inline">Eliminar</span>
-                                  </>
+                                  <span className="hidden sm:inline">Eliminar</span>
                                 )}
                               </Button>
                             </div>
@@ -459,6 +457,11 @@ export default function CabanasPage() {
                                 </>
                               )}
                             </Badge>
+                            
+                            {/* Fecha compacta solo en móviles */}
+                            <span className="text-xs text-muted-foreground sm:hidden">
+                              📅 {format(inicio, 'dd MMM', { locale: es })}
+                            </span>
                           </div>
                           
                           
@@ -467,45 +470,62 @@ export default function CabanasPage() {
                       </div>
                     </CardHeader>
                     
-                    <CardContent className="flex-1 flex flex-col p-3 sm:p-6 space-y-3 sm:space-y-4">
+                    <CardContent className="flex-1 flex flex-col p-2 sm:p-6 space-y-2 sm:space-y-4">
                       {/* Información principal - layout compacto para móviles */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-3 sm:gap-4 flex-shrink-0">
-                        {/* Contacto */}
-                        <div className="flex items-start gap-2 sm:gap-3">
-                          <div className="p-1 sm:p-1.5 bg-muted rounded-md">
-                            <PhoneCall className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-muted-foreground" />
+                      <div className="space-y-2 sm:space-y-3">
+                        {/* Fila compacta de información para móviles */}
+                        <div className="flex items-center justify-between gap-2 sm:hidden">
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <PhoneCall className="h-3 w-3" />
+                            <span className="truncate">
+                              {arriendo.celular ? `+56 9 ${arriendo.celular}` : 'Sin teléfono'}
+                            </span>
                           </div>
-                          <div className="flex-1 min-w-0">
-                            {arriendo.celular && (
-                              <p className="text-xs text-muted-foreground mt-1 truncate">
-                                +56 9 {arriendo.celular}
-                              </p>
-                            )}
+                          <div className="flex items-center gap-1 text-sm font-bold text-foreground">
+                            <DollarSign className="h-3 w-3" />
+                            <span>${arriendo.valorTotal.toLocaleString()}</span>
                           </div>
                         </div>
                         
-                        {/* Valor */}
-                        <div className="flex items-start gap-2 sm:gap-3">
-                          <div className="p-1 sm:p-1.5 bg-muted rounded-md">
-                            <DollarSign className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-muted-foreground" />
+                        {/* Layout completo para pantallas más grandes */}
+                        <div className="hidden sm:grid grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-4 flex-shrink-0">
+                          {/* Contacto */}
+                          <div className="flex items-start gap-3">
+                            <div className="p-1.5 bg-muted rounded-md">
+                              <PhoneCall className="h-3.5 w-3.5 text-muted-foreground" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              {arriendo.celular && (
+                                <p className="text-xs text-muted-foreground mt-1 truncate">
+                                  +56 9 {arriendo.celular}
+                                </p>
+                              )}
+                            </div>
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Valor</p>
-                            <p className="text-base sm:text-lg font-bold text-foreground">
-                              ${arriendo.valorTotal.toLocaleString()}
-                            </p>
-                            {arriendo.descuento && (
-                              <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-                                ✨ Con descuento
+                          
+                          {/* Valor */}
+                          <div className="flex items-start gap-3">
+                            <div className="p-1.5 bg-muted rounded-md">
+                              <DollarSign className="h-3.5 w-3.5 text-muted-foreground" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Valor</p>
+                              <p className="text-lg font-bold text-foreground">
+                                ${arriendo.valorTotal.toLocaleString()}
                               </p>
-                            )}
+                              {arriendo.descuento && (
+                                <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                                  ✨ Con descuento
+                                </p>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
                       
-                      {/* Período - full width */}
-                      <div className="flex items-start gap-2 sm:gap-3 flex-shrink-0">
-                        <div className="p-1 sm:p-1.5 bg-muted rounded-md">
+                      {/* Período - solo en pantallas más grandes */}
+                      <div className="hidden sm:flex items-start gap-3 flex-shrink-0">
+                        <div className="p-1.5 bg-muted rounded-md">
                           <span className="text-xs text-muted-foreground">📅</span>
                         </div>
                         <div className="flex-1 min-w-0">
@@ -527,7 +547,7 @@ export default function CabanasPage() {
                             <div className="space-y-1 sm:space-y-2">
                               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Comentarios</p>
                               <div className="max-h-none sm:max-h-16 overflow-y-auto">
-                                <p className="text-xs text-muted-foreground bg-muted/50 p-2 rounded border line-clamp-3">
+                                <p className="text-xs text-muted-foreground bg-muted/50 p-1.5 sm:p-2 rounded border line-clamp-2 sm:line-clamp-3">
                                   {arriendo.comentarios}
                                 </p>
                               </div>
