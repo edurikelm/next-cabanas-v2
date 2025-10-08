@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { 
   crearArriendo, 
   obtenerArriendos, 
@@ -44,7 +44,7 @@ export const useArriendos = () => {
     cargarArriendos();
   }, [refetch]);
 
-  const recargarArriendos = () => setRefetch(prev => prev + 1);
+  const recargarArriendos = useCallback(() => setRefetch(prev => prev + 1), []);
 
   return { ...state, recargar: recargarArriendos };
 };

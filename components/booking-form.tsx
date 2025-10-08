@@ -33,8 +33,8 @@ export interface BookingFormProps {
 
 export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }: BookingFormProps) {
   const { crear, actualizar, loading: operationLoading } = useArriendoOperaciones();
-  const { cabanas, loading: cabanasLoading, error: cabanasError } = useAvailableCabanas();
-  const { data: arriendos } = useArriendos();
+  const { cabanas, loading: cabanasLoading, error: cabanasError, recargar: recargarCabanas } = useAvailableCabanas();
+  const { data: arriendos, recargar: recargarArriendos } = useArriendos();
   
   // Referencias para los uploaders de archivos e imágenes
   const archivosUploaderRef = useRef<FileUploaderRef>(null);
@@ -142,6 +142,15 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
       }, 100);
     }
   }, [open, initial, form]);
+
+  // Efecto para recargar datos cuando se abre el modal
+  useEffect(() => {
+    if (open) {
+      // Recargar cabañas y arriendos para tener datos actualizados
+      recargarCabanas();
+      recargarArriendos();
+    }
+  }, [open]); // Removemos las funciones de las dependencias para evitar loops infinitos
 
   // Derivados en vivo para mostrar en la UI
   const range = form.watch("dateRange");
@@ -329,7 +338,9 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                         />
                       </SelectTrigger>
                       <SelectContent>
-                        {!cabanasLoading && !cabanasError && cabanasDisponibles.map((cabana) => (
+                        {!cabanasLoading && !cabanasError && cabanasDisponibles
+                          .sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }))
+                          .map((cabana) => (
                           <SelectItem key={cabana} value={cabana} className="text-base py-2">
                             {cabana}
                           </SelectItem>

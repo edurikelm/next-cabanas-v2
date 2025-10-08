@@ -1,5 +1,5 @@
 // lib/hooks/useCabanas.ts
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { 
   collection, 
   getDocs, 
@@ -62,9 +62,9 @@ export function useCabanas() {
     }
   };
 
-  const recargar = () => {
+  const recargar = useCallback(() => {
     fetchCabanas();
-  };
+  }, []);
 
   useEffect(() => {
     fetchCabanas();
@@ -126,9 +126,9 @@ export function useCabanasDisponibles() {
     }
   };
 
-  const recargar = () => {
+  const recargar = useCallback(() => {
     fetchCabanasDisponibles();
-  };
+  }, []);
 
   useEffect(() => {
     fetchCabanasDisponibles();

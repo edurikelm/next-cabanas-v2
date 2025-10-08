@@ -5,7 +5,7 @@ import { useCabanasDisponibles } from './hooks/useCabanas';
 
 // Hook para obtener solo las cabañas disponibles
 export function useAvailableCabanas() {
-  const { data: cabanas, loading, error } = useCabanasDisponibles();
+  const { data: cabanas, loading, error, recargar } = useCabanasDisponibles();
   
   // Retornar solo los nombres de las cabañas disponibles para compatibilidad
   const cabanasNames = cabanas?.map(cabana => cabana.nombre) || [];
@@ -14,7 +14,8 @@ export function useAvailableCabanas() {
     cabanas: cabanasNames,
     cabanasComplete: cabanas, // Datos completos si se necesitan
     loading,
-    error
+    error,
+    recargar // Agregar función de recarga
   };
 }
 

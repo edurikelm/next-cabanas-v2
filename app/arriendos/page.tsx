@@ -398,6 +398,7 @@ export default function CabanasPage() {
                                       setEliminando(arriendo.id);
                                       await eliminar(arriendo.id);
                                       await recargarArriendos();
+                                      recargar(); // También recargar cabañas para actualizar disponibilidad
                                     } catch (error) {
                                       console.error('Error al eliminar arriendo:', error);
                                       alert('Error al eliminar el arriendo. Inténtelo nuevamente.');
