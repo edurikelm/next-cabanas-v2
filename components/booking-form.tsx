@@ -262,8 +262,8 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[98vw] sm:max-w-4xl max-h-[98vh] overflow-y-auto p-2 sm:p-6">
-        <DialogHeader className="mb-3 sm:mb-6">
+      <DialogContent className="max-w-[96vw] sm:max-w-4xl max-h-[96vh] overflow-y-auto p-3 sm:p-6">
+        <DialogHeader className="mb-2 sm:mb-6">
           <DialogTitle className="text-base sm:text-xl">{initial?.id ? "Editar arriendo" : "Nuevo arriendo"}</DialogTitle>
           <DialogDescription className="text-xs sm:text-base hidden sm:block">
             Completa los datos de la reserva. {esMensual ? "Los campos adicionales aparecen porque seleccionaste arriendo mensual." : "Marca 'Arriendo Mensual' para campos adicionales."}
@@ -271,25 +271,25 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(submit)} className="booking-form grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-4">
+          <form onSubmit={form.handleSubmit(submit)} className="booking-form grid grid-cols-1 xl:grid-cols-2 gap-3 sm:gap-4">
             {/* Checkbox para Arriendo Mensual */}
             <FormField
               control={form.control}
               name="esMensual"
               render={({ field }) => (
-                <FormItem className="lg:col-span-2 flex flex-row items-start sm:items-center gap-3 p-3 sm:p-4 border rounded-lg bg-blue-50 dark:bg-blue-950/30">
+                <FormItem className="xl:col-span-2 flex flex-row items-start sm:items-center gap-2 sm:gap-3 p-2 sm:p-4 border rounded-lg bg-blue-50 dark:bg-blue-950/30">
                   <FormControl>
                     <Checkbox 
                       checked={field.value ?? false} 
                       onCheckedChange={field.onChange}
-                      className="mt-1 sm:mt-0 h-5 w-5"
+                      className="mt-0.5 sm:mt-0 h-4 w-4 sm:h-5 sm:w-5"
                     />
                   </FormControl>
                   <div className="flex-1">
-                    <FormLabel className="text-base font-medium cursor-pointer leading-tight">
+                    <FormLabel className="text-sm sm:text-base font-medium cursor-pointer leading-tight">
                       Arriendo Mensual
                     </FormLabel>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-0.5 sm:mt-1">
                       Marcar si este es un arriendo por mes (habilitará campos adicionales)
                     </p>
                   </div>
@@ -301,14 +301,14 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
               control={form.control}
               name="title"
               render={({ field }) => (
-                <FormItem className="lg:col-span-2">
+                <FormItem className="xl:col-span-2">
                   <FormLabel className="text-sm sm:text-base font-medium">Título</FormLabel>
                   <FormControl>
                     <Input 
                       placeholder="Ej: Eduardo - Cabaña del Bosque" 
                       value={field.value || ""} 
                       onChange={field.onChange}
-                      className="h-10 sm:h-11 text-base"
+                      className="h-9 sm:h-11 text-sm sm:text-base"
                     />
                   </FormControl>
                   <FormMessage />
@@ -324,7 +324,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                   <FormLabel className="text-sm sm:text-base font-medium">Cabaña</FormLabel>
                   <FormControl>
                     <Select value={field.value || ""} onValueChange={field.onChange}>
-                      <SelectTrigger className="h-10 sm:h-11 text-base">
+                      <SelectTrigger className="h-9 sm:h-11 text-sm sm:text-base">
                         <SelectValue 
                           placeholder={
                             cabanasLoading 
@@ -341,7 +341,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                         {!cabanasLoading && !cabanasError && cabanasDisponibles
                           .sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }))
                           .map((cabana) => (
-                          <SelectItem key={cabana} value={cabana} className="text-base py-2">
+                          <SelectItem key={cabana} value={cabana} className="text-sm sm:text-base py-1.5 sm:py-2">
                             {cabana}
                           </SelectItem>
                         ))}
@@ -374,7 +374,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                       placeholder="Ej: Pucón" 
                       value={field.value || ""} 
                       onChange={field.onChange}
-                      className="h-10 sm:h-11 text-base"
+                      className="h-9 sm:h-11 text-sm sm:text-base"
                     />
                   </FormControl>
                   <FormMessage />
@@ -400,7 +400,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                         const value = e.target.value;
                         field.onChange(value === "" ? 1 : Number(value));
                       }}
-                      className="h-10 sm:h-11 text-base"
+                      className="h-9 sm:h-11 text-sm sm:text-base"
                     />
                   </FormControl>
                   <FormMessage />
@@ -420,7 +420,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                       placeholder="+56 9 1234 5678" 
                       value={field.value || ""} 
                       onChange={field.onChange}
-                      className="h-10 sm:h-11 text-base"
+                      className="h-9 sm:h-11 text-sm sm:text-base"
                     />
                   </FormControl>
                   <FormMessage />
@@ -432,7 +432,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
               control={form.control}
               name="dateRange"
               render={({ field }) => (
-                <FormItem className="lg:col-span-2">
+                <FormItem className="xl:col-span-2">
                   <FormLabel className="text-sm sm:text-base font-medium">Fechas (Check-in / Check-out)</FormLabel>
                   <FormControl>
                     <DateRangePicker value={field.value as DateRange | undefined} onChange={field.onChange} />
@@ -460,7 +460,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                         const value = e.target.value;
                         field.onChange(value === "" ? 0 : Number(value));
                       }}
-                      className="h-10 sm:h-11 text-base"
+                      className="h-9 sm:h-11 text-sm sm:text-base"
                     />
                   </FormControl>
                   <FormMessage />
@@ -476,7 +476,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                   value={valorTotal.toLocaleString()} 
                   disabled 
                   readOnly
-                  className="h-10 sm:h-11 text-base font-semibold bg-muted"
+                  className="h-9 sm:h-11 text-sm sm:text-base font-semibold bg-muted"
                 />
               </FormControl>
             </FormItem>
@@ -486,15 +486,15 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
               control={form.control}
               name="descuento"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-center gap-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                <FormItem className="flex flex-row items-center gap-2 sm:gap-3 p-2 sm:p-3 border rounded-lg hover:bg-muted/50 transition-colors">
                   <FormControl>
                     <Checkbox 
                       checked={!!field.value} 
                       onCheckedChange={field.onChange}
-                      className="h-5 w-5"
+                      className="h-4 w-4 sm:h-5 sm:w-5"
                     />
                   </FormControl>
-                  <FormLabel className="text-sm sm:text-base font-medium cursor-pointer flex-1">Descuento aplicado</FormLabel>
+                  <FormLabel className="text-xs sm:text-base font-medium cursor-pointer flex-1">Descuento aplicado</FormLabel>
                 </FormItem>
               )}
             />
@@ -503,15 +503,15 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
               control={form.control}
               name="pago"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-center gap-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                <FormItem className="flex flex-row items-center gap-2 sm:gap-3 p-2 sm:p-3 border rounded-lg hover:bg-muted/50 transition-colors">
                   <FormControl>
                     <Checkbox 
                       checked={!!field.value} 
                       onCheckedChange={field.onChange}
-                      className="h-5 w-5"
+                      className="h-4 w-4 sm:h-5 sm:w-5"
                     />
                   </FormControl>
-                  <FormLabel className="text-sm sm:text-base font-medium cursor-pointer flex-1">Pago realizado</FormLabel>
+                  <FormLabel className="text-xs sm:text-base font-medium cursor-pointer flex-1">Pago realizado</FormLabel>
                 </FormItem>
               )}
             />
@@ -520,7 +520,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
             {esMensual && (
               <>
                 {/* Separador visual */}
-                <div className="lg:col-span-2 border-t pt-2 sm:pt-4 mt-2 sm:mt-4">
+                <div className="xl:col-span-2 border-t pt-2 sm:pt-4 mt-2 sm:mt-4">
                   <h3 className="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 text-blue-700 dark:text-blue-400 flex items-center gap-2">
                     📋 Información Adicional
                     <span className="text-xs font-normal text-muted-foreground hidden sm:inline">(Arriendo Mensual)</span>
@@ -528,7 +528,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                 </div>
 
                 {/* Subida de archivos */}
-                <div className="md:col-span-2">
+                <div className="xl:col-span-2">
                   <FormField
                     control={form.control}
                     name="archivos"
@@ -548,7 +548,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                 </div>
 
                 {/* Subida de imágenes */}
-                <div className="md:col-span-2">
+                <div className="xl:col-span-2">
                   <FormField
                     control={form.control}
                     name="imagenes"
@@ -568,7 +568,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                 </div>
 
                 {/* Campo de comentarios */}
-                <div className="md:col-span-2">
+                <div className="xl:col-span-2">
                   <FormField
                     control={form.control}
                     name="comentarios"
@@ -586,19 +586,19 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
               </>
             )}
 
-            <div className="lg:col-span-2 flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t">
+            <div className="xl:col-span-2 flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-3 sm:pt-4 border-t">
               <Button 
                 type="button" 
                 variant="outline" 
                 onClick={() => onOpenChange(false)}
-                className="w-full sm:w-auto h-11 text-base font-medium"
+                className="w-full sm:w-auto h-9 sm:h-11 text-sm sm:text-base font-medium"
               >
                 Cancelar
               </Button>
               <Button 
                 type="submit" 
                 disabled={operationLoading}
-                className="w-full sm:w-auto h-11 text-base font-medium min-w-[140px]"
+                className="w-full sm:w-auto h-9 sm:h-11 text-sm sm:text-base font-medium min-w-[120px] sm:min-w-[140px]"
               >
                 {operationLoading ? 'Guardando...' : (initial?.id ? "Guardar cambios" : "Agregar")}
               </Button>
