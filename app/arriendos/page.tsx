@@ -21,6 +21,7 @@ export default function CabanasPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Booking | null>(null);
   const [eliminando, setEliminando] = useState<string | null>(null);
+  const [nuevoArriendomMensual, setNuevoArriendomMensual] = useState(false);
 
   // Obtener arriendos actuales (que están en curso hoy) - solo diarios
   const getArriendosActuales = () => {
@@ -211,10 +212,6 @@ export default function CabanasPage() {
           }} variant="outline">
             Recargar
           </Button>
-          <Button>
-            <Plus className="h-4 w-4" />
-            Arriendo
-          </Button>
         </div>
       </div>
 
@@ -315,11 +312,24 @@ export default function CabanasPage() {
       </Card>
 
       {/* Arriendos Mensuales */}
+      
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Home className="h-5 w-5" />
-            Arriendos Mensuales
+          <CardTitle className="flex items-center gap-2 justify-between w-full">
+            <div className="flex items-center gap-2">
+              <Home className="h-5 w-5" />
+              Arriendos Mensuales
+            </div>
+            <Button 
+              onClick={() => {
+                setEditing(null); // Asegurar que no estamos editando
+                setNuevoArriendomMensual(true); // Indicar que es un nuevo arriendo mensual
+                setFormOpen(true); // Abrir formulario para nuevo arriendo mensual
+              }}
+            >
+              <Plus className="h-4 w-4" />
+              Arriendo
+            </Button>
           </CardTitle>
           <CardDescription>
             {arriendosMensuales.length} {arriendosMensuales.length === 1 ? 'arriendo mensual registrado' : 'arriendos mensuales registrados'}
@@ -371,6 +381,7 @@ export default function CabanasPage() {
                                 variant="outline"
                                 onClick={() => {
                                   setEditing(arriendo);
+                                  setNuevoArriendomMensual(false); // Limpiar estado de nuevo arriendo mensual
                                   setFormOpen(true);
                                 }}
                                 className="h-7 px-2 sm:h-8 sm:px-3 text-xs hover:bg-accent hover:text-accent-foreground transition-colors"
@@ -625,9 +636,23 @@ export default function CabanasPage() {
           setFormOpen(open);
           if (!open) {
             setEditing(null); // Limpiar estado de edición al cerrar
+            setNuevoArriendomMensual(false); // Limpiar estado de nuevo arriendo mensual
           }
         }}
-        initial={editing || undefined}
+        initial={editing ? editing : (nuevoArriendomMensual ? { 
+          esMensual: true,
+          title: "",
+          cabana: "",
+          ubicacion: "",
+          cantPersonas: 1,
+          celular: "",
+          valorNoche: 0,
+          descuento: false,
+          pago: false,
+          archivos: [],
+          imagenes: [],
+          comentarios: ""
+        } as Partial<Booking> : undefined)}
         onSubmit={() => {
           recargar(); // Recargar cabañas
           recargarArriendos(); // Recargar arriendos

@@ -199,11 +199,40 @@ export const actualizarArriendo = async (
 // Eliminar un arriendo
 export const eliminarArriendo = async (id: string): Promise<void> => {
   try {
+    console.log('🗑️ Iniciando eliminación del arriendo:', id);
+    
+    // Primero obtener el arriendo para acceder a sus archivos
+    const arriendo = await obtenerArriendoPorId(id);
+    
+    if (arriendo) {
+      // Eliminar archivos asociados si existen
+      const archivosParaEliminar = [
+        ...(arriendo.archivos || []),
+        ...(arriendo.imagenes || [])
+      ];
+
+      if (archivosParaEliminar.length > 0) {
+        console.log(`📁 Eliminando ${archivosParaEliminar.length} archivos asociados...`);
+        
+        // Importar dinámicamente la función de eliminación
+        const { eliminarMultiplesArchivos } = await import('@/lib/utils/archivo-utils');
+        
+        try {
+          await eliminarMultiplesArchivos(archivosParaEliminar);
+          console.log('✅ Archivos eliminados exitosamente');
+        } catch (error) {
+          console.error('⚠️ Error eliminando archivos (continuando con eliminación del arriendo):', error);
+          // No interrumpir la eliminación del arriendo si falla la eliminación de archivos
+        }
+      }
+    }
+
+    // Eliminar el documento del arriendo
     const docRef = doc(db, COLLECTION_NAME, id);
     await deleteDoc(docRef);
-    console.log('Arriendo eliminado:', id);
+    console.log('✅ Arriendo eliminado exitosamente:', id);
   } catch (error) {
-    console.error('Error al eliminar arriendo:', error);
+    console.error('❌ Error al eliminar arriendo:', error);
     throw new Error('No se pudo eliminar el arriendo');
   }
 };

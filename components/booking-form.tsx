@@ -17,7 +17,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import type { Booking, ArchivoAdjunto, ImagenAdjunta } from "../lib/types/booking-types";
 import { DateRangePicker } from "@/components/date-range-picker";
 import { bookingFormSchema, type BookingFormValues } from "@/lib/schemas/booking-schema";
-import { useArriendoOperaciones } from "@/lib/hooks/useFirestore";
+import { useArriendoOperaciones, useArriendos } from "@/lib/hooks/useFirestore";
 import { useAvailableCabanas } from "@/lib/cabanas";
 import { FileUploader, type FileUploaderRef } from "@/components/file-uploader";
 import { ComentariosField } from "@/components/booking-fields-extra";
@@ -34,10 +34,33 @@ export interface BookingFormProps {
 export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }: BookingFormProps) {
   const { crear, actualizar, loading: operationLoading } = useArriendoOperaciones();
   const { cabanas, loading: cabanasLoading, error: cabanasError } = useAvailableCabanas();
+  const { data: arriendos } = useArriendos();
   
   // Referencias para los uploaders de archivos e imágenes
   const archivosUploaderRef = useRef<FileUploaderRef>(null);
   const imagenesUploaderRef = useRef<FileUploaderRef>(null);
+  
+  // Filtrar cabañas que no tienen arriendos mensuales activos
+  const cabanasDisponibles = cabanas.filter((cabana) => {
+    if (!arriendos) return true; // Si no hay arriendos cargados, mostrar todas las cabañas
+    
+    // Verificar si hay arriendos mensuales activos para esta cabaña
+    const tieneArriendoMensualActivo = arriendos.some((arriendo) => {
+      if (!arriendo.esMensual || arriendo.cabana !== cabana) return false;
+      
+      const hoy = new Date();
+      const inicio = new Date(arriendo.start);
+      const fin = new Date(arriendo.end);
+      
+      // Si estamos editando un arriendo existente, excluirlo del filtro
+      if (initial?.id && arriendo.id === initial.id) return false;
+      
+      // Verificar si el arriendo mensual está activo (en curso)
+      return hoy >= inicio && hoy <= fin;
+    });
+    
+    return !tieneArriendoMensualActivo;
+  });
   
   // Asegurar que initialRange tenga una estructura válida
   const initialRange: DateRange = initial?.start && initial?.end 
@@ -299,19 +322,26 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                               ? "Cargando cabañas..." 
                               : cabanasError 
                                 ? "Error cargando cabañas" 
-                                : "Seleccionar cabaña disponible"
+                                : cabanasDisponibles.length === 0
+                                  ? "No hay cabañas disponibles"
+                                  : "Seleccionar cabaña disponible"
                           } 
                         />
                       </SelectTrigger>
                       <SelectContent>
-                        {!cabanasLoading && !cabanasError && cabanas.map((cabana) => (
+                        {!cabanasLoading && !cabanasError && cabanasDisponibles.map((cabana) => (
                           <SelectItem key={cabana} value={cabana} className="text-base py-2">
                             {cabana}
                           </SelectItem>
                         ))}
-                        {cabanasError && cabanas.length === 0 && (
+                        {!cabanasLoading && !cabanasError && cabanasDisponibles.length === 0 && (
+                          <div className="px-3 py-2 text-sm text-orange-600">
+                            No hay cabañas disponibles (todas tienen arriendos mensuales activos)
+                          </div>
+                        )}
+                        {cabanasError && (
                           <div className="px-3 py-2 text-sm text-red-600">
-                            No hay cabañas disponibles
+                            Error al cargar cabañas
                           </div>
                         )}
                       </SelectContent>
