@@ -256,8 +256,8 @@ export default function CabanasPage() {
                   <div key={arriendo.id} className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
-                        <h4 className="font-semibold text-gray-900 dark:text-gray-100">{arriendo.title}</h4>
-                        <p className="text-sm text-blue-700 dark:text-blue-300 font-medium">{arriendo.cabana}</p>
+                        <h4 className="font-semibold text-blue-800 dark:text-blue-800">{arriendo.cabana}</h4>
+                        <p className="font-medium">{arriendo.title}</p>
                       </div>
                       <Badge variant={diasRestantes <= 1 ? "destructive" : diasRestantes <= 3 ? "default" : "secondary"}>
                         {diasRestantes <= 0 ? 'Finaliza hoy' : `${diasRestantes} día${diasRestantes > 1 ? 's' : ''} restantes`}
@@ -266,20 +266,20 @@ export default function CabanasPage() {
                     
                     <div className="space-y-2 text-sm">
                       <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4 text-gray-500" />
-                        <span className="text-gray-700 dark:text-gray-300">{arriendo.ubicacion || arriendo.cabana}</span>
+                        <MapPin className="h-4 w-4 " />
+                        <span className="">{arriendo.ubicacion || arriendo.cabana}</span>
                       </div>
                       
                       {arriendo.celular && (
                         <div className="flex items-center gap-2">
-                          <span className="h-4 w-4 text-center text-xs font-medium text-gray-500">📱</span>
-                          <span className="text-gray-700 dark:text-gray-300">{arriendo.celular}</span>
+                          <span className="h-4 w-4 text-center text-xs font-medium ">📱</span>
+                          <span className="">{arriendo.celular}</span>
                         </div>
                       )}
                       
                       <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4 text-gray-500" />
-                        <span className="text-gray-700 dark:text-gray-300">{arriendo.cantPersonas} persona{arriendo.cantPersonas > 1 ? 's' : ''}</span>
+                        <Users className="h-4 w-4 " />
+                        <span className="">{arriendo.cantPersonas} persona{arriendo.cantPersonas > 1 ? 's' : ''}</span>
                       </div>
                       
                       <div className="flex items-center justify-between pt-2 border-t border-blue-200 dark:border-blue-800">
@@ -288,7 +288,7 @@ export default function CabanasPage() {
                         </div>
                         <div className="flex items-center gap-1">
                           <DollarSign className="h-3 w-3 text-green-600" />
-                          <span className="text-sm font-medium text-green-700 dark:text-green-400">
+                          <span className="text-sm font-medium text-green-700 dark:text-green-500">
                             ${arriendo.valorTotal.toLocaleString()}
                           </span>
                         </div>
@@ -298,7 +298,7 @@ export default function CabanasPage() {
                         <Badge variant={arriendo.pago ? "outline" : "destructive"} className="text-xs">
                           {arriendo.pago ? '✓ Pagado' : '⚠ Pendiente'}
                         </Badge>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs ">
                           ${arriendo.valorNoche.toLocaleString()}/noche
                         </span>
                       </div>
@@ -355,7 +355,7 @@ export default function CabanasPage() {
               <p className="text-sm text-gray-400 mt-1">Los arriendos mensuales aparecerán aquí</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {arriendosMensuales.map((arriendo) => {
                 const inicio = new Date(arriendo.start);
                 const fin = new Date(arriendo.end);
@@ -364,282 +364,210 @@ export default function CabanasPage() {
                 const hasImagenes = arriendo.imagenes && arriendo.imagenes.length > 0;
                 
                 return (
-                  <Card key={arriendo.id} className="arriendos-mensuales-card h-auto flex flex-col overflow-visible transition-all duration-200 hover:shadow-lg border-border/50 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
-                    {/* Header compacto para móviles */}
-                    <CardHeader className="pb-2 sm:pb-4 px-3 sm:px-6 pt-3 sm:pt-6 flex-shrink-0 border-b border-border/50">
-                      <div className="space-y-2 sm:space-y-4">
-                        {/* Título y ubicación */}
-                        <div className="space-y-1 sm:space-y-2">
-                          <div className="flex items-start justify-between gap-2">
-                            <CardTitle className="text-sm sm:text-lg font-semibold text-foreground line-clamp-1 sm:line-clamp-2 min-h-[1.25rem] sm:min-h-[3.5rem] leading-tight flex-1">
-                              {arriendo.cabana}
-                            </CardTitle>
-                            {/* Botones de acción - ubicados al final */}
-                            <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                  setEditing(arriendo);
-                                  setNuevoArriendomMensual(false); // Limpiar estado de nuevo arriendo mensual
-                                  setFormOpen(true);
-                                }}
-                                className="h-6 w-6 p-0 sm:h-8 sm:w-auto sm:px-3 text-xs hover:bg-accent hover:text-accent-foreground transition-colors"
-                              >
-                                <Edit className="h-2.5 w-2.5 sm:h-3 sm:w-3 sm:mr-1.5" />
-                                <span className="hidden sm:inline">Editar</span>
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={async () => {
-                                  if (confirm(`¿Está seguro que desea eliminar el arriendo "${arriendo.title}"?`)) {
-                                    try {
-                                      setEliminando(arriendo.id);
-                                      await eliminar(arriendo.id);
-                                      await recargarArriendos();
-                                      recargar(); // También recargar cabañas para actualizar disponibilidad
-                                    } catch (error) {
-                                      console.error('Error al eliminar arriendo:', error);
-                                      alert('Error al eliminar el arriendo. Inténtelo nuevamente.');
-                                    } finally {
-                                      setEliminando(null);
-                                    }
-                                  }
-                                }}
-                                disabled={eliminando === arriendo.id}
-                                className="h-6 w-6 p-0 sm:h-8 sm:w-auto sm:px-3 text-xs opacity-80 hover:opacity-100 transition-opacity"
-                              >
-                                <Trash2 className="h-2.5 w-2.5 sm:h-3 sm:w-3 sm:mr-1.5" />
-                                {eliminando === arriendo.id ? (
-                                  <span className="hidden sm:inline">...</span>
-                                ) : (
-                                  <span className="hidden sm:inline">Eliminar</span>
-                                )}
-                              </Button>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <Home className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
-                            <span className="text-xs sm:text-sm font-medium truncate">{arriendo.title}</span>
-                          </div>
-                          {arriendo.esMensual ? (
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <MapPin className="h-2.5 w-2.5 sm:h-3 sm:w-3 shrink-0" />
-                              <span className="text-xs truncate">{arriendo.esMensual ? 'Mensual' : 'Diario'}</span>
-                            </div>
-                          ) : (
-                            <div className="h-3 sm:h-4"></div>
-                          )}
+                  <Card key={arriendo.id} className="p-0 bg-gradient-to-r from-green-50 to-emerald-50-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                    <CardContent className="p-4">
+                      {/* Header con título y badge */}
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex-1">
+                          <h4 className="text-lg font-semibold text-green-800 dark:text-green-500 mb-1">
+                            {arriendo.cabana}
+                          </h4>
+                          <p className="font-medium">
+                            Arrendatario: <span className="text-sm">{arriendo.title}</span>
+                          </p>
                         </div>
-                        
-                        {/* Estados y botones en móviles */}
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                          {/* Estados */}
-                          <div className="flex flex-wrap items-center gap-1 sm:gap-2">
-                            <Badge 
-                              variant={arriendo.pago ? "outline" : "destructive"}
-                              className={`text-xs ${
-                                arriendo.pago
-                                  ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800'
-                                  : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800'
-                              }`}
-                            >
-                              {arriendo.pago ? (
-                                <>
-                                  <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-green-500 mr-1 sm:mr-1.5"></div>
-                                  Pagado
-                                </>
-                              ) : (
-                                <>
-                                  <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-red-500 mr-1 sm:mr-1.5"></div>
-                                  Pendiente
-                                </>
-                              )}
-                            </Badge>
-                            
-                            {/* Fecha compacta solo en móviles */}
-                            <span className="text-xs text-muted-foreground sm:hidden">
-                              📅 {format(inicio, 'dd MMM', { locale: es })}
-                            </span>
-                          </div>
-                          
-                          
-                          
+                        <Badge 
+                          variant="secondary"
+                          className="bg-orange-100 text-orange-800 border-orange-200 font-medium px-3 py-1"
+                        >
+                          Mensual
+                        </Badge>
+                      </div>
+
+                      {/* Precio destacado */}
+                      <div className="mb-6">
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-3xl font-bold text-green-500">
+                            ${arriendo.valorTotal.toLocaleString()}
+                          </span>
+                          <span className=" text-sm">/ mes</span>
                         </div>
                       </div>
-                    </CardHeader>
-                    
-                    <CardContent className="flex-1 flex flex-col p-2 sm:p-6 space-y-2 sm:space-y-4">
-                      {/* Información principal - layout compacto para móviles */}
-                      <div className="space-y-2 sm:space-y-3">
-                        {/* Fila compacta de información para móviles */}
-                        <div className="flex items-center justify-between gap-2 sm:hidden">
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <PhoneCall className="h-3 w-3" />
-                            <span className="truncate">
+
+                      {/* Información de contacto y fecha en dos columnas */}
+                      <div className="grid grid-cols-2 gap-4 mb-6">
+                        <div className="space-y-1">
+                          <p className="text-xs font-medium  uppercase tracking-wide">
+                            Celular
+                          </p>
+                          <div className="flex items-center gap-2">
+                            <PhoneCall className="h-4 w-4" />
+                            <span className="text-sm">
                               {arriendo.celular ? `+56 9 ${arriendo.celular}` : 'Sin teléfono'}
                             </span>
                           </div>
-                          <div className="flex items-center gap-1 text-sm font-bold text-foreground">
-                            <DollarSign className="h-3 w-3" />
-                            <span>${arriendo.valorTotal.toLocaleString()}</span>
-                          </div>
                         </div>
-                        
-                        {/* Layout completo para pantallas más grandes */}
-                        <div className="hidden sm:grid grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-4 flex-shrink-0">
-                          {/* Contacto */}
-                          <div className="flex items-start gap-3">
-                            <div className="p-1.5 bg-muted rounded-md">
-                              <PhoneCall className="h-3.5 w-3.5 text-muted-foreground" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              {arriendo.celular && (
-                                <p className="text-xs text-muted-foreground mt-1 truncate">
-                                  +56 9 {arriendo.celular}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                          
-                          {/* Valor */}
-                          <div className="flex items-start gap-3">
-                            <div className="p-1.5 bg-muted rounded-md">
-                              <DollarSign className="h-3.5 w-3.5 text-muted-foreground" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Valor</p>
-                              <p className="text-lg font-bold text-foreground">
-                                ${arriendo.valorTotal.toLocaleString()}
-                              </p>
-                              {arriendo.descuento && (
-                                <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-                                  ✨ Con descuento
-                                </p>
-                              )}
-                            </div>
+                        <div className="space-y-1">
+                          <p className="text-xs font-medium  uppercase tracking-wide">
+                            Fecha contrato
+                          </p>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm">📅</span>
+                            <span className="text-sm">
+                              {format(inicio, 'dd/MM/yyyy', { locale: es })}
+                            </span>
                           </div>
                         </div>
                       </div>
-                      
-                      {/* Período - solo en pantallas más grandes */}
-                      <div className="hidden sm:flex items-start gap-3 flex-shrink-0">
-                        <div className="p-1.5 bg-muted rounded-md">
-                          <span className="text-xs text-muted-foreground">📅</span>
+
+                      {/* Comentarios del dueño */}
+                      {arriendo.comentarios && (
+                        <div className="mb-6">
+                          <p className="text-xs font-medium uppercase tracking-wide mb-2">
+                            Comentarios del dueño:
+                          </p>
+                          <p className="text-sm bg-green-100 text-black p-3 rounded-md border">
+                            {arriendo.comentarios}
+                          </p>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Contrato</p>
-                          <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                            <p className="text-sm text-foreground">
-                              {format(inicio, 'dd MMM yyyy', { locale: es })}
-                            </p>
+                      )}
+
+                      {/* Archivos adjuntos */}
+                      {hasArchivos && (
+                        <div className="mb-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <FileText className="h-4 w-4" />
+                            <span className="text-xs font-medium uppercase tracking-wide">
+                              Archivos adjuntos ({arriendo.archivos!.length})
+                            </span>
                           </div>
-                        </div>
-                      </div>
-                      
-                      {/* Sección flexible - comentarios y archivos */}
-                      <div className="flex-1 flex flex-col space-y-2 sm:space-y-3 min-h-0">
-                        {/* Comentarios */}
-                        {arriendo.comentarios && (
-                          <>
-                            <Separator className="my-1 sm:my-2" />
-                            <div className="space-y-1 sm:space-y-2">
-                              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Comentarios</p>
-                              <div className="max-h-none sm:max-h-16 overflow-y-auto">
-                                <p className="text-xs text-muted-foreground bg-muted/50 p-1.5 sm:p-2 rounded border line-clamp-2 sm:line-clamp-3">
-                                  {arriendo.comentarios}
-                                </p>
-                              </div>
-                            </div>
-                          </>
-                        )}
-                        
-                        {/* Archivos */}
-                        {(hasArchivos || hasImagenes) && (
-                          <>
-                            {!arriendo.comentarios && <Separator className="my-1 sm:my-2" />}
-                            <div className="space-y-2 sm:space-y-3 flex-1 min-h-0">
-                              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Archivos</p>
-                              <div className="max-h-none sm:max-h-24 overflow-y-auto space-y-1 sm:space-y-2">
-                                {hasArchivos && (
-                                  <ArchivosViewer archivos={arriendo.archivos!} />
-                                )}
-                                
-                                {hasImagenes && (
-                                  <div className="space-y-1">
-                                    <p className="text-xs text-muted-foreground flex items-center gap-1">
-                                      <span>🖼️</span>
-                                      {arriendo.imagenes!.length} img{arriendo.imagenes!.length > 1 ? 's' : ''}
-                                    </p>
-                                    <div className="grid grid-cols-4 sm:grid-cols-6 gap-1">
-                                      {arriendo.imagenes!.slice(0, 5).map((imagen, index) => (
-                                        <Dialog key={imagen.id}>
-                                          <DialogTrigger asChild>
-                                            <button className="group relative block aspect-square bg-muted rounded border border-border overflow-hidden">
-                                              <img
-                                                src={imagen.urlThumbnail || imagen.url}
-                                                alt={imagen.nombre}
-                                                className="w-full h-full object-cover group-hover:opacity-80 transition-opacity"
-                                                onLoad={(e) => {
-                                                  const target = e.target as HTMLImageElement;
-                                                  target.style.display = 'block';
-                                                  const fallback = target.parentElement?.querySelector('.fallback-icon') as HTMLElement;
-                                                  if (fallback) fallback.style.display = 'none';
-                                                }}
-                                                onError={(e) => {
-                                                  console.log('Error loading image:', imagen.url, imagen.urlThumbnail);
-                                                  const target = e.target as HTMLImageElement;
-                                                  target.style.display = 'none';
-                                                  const fallback = target.parentElement?.querySelector('.fallback-icon') as HTMLElement;
-                                                  if (fallback) fallback.style.display = 'flex';
-                                                }}
-                                              />
-                                              <div className="fallback-icon absolute inset-0 bg-muted rounded flex items-center justify-center" style={{ display: 'none' }}>
-                                                <Image className="h-4 w-4 text-muted-foreground" />
-                                              </div>
-                                              {index === 4 && arriendo.imagenes!.length > 5 && (
-                                                <div className="absolute inset-0 bg-black/60 rounded flex items-center justify-center">
-                                                  <span className="text-white text-xs font-medium">
-                                                    +{arriendo.imagenes!.length - 4}
-                                                  </span>
-                                                </div>
-                                              )}
-                                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all rounded flex items-center justify-center">
-                                                <Eye className="h-3 w-3 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                                              </div>
-                                            </button>
-                                          </DialogTrigger>
-                                          <DialogContent className="max-w-4xl">
-                                            <DialogHeader>
-                                              <DialogTitle>{imagen.nombre}</DialogTitle>
-                                              <DialogDescription>
-                                                Tamaño: {(imagen.tamaño / 1024 / 1024).toFixed(2)} MB
-                                              </DialogDescription>
-                                            </DialogHeader>
-                                            <div className="flex justify-center">
-                                              <img
-                                                src={imagen.url}
-                                                alt={imagen.nombre}
-                                                className="max-w-full max-h-[70vh] object-contain"
-                                              />
-                                            </div>
-                                            <div className="flex justify-end">
-                                              <Button onClick={() => window.open(imagen.url, '_blank')}>
-                                                <ExternalLink className="h-4 w-4 mr-2" />
-                                                Abrir en nueva pestaña
-                                              </Button>
-                                            </div>
-                                          </DialogContent>
-                                        </Dialog>
-                                      ))}
+                          <div className="space-y-1">
+                            {arriendo.archivos!.map((archivo) => (
+                              <div key={archivo.id} className="flex items-center gap-2 p-2 rounded border text-sm bg-green-100">
+                                <span className="">📄</span>
+                                <span className="flex-1 truncate font-medium text-black">{archivo.nombre}</span>
+                                <Dialog>
+                                  <DialogTrigger asChild>
+                                    <Button size="sm" variant="outline" className="h-6 px-2 text-xs">
+                                      <Eye className="h-3 w-3 text-black" />
+                                    </Button>
+                                  </DialogTrigger>
+                                  <DialogContent className="max-w-[95vw] h-[90vh]">
+                                    <DialogHeader>
+                                      <DialogTitle>{archivo.nombre}</DialogTitle>
+                                    </DialogHeader>
+                                    <div className="flex-1 flex justify-center items-center">
+                                      <iframe
+                                        src={archivo.url}
+                                        className="w-full h-full border rounded"
+                                        title={archivo.nombre}
+                                      />
                                     </div>
-                                  </div>
-                                )}
+                                  </DialogContent>
+                                </Dialog>
                               </div>
-                            </div>
-                          </>
-                        )}
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Imágenes */}
+                      {hasImagenes && (
+                        <div className="mb-6">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Image className="h-4 w-4 " />
+                            <span className="text-xs font-medium  uppercase tracking-wide">
+                              Imágenes ({arriendo.imagenes!.length})
+                            </span>
+                          </div>
+                          <div className="grid grid-cols-4 gap-2">
+                            {arriendo.imagenes!.slice(0, 3).map((imagen) => (
+                              <Dialog key={imagen.id}>
+                                <DialogTrigger asChild>
+                                  <button className="group relative aspect-square bg-gray-100 rounded border overflow-hidden hover:ring-2 hover:ring-green-600 transition-all">
+                                    <img
+                                      src={imagen.urlThumbnail || imagen.url}
+                                      alt={imagen.nombre}
+                                      className="w-full h-full object-cover"
+                                    />
+                                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all flex items-center justify-center">
+                                      <Eye className="h-4 w-4 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    </div>
+                                  </button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-4xl">
+                                  <DialogHeader>
+                                    <DialogTitle>{imagen.nombre}</DialogTitle>
+                                    <DialogDescription>
+                                      Tamaño: {(imagen.tamaño / 1024 / 1024).toFixed(2)} MB
+                                    </DialogDescription>
+                                  </DialogHeader>
+                                  <div className="flex justify-center">
+                                    <img
+                                      src={imagen.url}
+                                      alt={imagen.nombre}
+                                      className="max-w-full max-h-[70vh] object-contain"
+                                    />
+                                  </div>
+                                  <div className="flex justify-end">
+                                    <Button onClick={() => window.open(imagen.url, '_blank')}>
+                                      <ExternalLink className="h-4 w-4 mr-2" />
+                                      Abrir en nueva pestaña
+                                    </Button>
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
+                            ))}
+                            {arriendo.imagenes!.length > 3 && (
+                              <div className="aspect-square bg-gray-100 rounded border flex items-center justify-center">
+                                <span className=" text-sm font-medium">
+                                  +{arriendo.imagenes!.length - 3}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Botones de acción */}
+                      <div className="flex gap-2 pt-4 border-t border-gray-200">
+                        <Button
+                          size="sm"
+                          className="flex-1 background-yellow-50 text-yellow-600 border-yellow-200 hover:bg-yellow-100 hover:text-yellow-800"
+                          variant="outline"
+                          onClick={() => {
+                            setEditing(arriendo);
+                            setNuevoArriendomMensual(false);
+                            setFormOpen(true);
+                          }}
+                        >
+                          <Edit className="h-4 w-4 mr-1" />
+                          Editar
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="flex-1 bacgkground-red-50 text-red-700 border-red-200 hover:bg-red-100 hover:text-red-800"
+                          onClick={async () => {
+                            if (confirm(`¿Está seguro que desea eliminar el arriendo "${arriendo.title}"?`)) {
+                              try {
+                                setEliminando(arriendo.id);
+                                await eliminar(arriendo.id);
+                                await recargarArriendos();
+                                recargar();
+                              } catch (error) {
+                                console.error('Error al eliminar arriendo:', error);
+                                alert('Error al eliminar el arriendo. Inténtelo nuevamente.');
+                              } finally {
+                                setEliminando(null);
+                              }
+                            }
+                          }}
+                          disabled={eliminando === arriendo.id}
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Eliminar
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>

@@ -123,12 +123,6 @@ export default function CalendarioPage() {
     }
   };
 
-  const openEditForm = (arriendo: Booking) => {
-    setEditing(arriendo);
-    setDetailOpen(false);
-    setFormOpen(true);
-  };
-
   // Mostrar estado de carga
   if (loading) {
     return (
@@ -157,27 +151,7 @@ export default function CalendarioPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-semibold">Calendario</h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            {arriendosFiltrados ? `Mostrando ${arriendosFiltrados.length} arriendos` : 'No hay arriendos'}
-            {selectedCabana !== "todas" && ` • Filtrado por: ${cabanas.find(c => c.value === selectedCabana)?.label}`}
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={recargar}>
-            Recargar
-          </Button>
-          {/* <ICalendarSync /> */}
-          <Button onClick={() => { setEditing(null); setFormOpen(true); }}>
-            <Plus className="h-4 w-4" />
-            Arriendo
-          </Button>
-        </div>
-      </div>
-
-      {/* Filtro de cabañas */}
-      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4">
         <span className="text-sm font-medium">Filtrar por cabaña:</span>
         <Select value={selectedCabana} onValueChange={setSelectedCabana}>
           <SelectTrigger className="w-64">
@@ -200,7 +174,25 @@ export default function CalendarioPage() {
             Limpiar filtro
           </Button>
         )}
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+            {arriendosFiltrados ? `Mostrando ${arriendosFiltrados.length} arriendos` : 'No hay arriendos'}
+            {selectedCabana !== "todas" && ` • Filtrado por: ${cabanas.find(c => c.value === selectedCabana)?.label}`}
+        </p>
       </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={recargar}>
+            Recargar
+          </Button>
+          {/* <ICalendarSync /> */}
+          <Button onClick={() => { setEditing(null); setFormOpen(true); }}>
+            <Plus className="h-4 w-4" />
+            Arriendo
+          </Button>
+        </div>
+      </div>
+
+      {/* Filtro de cabañas */}
+      
 
       <div className="rounded-2xl border bg-white dark:bg-white p-3">
         <div className="h-[65dvh] sm:h-[70dvh] md:h-[75dvh] lg:h-[80dvh] dark:text-black">
