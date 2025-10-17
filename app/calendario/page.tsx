@@ -150,44 +150,61 @@ export default function CalendarioPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-        <span className="text-sm font-medium">Filtrar por cabaña:</span>
-        <Select value={selectedCabana} onValueChange={setSelectedCabana}>
-          <SelectTrigger className="w-64">
-            <SelectValue placeholder="Seleccionar cabaña" />
-          </SelectTrigger>
-          <SelectContent>
-            {cabanas.map((cabana) => (
-              <SelectItem key={cabana.value} value={cabana.value}>
-                {cabana.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {selectedCabana !== "todas" && (
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => setSelectedCabana("todas")}
-          >
-            Limpiar filtro
-          </Button>
-        )}
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+      <div className="space-y-4">
+        {/* Sección de filtros */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 flex-1">
+            <span className="text-sm font-medium whitespace-nowrap">Filtrar por cabaña:</span>
+            <div className="flex items-center gap-2 flex-1">
+              <Select value={selectedCabana} onValueChange={setSelectedCabana}>
+                <SelectTrigger className="w-full sm:w-64">
+                  <SelectValue placeholder="Seleccionar cabaña" />
+                </SelectTrigger>
+                <SelectContent>
+                  {cabanas.map((cabana) => (
+                    <SelectItem key={cabana.value} value={cabana.value}>
+                      {cabana.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {selectedCabana !== "todas" && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setSelectedCabana("todas")}
+                  className="whitespace-nowrap"
+                >
+                  Limpiar filtro
+                </Button>
+              )}
+            </div>
+          </div>
+          
+          {/* Botones de acción */}
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={recargar} size="sm" className="flex-1 sm:flex-none">
+              Recargar
+            </Button>
+            {/* <ICalendarSync /> */}
+            <Button onClick={() => { setEditing(null); setFormOpen(true); }} size="sm" className="flex-1 sm:flex-none">
+              <Plus className="h-4 w-4 mr-1 sm:mr-0" />
+              <span className="sm:hidden">Nuevo</span>
+              <span className="hidden sm:inline">Arriendo</span>
+            </Button>
+          </div>
+        </div>
+        
+        {/* Información de resultados */}
+        <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+          <p>
             {arriendosFiltrados ? `Mostrando ${arriendosFiltrados.length} arriendos` : 'No hay arriendos'}
-            {selectedCabana !== "todas" && ` • Filtrado por: ${cabanas.find(c => c.value === selectedCabana)?.label}`}
-        </p>
-      </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={recargar}>
-            Recargar
-          </Button>
-          {/* <ICalendarSync /> */}
-          <Button onClick={() => { setEditing(null); setFormOpen(true); }}>
-            <Plus className="h-4 w-4" />
-            Arriendo
-          </Button>
+          </p>
+          {selectedCabana !== "todas" && (
+            <p className="text-xs sm:text-sm truncate ml-2">
+              Filtrado por: <span className="font-medium">{cabanas.find(c => c.value === selectedCabana)?.label}</span>
+            </p>
+          )}
         </div>
       </div>
 
