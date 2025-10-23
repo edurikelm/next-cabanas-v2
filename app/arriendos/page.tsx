@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Home, Users, PhoneCall, DollarSign, MapPin, Settings, Plus, Edit, Trash2, Eye, FileText, Image, Download, ExternalLink } from "lucide-react";
+import { Home, Users, PhoneCall, DollarSign, MapPin, Settings, Plus, Edit, Trash2, Eye, FileText, Image, Download, ExternalLink, User, Phone, Calendar, MessageSquare, Pencil } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -312,271 +312,293 @@ export default function CabanasPage() {
       </Card>
 
       {/* Arriendos Mensuales */}
-      
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 justify-between w-full">
-            <div className="flex items-center gap-2">
-              <Home className="h-5 w-5" />
-              Arriendos Mensuales
-            </div>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-foreground">Cabañas Arrendadas Mensualmente</h2>
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary" className="text-sm">
+              {arriendosMensuales.length} activas
+            </Badge>
             <Button 
               onClick={() => {
-                setEditing(null); // Asegurar que no estamos editando
-                setNuevoArriendomMensual(true); // Indicar que es un nuevo arriendo mensual
-                setFormOpen(true); // Abrir formulario para nuevo arriendo mensual
+                setEditing(null);
+                setNuevoArriendomMensual(true);
+                setFormOpen(true);
               }}
             >
               <Plus className="h-4 w-4" />
               Arriendo
             </Button>
-          </CardTitle>
-          <CardDescription>
-            {arriendosMensuales.length} {arriendosMensuales.length === 1 ? 'arriendo mensual registrado' : 'arriendos mensuales registrados'}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {loadingArriendos ? (
-            <div className="flex items-center justify-center h-32">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-2"></div>
-                <p className="text-sm text-gray-600">Cargando arriendos mensuales...</p>
-              </div>
-            </div>
-          ) : errorArriendos ? (
-            <div className="text-center py-8">
-              <p className="text-red-600 mb-2">Error al cargar arriendos mensuales:</p>
-              <p className="text-sm text-gray-600">{errorArriendos}</p>
-            </div>
-          ) : arriendosMensuales.length === 0 ? (
-            <div className="text-center py-8">
-              <Home className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-600">No hay arriendos mensuales registrados</p>
-              <p className="text-sm text-gray-400 mt-1">Los arriendos mensuales aparecerán aquí</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {arriendosMensuales.map((arriendo) => {
-                const inicio = new Date(arriendo.start);
-                const fin = new Date(arriendo.end);
-                const enCurso = new Date() >= inicio && new Date() <= fin;
-                const hasArchivos = arriendo.archivos && arriendo.archivos.length > 0;
-                const hasImagenes = arriendo.imagenes && arriendo.imagenes.length > 0;
-                
-                return (
-                  <Card key={arriendo.id} className="p-0 bg-gradient-to-r from-green-50 to-emerald-50-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                    <CardContent className="p-4">
-                      {/* Header con título y badge */}
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1">
-                          <h4 className="text-lg font-semibold text-green-800 dark:text-green-500 mb-1">
-                            {arriendo.cabana}
-                          </h4>
-                          <p className="font-medium">
-                            Arrendatario: <span className="text-sm">{arriendo.title}</span>
-                          </p>
-                        </div>
-                        <Badge 
-                          variant="secondary"
-                          className="bg-orange-100 text-orange-800 border-orange-200 font-medium px-3 py-1"
-                        >
-                          Mensual
-                        </Badge>
-                      </div>
+          </div>
+        </div>
 
-                      {/* Precio destacado */}
-                      <div className="mb-6">
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-3xl font-bold text-green-500">
-                            ${arriendo.valorTotal.toLocaleString()}
-                          </span>
-                          <span className=" text-sm">/ mes</span>
-                        </div>
+        {loadingArriendos ? (
+          <div className="flex items-center justify-center h-32">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-2"></div>
+              <p className="text-sm text-gray-600">Cargando arriendos mensuales...</p>
+            </div>
+          </div>
+        ) : errorArriendos ? (
+          <div className="text-center py-8">
+            <p className="text-red-600 mb-2">Error al cargar arriendos mensuales:</p>
+            <p className="text-sm text-gray-600">{errorArriendos}</p>
+          </div>
+        ) : arriendosMensuales.length === 0 ? (
+          <div className="text-center py-8">
+            <Home className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+            <p className="text-gray-600">No hay arriendos mensuales registrados</p>
+            <p className="text-sm text-gray-400 mt-1">Los arriendos mensuales aparecerán aquí</p>
+          </div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {arriendosMensuales.map((arriendo) => {
+              const inicio = new Date(arriendo.start);
+              const fin = new Date(arriendo.end);
+              const enCurso = new Date() >= inicio && new Date() <= fin;
+              const hasArchivos = arriendo.archivos && arriendo.archivos.length > 0;
+              const hasImagenes = arriendo.imagenes && arriendo.imagenes.length > 0;
+              
+              return (
+                <Card key={arriendo.id} className="overflow-hidden bg-gradient-to-r from-green-50 to-green-50 dark:from-green-900/20 dark:to-green-900/20 rounded-lg border border-green-200 dark:border-green-800 gap-2">
+                  <CardHeader className="">
+                    <div className="flex items-start justify-center">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Home className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <CardTitle className="text-base text-green-600 truncate uppercase">{arriendo.cabana}</CardTitle>
                       </div>
+                    </div>
+                  </CardHeader>
+                  <Separator />
+                  <CardContent className="space-y-2.5">
+                    {/* Contact info in compact grid */}
+                    <div className="grid grid-cols-2 gap-x-3 text-sm">
+                      <div className="flex items-center gap-1.5">
+                        <User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                        <span className="font-medium truncate">{arriendo.title}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Phone className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                        <span className="font-semibold text-xs truncate">
+                          {arriendo.celular ? `+56 9 ${arriendo.celular}` : 'Sin teléfono'}
+                        </span>
+                      </div>
+                    </div>
 
-                      {/* Información de contacto y fecha en dos columnas */}
-                      <div className="grid grid-cols-2 gap-4 mb-6">
-                        <div className="space-y-1">
-                          <p className="text-xs font-medium  uppercase tracking-wide">
-                            Celular
-                          </p>
-                          <div className="flex items-center gap-2">
-                            <PhoneCall className="h-4 w-4" />
-                            <span className="text-sm">
-                              {arriendo.celular ? `+56 9 ${arriendo.celular}` : 'Sin teléfono'}
-                            </span>
-                          </div>
+                    {/* Dates and price in compact layout */}
+                    <div className="grid grid-cols-2 gap-x-3 text-sm">
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <Calendar className="h-3.5 w-3.5 shrink-0" />
+                        <span className="truncate">
+                          {format(inicio, 'dd MMM yyy', { locale: es })}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1 text-foreground shrink-0">
+                        <span className="text-muted-foreground">Mes:</span>
+                        <span className="text-sm font-semibold">${(arriendo.valorTotal).toLocaleString()}</span>
+                      </div>
+                    </div>
+
+                    <Separator className="my-2" />
+
+                    {/* Comments section - compact */}
+                    {arriendo.comentarios && (
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-1.5 text-xs font-medium text-foreground">
+                          <MessageSquare className="h-3.5 w-3.5" />
+                          <span>Comentarios</span>
                         </div>
-                        <div className="space-y-1">
-                          <p className="text-xs font-medium  uppercase tracking-wide">
-                            Fecha contrato
-                          </p>
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm">📅</span>
-                            <span className="text-sm">
-                              {format(inicio, 'dd/MM/yyyy', { locale: es })}
-                            </span>
-                          </div>
+                        <div className="bg-green-200 dark:bg-green-100 border rounded p-2 mt-2">
+                          <p className="text-xs text-green-900 leading-snug line-clamp-2">{arriendo.comentarios}</p>
                         </div>
                       </div>
+                    )}
 
-                      {/* Comentarios del dueño */}
-                      {arriendo.comentarios && (
-                        <div className="mb-6">
-                          <p className="text-xs font-medium uppercase tracking-wide mb-2">
-                            Comentarios del dueño:
-                          </p>
-                          <p className="text-sm bg-green-100 text-black p-3 rounded-md border">
-                            {arriendo.comentarios}
-                          </p>
+                    {/* Documents section - compact badges */}
+                    {hasArchivos && (
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-1.5 text-xs font-medium text-foreground">
+                          <FileText className="h-3.5 w-3.5" />
+                          <span>Documentos ({arriendo.archivos!.length})</span>
                         </div>
-                      )}
-
-                      {/* Archivos adjuntos */}
-                      {hasArchivos && (
-                        <div className="mb-4">
-                          <div className="flex items-center gap-2 mb-2">
-                            <FileText className="h-4 w-4" />
-                            <span className="text-xs font-medium uppercase tracking-wide">
-                              Archivos adjuntos ({arriendo.archivos!.length})
-                            </span>
-                          </div>
-                          <div className="space-y-1">
-                            {arriendo.archivos!.map((archivo) => (
-                              <div key={archivo.id} className="flex items-center gap-2 p-2 rounded border text-sm bg-green-100">
-                                <span className="">📄</span>
-                                <span className="flex-1 truncate font-medium text-black">{archivo.nombre}</span>
-                                <Dialog>
-                                  <DialogTrigger asChild>
-                                    <Button size="sm" variant="outline" className="h-6 px-2 text-xs">
-                                      <Eye className="h-3 w-3 text-black" />
+                        <div className="flex flex-wrap gap-1 bg-green-200 dark:bg-green-100 border rounded p-2 mt-2">
+                          {arriendo.archivos!.map((archivo, index) => (
+                            <Dialog key={archivo.id}>
+                              <DialogTrigger asChild>
+                                <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5 font-normal cursor-pointer bg-muted">
+                                  {archivo.nombre.length > 20 ? archivo.nombre.substring(0, 20) + "..." : archivo.nombre}
+                                </Badge>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-full">
+                                <DialogHeader>
+                                  <DialogTitle>{archivo.nombre}</DialogTitle>
+                                </DialogHeader>
+                                <div className="flex-1 flex justify-center items-center h-[70vh]">
+                                  <iframe
+                                    src={archivo.url}
+                                    className="w-full h-full border rounded"
+                                    title={archivo.nombre}
+                                    
+                                  />
+                                </div>
+                                <div className="flex justify-between items-center pt-4 border-t">
+                                  <div className="flex gap-2">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => {
+                                        const mensaje = `Hola ${arriendo.title}, te envío el documento: ${archivo.nombre} relacionado con tu arriendo de ${arriendo.cabana}. ${archivo.url}`;
+                                        const whatsappUrl = `https://wa.me/569${arriendo.celular}?text=${encodeURIComponent(mensaje)}`;
+                                        window.open(whatsappUrl, '_blank');
+                                      }}
+                                      className="gap-2"
+                                    >
+                                      <span className="text-green-600">📱</span>
+                                      Enviar por WhatsApp
                                     </Button>
-                                  </DialogTrigger>
-                                  <DialogContent className="max-w-[95vw] h-[90vh]">
-                                    <DialogHeader>
-                                      <DialogTitle>{archivo.nombre}</DialogTitle>
-                                    </DialogHeader>
-                                    <div className="flex-1 flex justify-center items-center">
-                                      <iframe
-                                        src={archivo.url}
-                                        className="w-full h-full border rounded"
-                                        title={archivo.nombre}
-                                      />
-                                    </div>
-                                  </DialogContent>
-                                </Dialog>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Imágenes */}
-                      {hasImagenes && (
-                        <div className="mb-6">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Image className="h-4 w-4 " />
-                            <span className="text-xs font-medium  uppercase tracking-wide">
-                              Imágenes ({arriendo.imagenes!.length})
-                            </span>
-                          </div>
-                          <div className="grid grid-cols-4 gap-2">
-                            {arriendo.imagenes!.slice(0, 3).map((imagen) => (
-                              <Dialog key={imagen.id}>
-                                <DialogTrigger asChild>
-                                  <button className="group relative aspect-square bg-gray-100 rounded border overflow-hidden hover:ring-2 hover:ring-green-600 transition-all">
-                                    <img
-                                      src={imagen.urlThumbnail || imagen.url}
-                                      alt={imagen.nombre}
-                                      className="w-full h-full object-cover"
-                                    />
-                                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all flex items-center justify-center">
-                                      <Eye className="h-4 w-4 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                                    </div>
-                                  </button>
-                                </DialogTrigger>
-                                <DialogContent className="max-w-4xl">
-                                  <DialogHeader>
-                                    <DialogTitle>{imagen.nombre}</DialogTitle>
-                                    <DialogDescription>
-                                      Tamaño: {(imagen.tamaño / 1024 / 1024).toFixed(2)} MB
-                                    </DialogDescription>
-                                  </DialogHeader>
-                                  <div className="flex justify-center">
-                                    <img
-                                      src={imagen.url}
-                                      alt={imagen.nombre}
-                                      className="max-w-full max-h-[70vh] object-contain"
-                                    />
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => {
+                                        const subject = `Documento: ${archivo.nombre} - Arriendo ${arriendo.cabana}`;
+                                        const body = `Estimado/a ${arriendo.title},\n\nAdjunto encontrarás el documento "${archivo.nombre}" relacionado con tu arriendo de la cabaña ${arriendo.cabana}.\n\nPuedes acceder al documento en el siguiente enlace:\n${archivo.url}\n\nSaludos cordiales.`;
+                                        const mailtoUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                                        window.open(mailtoUrl, '_blank');
+                                      }}
+                                      className="gap-2"
+                                    >
+                                      <span>📧</span>
+                                      Enviar por Email
+                                    </Button>
                                   </div>
-                                  <div className="flex justify-end">
-                                    <Button onClick={() => window.open(imagen.url, '_blank')}>
+                                  <div className="flex gap-2">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => window.open(archivo.url, '_blank')}
+                                    >
                                       <ExternalLink className="h-4 w-4 mr-2" />
                                       Abrir en nueva pestaña
                                     </Button>
+                                    <Button
+                                      size="sm"
+                                      onClick={() => {
+                                        const link = document.createElement('a');
+                                        link.href = archivo.url;
+                                        link.download = archivo.nombre;
+                                        link.target = '_blank';
+                                        document.body.appendChild(link);
+                                        link.click();
+                                        document.body.removeChild(link);
+                                      }}
+                                    >
+                                      <Download className="h-4 w-4 mr-2" />
+                                      Descargar
+                                    </Button>
                                   </div>
-                                </DialogContent>
-                              </Dialog>
-                            ))}
-                            {arriendo.imagenes!.length > 3 && (
-                              <div className="aspect-square bg-gray-100 rounded border flex items-center justify-center">
-                                <span className=" text-sm font-medium">
-                                  +{arriendo.imagenes!.length - 3}
-                                </span>
-                              </div>
-                            )}
-                          </div>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+                          ))}
                         </div>
-                      )}
-
-                      {/* Botones de acción */}
-                      <div className="flex gap-2 pt-4 border-t border-gray-200">
-                        <Button
-                          size="sm"
-                          className="flex-1 background-yellow-50 text-yellow-600 border-yellow-200 hover:bg-yellow-100 hover:text-yellow-800"
-                          variant="outline"
-                          onClick={() => {
-                            setEditing(arriendo);
-                            setNuevoArriendomMensual(false);
-                            setFormOpen(true);
-                          }}
-                        >
-                          <Edit className="h-4 w-4 mr-1" />
-                          Editar
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="flex-1 bacgkground-red-50 text-red-700 border-red-200 hover:bg-red-100 hover:text-red-800"
-                          onClick={async () => {
-                            if (confirm(`¿Está seguro que desea eliminar el arriendo "${arriendo.title}"?`)) {
-                              try {
-                                setEliminando(arriendo.id);
-                                await eliminar(arriendo.id);
-                                await recargarArriendos();
-                                recargar();
-                              } catch (error) {
-                                console.error('Error al eliminar arriendo:', error);
-                                alert('Error al eliminar el arriendo. Inténtelo nuevamente.');
-                              } finally {
-                                setEliminando(null);
-                              }
-                            }
-                          }}
-                          disabled={eliminando === arriendo.id}
-                        >
-                          <Trash2 className="h-4 w-4 mr-1" />
-                          Eliminar
-                        </Button>
                       </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                    )}
+
+                    {/* Images section - compact thumbnails */}
+                    {hasImagenes && (
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-1.5 text-xs font-medium text-foreground">
+                          <Image className="h-3.5 w-3.5" />
+                          <span>Imágenes ({arriendo.imagenes!.length})</span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5 bg-green-200 dark:bg-green-100 border rounded p-2 mt-2">
+                          {arriendo.imagenes!.map((imagen, index) => (
+                            <Dialog key={imagen.id}>
+                              <DialogTrigger asChild>
+                                <div className="h-14 w-14 overflow-hidden rounded border border-border bg-muted shrink-0 cursor-pointer hover:ring-2 hover:ring-primary transition-all">
+                                  <img
+                                    src={imagen.urlThumbnail || imagen.url || "/placeholder.svg"}
+                                    alt={`Imagen ${index + 1}`}
+                                    className="h-full w-full object-cover"
+                                  />
+                                </div>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-4xl">
+                                <DialogHeader>
+                                  <DialogTitle>{imagen.nombre}</DialogTitle>
+                                  <DialogDescription>
+                                    Tamaño: {(imagen.tamaño / 1024 / 1024).toFixed(2)} MB
+                                  </DialogDescription>
+                                </DialogHeader>
+                                <div className="flex justify-center">
+                                  <img
+                                    src={imagen.url}
+                                    alt={imagen.nombre}
+                                    className="max-w-full max-h-[70vh] object-contain"
+                                  />
+                                </div>
+                                <div className="flex justify-end">
+                                  <Button onClick={() => window.open(imagen.url, '_blank')}>
+                                    <ExternalLink className="h-4 w-4 mr-2" />
+                                    Abrir en nueva pestaña
+                                  </Button>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <Separator className="my-2" />
+
+                    {/* Action buttons - compact */}
+                    <div className="flex gap-2 pt-1">
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => {
+                          setEditing(arriendo);
+                          setNuevoArriendomMensual(false);
+                          setFormOpen(true);
+                        }}
+                        className="gap-1.5 h-8 flex-1 text-xs bg-yellow-500"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                        Editar
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={async () => {
+                          if (confirm(`¿Está seguro que desea eliminar el arriendo "${arriendo.title}"?`)) {
+                            try {
+                              setEliminando(arriendo.id);
+                              await eliminar(arriendo.id);
+                              await recargarArriendos();
+                              recargar();
+                            } catch (error) {
+                              console.error('Error al eliminar arriendo:', error);
+                              alert('Error al eliminar el arriendo. Inténtelo nuevamente.');
+                            } finally {
+                              setEliminando(null);
+                            }
+                          }
+                        }}
+                        disabled={eliminando === arriendo.id}
+                        className="gap-1.5 h-8 flex-1 text-xs"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        Eliminar
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+      </div>
 
       {/* Formulario de edición de arriendos */}
       <BookingForm

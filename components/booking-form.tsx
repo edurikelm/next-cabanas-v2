@@ -22,6 +22,7 @@ import { useAvailableCabanas } from "@/lib/cabanas";
 import { FileUploader, type FileUploaderRef } from "@/components/file-uploader";
 import { ComentariosField } from "@/components/booking-fields-extra";
 import { eliminarMultiplesArchivos } from "@/lib/utils/archivo-utils";
+import { generarContratoArrendamiento, type DatosContrato } from "@/lib/utils/contrato-generator";
 
 export interface BookingFormProps {
   open: boolean;
@@ -595,6 +596,44 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
               >
                 Cancelar
               </Button>
+              
+              {/* Botón Generar Contrato - solo para arriendos mensuales nuevos */}
+              {esMensual && !initial?.id && (
+                <Button 
+                  type="button" 
+                  variant="secondary"
+                  onClick={() => {
+                    const values = form.getValues();
+                    
+                    // Validar que los campos necesarios estén llenos
+                    if (!values.title || !values.cabana || !values.celular || !values.dateRange?.from || !values.dateRange?.to || !values.valorNoche) {
+                      alert('Por favor, completa todos los campos obligatorios antes de generar el contrato (Arrendatario, Cabaña, Celular, Fechas y Valor).');
+                      return;
+                    }
+
+                    try {
+                      const datosContrato: DatosContrato = {
+                        arrendatario: values.title,
+                        cabana: values.cabana,
+                        celular: values.celular,
+                        fechaInicio: values.dateRange.from,
+                        fechaFin: values.dateRange.to,
+                        valorMensual: values.valorNoche, // En arriendos mensuales, valorNoche representa el valor mensual
+                        comentarios: values.comentarios || undefined,
+                      };
+
+                      generarContratoArrendamiento(datosContrato);
+                    } catch (error) {
+                      console.error('Error generando contrato:', error);
+                      alert('Error al generar el contrato. Por favor, intenta nuevamente.');
+                    }
+                  }}
+                  className="w-full sm:w-auto h-9 sm:h-11 text-sm sm:text-base font-medium"
+                >
+                  Generar contrato
+                </Button>
+              )}
+              
               <Button 
                 type="submit" 
                 disabled={operationLoading}
