@@ -92,17 +92,26 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
 }
 
 /* Scroll suave para el calendario y paneles */
-* { scrollbar-width: thin; }
+* {
+  scrollbar-width: thin;
+}
 
 /* --- react-big-calendar ajustes responsive --- */
-.rbc-calendar { touch-action: pan-y; }
-.rbc-toolbar { gap: .5rem; flex-wrap: wrap; }
+.rbc-calendar {
+  touch-action: pan-y;
+}
+
+.rbc-toolbar {
+  gap: .5rem;
+  flex-wrap: wrap;
+}
 
 /* Asegurar texto negro en calendario en modo oscuro */
 .dark .rbc-calendar {
@@ -163,12 +172,32 @@
 }
 
 @media (max-width: 640px) {
-  .rbc-toolbar { flex-direction: column; align-items: stretch; }
-  .rbc-toolbar .rbc-btn-group { width: 100%; justify-content: space-between; }
-  .rbc-event { font-size: 0.7rem; padding: 1px 2px; }
-  .rbc-time-view .rbc-time-content { overflow-x: auto; }
-  .rbc-month-row { min-height: 100px; }
-  .rbc-month-view .rbc-day-bg { min-height: 100px; }
+  .rbc-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .rbc-toolbar .rbc-btn-group {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .rbc-event {
+    font-size: 0.7rem;
+    padding: 1px 2px;
+  }
+
+  .rbc-time-view .rbc-time-content {
+    overflow-x: auto;
+  }
+
+  .rbc-month-row {
+    min-height: 100px;
+  }
+
+  .rbc-month-view .rbc-day-bg {
+    min-height: 100px;
+  }
 }
 
 /* Estilos para funcionalidad de cámara */
@@ -186,13 +215,13 @@
   .mobile-camera-priority {
     order: -1;
   }
-  
+
   .camera-button {
     background: linear-gradient(135deg, #4f46e5, #7c3aed);
     border: none;
     color: white;
   }
-  
+
   .camera-button:hover {
     background: linear-gradient(135deg, #4338ca, #6d28d9);
     color: white;
@@ -210,9 +239,20 @@
 
 /* Animación para feedback visual al capturar */
 @keyframes capture-flash {
-  0% { background-color: white; opacity: 0; }
-  50% { background-color: white; opacity: 0.8; }
-  100% { background-color: white; opacity: 0; }
+  0% {
+    background-color: white;
+    opacity: 0;
+  }
+
+  50% {
+    background-color: white;
+    opacity: 0.8;
+  }
+
+  100% {
+    background-color: white;
+    opacity: 0;
+  }
 }
 
 .capture-flash {
@@ -230,7 +270,7 @@
   .rbc-month-view .rbc-day-bg {
     min-height: 80px;
   }
-  
+
   .camera-capture-dialog {
     margin: 1rem;
     max-width: calc(100vw - 2rem);
@@ -239,21 +279,23 @@
 
 /* Mejoras específicas para formularios en móviles */
 @media (max-width: 640px) {
+
   /* Inputs más grandes en móviles */
   .booking-form input,
   .booking-form select,
   .booking-form textarea {
     min-height: 36px;
-    font-size: 16px; /* Previene zoom en iOS */
+    font-size: 16px;
+    /* Previene zoom en iOS */
     padding: 8px 12px;
   }
-  
+
   /* Checkboxes más grandes */
   .booking-form input[type="checkbox"] {
     width: 18px;
     height: 18px;
   }
-  
+
   /* Labels más visibles */
   .booking-form label {
     font-weight: 500;
@@ -261,7 +303,7 @@
     margin-bottom: 4px;
     display: block;
   }
-  
+
   /* Botones más compactos pero usables */
   .booking-form button {
     min-height: 36px;
@@ -269,42 +311,42 @@
     font-weight: 500;
     padding: 8px 12px;
   }
-  
+
   /* Espaciado compacto */
   .booking-form .form-item {
     margin-bottom: 1rem;
   }
-  
+
   /* Select mejorado */
   .booking-form [role="combobox"] {
     min-height: 36px;
     font-size: 14px;
   }
-  
+
   /* DatePicker más compacto */
   .booking-form [data-radix-popper-content-wrapper] {
     width: 100vw !important;
     max-width: calc(100vw - 1rem);
   }
-  
+
   /* Cards con espaciado compacto */
   .booking-form .card {
     padding: 0.75rem;
     margin-bottom: 0.75rem;
   }
-  
+
   /* TextArea más compacto */
   .booking-form textarea {
     min-height: 80px;
     line-height: 1.4;
     padding: 8px 12px;
   }
-  
+
   /* File uploader compacto */
   .booking-form .file-uploader {
     padding: 0.75rem;
   }
-  
+
   /* Dialog ultra compacto */
   [data-radix-dialog-content] {
     margin: 0.25rem;
@@ -312,7 +354,7 @@
     width: calc(100vw - 0.5rem);
     padding: 0.5rem !important;
   }
-  
+
   /* Títulos más pequeños */
   .booking-form h1,
   .booking-form h2,
@@ -320,33 +362,33 @@
     margin-bottom: 0.5rem;
     line-height: 1.2;
   }
-  
+
   /* Espaciado entre elementos */
-  .booking-form > * + * {
+  .booking-form>*+* {
     margin-top: 0.75rem;
   }
-  
+
   /* Listas de archivos compactas */
   .booking-form .file-list-item {
     padding: 0.5rem !important;
     margin-bottom: 0.25rem !important;
   }
-  
+
   .booking-form .file-list-item .text-sm {
     font-size: 0.75rem !important;
   }
-  
+
   .booking-form .file-list-item .text-xs {
     font-size: 0.65rem !important;
   }
-  
+
   /* Botones de archivo más pequeños */
   .booking-form .file-list-item button {
     min-height: 24px !important;
     width: 24px !important;
     padding: 0 !important;
   }
-  
+
   /* Iconos más pequeños en listas de archivos */
   .booking-form .file-list-item svg {
     width: 12px !important;
@@ -364,7 +406,7 @@
   .arriendos-mensuales-card .max-h-none {
     max-height: none !important;
   }
-  
+
   .arriendos-mensuales-card .space-y-2,
   .arriendos-mensuales-card .space-y-3 {
     display: flex !important;
@@ -377,47 +419,47 @@
   .arriendos-mensuales-card {
     height: auto !important;
   }
-  
+
   .arriendos-mensuales-card .card-header {
     padding-bottom: 0.75rem;
   }
-  
+
   .arriendos-mensuales-card .card-content {
     padding: 0.75rem;
   }
-  
+
   /* Botones compactos en cards */
   .arriendos-mensuales-card button {
     min-height: 28px;
     padding: 4px 8px;
     font-size: 11px;
   }
-  
+
   /* Badges más pequeños */
   .arriendos-mensuales-card .badge {
     font-size: 10px;
     padding: 2px 6px;
   }
-  
+
   /* Texto más compacto */
   .arriendos-mensuales-card .text-xs {
     font-size: 10px;
   }
-  
+
   .arriendos-mensuales-card .text-sm {
     font-size: 12px;
   }
-  
+
   /* Grid de imágenes más compacto */
   .arriendos-mensuales-card .grid-cols-3 {
     gap: 2px;
   }
-  
+
   /* Separadores más sutiles */
   .arriendos-mensuales-card .separator {
     margin: 0.5rem 0;
   }
-  
+
   /* Mantener limitaciones de altura en móviles */
   .arriendos-mensuales-card .max-h-none {
     max-height: 3rem !important;
@@ -426,6 +468,7 @@
 
 /* Mejoras para touch en formularios */
 @media (hover: none) and (pointer: coarse) {
+
   .booking-form input,
   .booking-form button,
   .booking-form select {
@@ -433,12 +476,12 @@
     appearance: none;
     border-radius: 8px;
   }
-  
+
   .booking-form button:active {
     transform: scale(0.98);
     transition: transform 0.1s ease;
   }
-  
+
   /* Mejor contraste para inputs en móviles */
   .booking-form input:focus,
   .booking-form select:focus,

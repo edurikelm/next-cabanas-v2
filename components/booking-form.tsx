@@ -20,9 +20,9 @@ import { bookingFormSchema, type BookingFormValues } from "@/lib/schemas/booking
 import { useArriendoOperaciones, useArriendos } from "@/lib/hooks/useFirestore";
 import { useAvailableCabanas } from "@/lib/cabanas";
 import { FileUploader, type FileUploaderRef } from "@/components/file-uploader";
-import { ComentariosField } from "@/components/booking-fields-extra";
 import { eliminarMultiplesArchivos } from "@/lib/utils/archivo-utils";
 import { generarContratoArrendamiento, type DatosContrato } from "@/lib/utils/contrato-generator";
+import { Textarea } from "@/components/ui/textarea";
 
 export interface BookingFormProps {
   open: boolean;
@@ -348,7 +348,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                         ))}
                         {!cabanasLoading && !cabanasError && cabanasDisponibles.length === 0 && (
                           <div className="px-3 py-2 text-sm text-orange-600">
-                            No hay cabañas disponibles (todas tienen arriendos mensuales activos)
+                            No hay cabañas disponibles - Todas tienen arriendos mensuales registrados
                           </div>
                         )}
                         {cabanasError && (
@@ -396,10 +396,10 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                       min={1} 
                       step={1} 
                       placeholder="2" 
-                      value={field.value || ""}
+                      value={field.value === 0 ? "" : field.value || ""}
                       onChange={(e) => {
                         const value = e.target.value;
-                        field.onChange(value === "" ? 1 : Number(value));
+                        field.onChange(value === "" ? 0 : Number(value));
                       }}
                       className="h-9 sm:h-11 text-sm sm:text-base"
                     />
@@ -646,5 +646,19 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
         </Form>
       </DialogContent>
     </Dialog>
+  );
+}
+
+export function ComentariosField({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder?: string; }) {
+  return (
+    <div className="space-y-1.5 sm:space-y-2">
+      <FormLabel className="text-sm sm:text-base font-medium">Comentarios</FormLabel>
+      <Textarea 
+        value={value} 
+        onChange={(e) => onChange(e.target.value)} 
+        placeholder={placeholder || "Comentarios adicionales..."} 
+        className="min-h-[80px] sm:min-h-[100px] text-sm sm:text-base resize-y"
+      />
+    </div>
   );
 }
