@@ -278,21 +278,25 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
               control={form.control}
               name="esMensual"
               render={({ field }) => (
-                <FormItem className="xl:col-span-2 flex flex-row items-start sm:items-center gap-2 sm:gap-3 p-2 sm:p-4 border rounded-lg bg-blue-50 dark:bg-blue-950/30">
-                  <FormControl>
-                    <Checkbox 
-                      checked={field.value ?? false} 
-                      onCheckedChange={field.onChange}
-                      className="mt-0.5 sm:mt-0 h-4 w-4 sm:h-5 sm:w-5"
-                    />
-                  </FormControl>
-                  <div className="flex-1">
-                    <FormLabel className="text-sm sm:text-base font-medium cursor-pointer leading-tight">
-                      Arriendo Mensual
-                    </FormLabel>
-                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-0.5 sm:mt-1">
-                      Marcar si este es un arriendo por mes (habilitará campos adicionales)
-                    </p>
+                <FormItem className="xl:col-span-2">
+                  <div className="flex flex-row items-start gap-3 p-4 border-2 rounded-lg bg-blue-50/50 dark:bg-blue-950/20 hover:bg-blue-100/50 dark:hover:bg-blue-950/30 transition-colors cursor-pointer"
+                    onClick={() => field.onChange(!field.value)}
+                  >
+                    <FormControl>
+                      <Checkbox 
+                        checked={field.value ?? false} 
+                        onCheckedChange={field.onChange}
+                        className="mt-0.5"
+                      />
+                    </FormControl>
+                    <div className="flex-1 space-y-1">
+                      <FormLabel className="text-base font-semibold cursor-pointer leading-none">
+                        Arriendo Mensual
+                      </FormLabel>
+                      <p className="text-sm text-muted-foreground leading-snug">
+                        Marcar si este es un arriendo por mes (habilitará campos adicionales)
+                      </p>
+                    </div>
                   </div>
                 </FormItem>
               )}
@@ -487,15 +491,18 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
               control={form.control}
               name="descuento"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-center gap-2 sm:gap-3 p-2 sm:p-3 border rounded-lg hover:bg-muted/50 transition-colors">
-                  <FormControl>
-                    <Checkbox 
-                      checked={!!field.value} 
-                      onCheckedChange={field.onChange}
-                      className="h-4 w-4 sm:h-5 sm:w-5"
-                    />
-                  </FormControl>
-                  <FormLabel className="text-xs sm:text-base font-medium cursor-pointer flex-1">Descuento aplicado</FormLabel>
+                <FormItem>
+                  <div className="flex flex-row items-center gap-3 p-3 border-2 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                    onClick={() => field.onChange(!field.value)}
+                  >
+                    <FormControl>
+                      <Checkbox 
+                        checked={!!field.value} 
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormLabel className="text-sm sm:text-base font-medium cursor-pointer flex-1 leading-none">Descuento aplicado</FormLabel>
+                  </div>
                 </FormItem>
               )}
             />
@@ -504,15 +511,18 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
               control={form.control}
               name="pago"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-center gap-2 sm:gap-3 p-2 sm:p-3 border rounded-lg hover:bg-muted/50 transition-colors">
-                  <FormControl>
-                    <Checkbox 
-                      checked={!!field.value} 
-                      onCheckedChange={field.onChange}
-                      className="h-4 w-4 sm:h-5 sm:w-5"
-                    />
-                  </FormControl>
-                  <FormLabel className="text-xs sm:text-base font-medium cursor-pointer flex-1">Pago realizado</FormLabel>
+                <FormItem>
+                  <div className="flex flex-row items-center gap-3 p-3 border-2 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                    onClick={() => field.onChange(!field.value)}
+                  >
+                    <FormControl>
+                      <Checkbox 
+                        checked={!!field.value} 
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormLabel className="text-sm sm:text-base font-medium cursor-pointer flex-1 leading-none">Pago realizado</FormLabel>
+                  </div>
                 </FormItem>
               )}
             />

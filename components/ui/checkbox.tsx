@@ -16,22 +16,32 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
     };
 
     return (
-      <div className="relative flex items-center">
+      <div className="relative inline-flex items-center justify-center">
         <input
           type="checkbox"
           ref={ref}
           checked={checked}
           onChange={handleChange}
-          className={cn(
-            "peer h-4 w-4 shrink-0 rounded-sm border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-            "checked:bg-blue-600 checked:border-blue-600",
-            className
-          )}
+          className="sr-only peer"
           {...props}
         />
-        {checked && (
-          <Check className="absolute h-3 w-3 text-white pointer-events-none left-0.5 top-0.5" />
-        )}
+        <div
+          className={cn(
+            "h-5 w-5 shrink-0 rounded border-2 border-primary transition-all duration-200",
+            "flex items-center justify-center cursor-pointer",
+            "peer-focus-visible:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2",
+            "peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
+            "hover:bg-primary/10",
+            checked
+              ? "bg-primary border-primary"
+              : "bg-background hover:border-primary/80",
+            className
+          )}
+        >
+          {checked && (
+            <Check className="h-4 w-4 text-primary-foreground stroke-[3]" />
+          )}
+        </div>
       </div>
     );
   }
