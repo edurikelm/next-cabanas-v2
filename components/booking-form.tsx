@@ -78,7 +78,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
       cantPersonas: initial?.cantPersonas ?? 1,
       celular: initial?.celular ?? "",
       valorNoche: initial?.valorNoche ?? 0,
-      descuento: initial?.descuento ?? false,
+      descuento: initial?.descuento ?? "sin-descuento",
       pago: initial?.pago ?? false,
       dateRange: initialRange,
       esMensual: initial?.esMensual ?? false,
@@ -103,7 +103,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
       cantPersonas: initial?.cantPersonas ?? 1,
       celular: initial?.celular ?? "",
       valorNoche: initial?.valorNoche ?? 0,
-      descuento: initial?.descuento ?? false,
+      descuento: initial?.descuento ?? "sin-descuento",
       pago: initial?.pago ?? false,
       dateRange: newInitialRange,
       esMensual: initial?.esMensual ?? false,
@@ -132,7 +132,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
           cantPersonas: initial?.cantPersonas ?? 1,
           celular: initial?.celular ?? "",
           valorNoche: initial?.valorNoche ?? 0,
-          descuento: initial?.descuento ?? false,
+          descuento: initial?.descuento ?? "sin-descuento",
           pago: initial?.pago ?? false,
           dateRange: newInitialRange,
           esMensual: initial?.esMensual ?? false,
@@ -157,8 +157,13 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
   const range = form.watch("dateRange");
   const valorNoche = form.watch("valorNoche") ?? 0;
   const esMensual = form.watch("esMensual") ?? false;
+  const descuento = form.watch("descuento") ?? "sin-descuento";
   const cantDias = range?.from && range?.to ? Math.max(1, differenceInCalendarDays(endOfDay(range.to), startOfDay(range.from))) : 0;
-  const valorTotal = Math.max(0, (valorNoche || 0) * (cantDias || 0));
+  
+  // Calcular valor total con descuento si aplica
+  const valorBase = Math.max(0, (valorNoche || 0) * (cantDias || 0));
+  const porcentajeDescuento = descuento === "gringo" || descuento === "patricia" ? 0.20 : 0;
+  const valorTotal = Math.round(valorBase * (1 - porcentajeDescuento));
 
   const submit = async (values: BookingFormValues) => {
     const { from, to } = values.dateRange || {};
@@ -475,38 +480,64 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
 
             {/* Campo derivado solo de lectura */}
             <FormItem>
-              <FormLabel className="text-sm sm:text-base font-medium">Total</FormLabel>
+              <div className="flex items-center justify-between mb-2">
+                <FormLabel className="text-sm sm:text-base font-medium">Total</FormLabel>
+                {porcentajeDescuento > 0 && (
+                  <div className="flex items-center gap-1.5 text-xs">
+                    <span className="text-muted-foreground line-through">
+                      ${valorBase.toLocaleString()}
+                    </span>
+                    <span className="px-1.5 py-0.5 bg-green-500 text-white rounded-full font-semibold text-[10px]">
+                      -{(porcentajeDescuento * 100).toFixed(0)}%
+                    </span>
+                  </div>
+                )}
+              </div>
               <FormControl>
                 <Input 
                   value={valorTotal.toLocaleString()} 
                   disabled 
                   readOnly
-                  className="h-9 sm:h-11 text-sm sm:text-base font-semibold bg-muted"
+                  className={`h-9 sm:h-11 text-sm sm:text-base font-semibold ${
+                    porcentajeDescuento > 0 
+                      ? 'bg-green-50 dark:bg-green-950/30 border-green-500 text-green-700 dark:text-green-400' 
+                      : 'bg-muted'
+                  }`}
                 />
               </FormControl>
             </FormItem>
 
-            {/* Checkboxes (booleans) */}
+            {/* Select de descuento */}
             <FormField
               control={form.control}
               name="descuento"
               render={({ field }) => (
                 <FormItem>
-                  <div className="flex flex-row items-center gap-3 p-3 border-2 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-                    onClick={() => field.onChange(!field.value)}
-                  >
-                    <FormControl>
-                      <Checkbox 
-                        checked={!!field.value} 
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormLabel className="text-sm sm:text-base font-medium cursor-pointer flex-1 leading-none">Descuento aplicado</FormLabel>
-                  </div>
+                  <FormLabel className="text-sm sm:text-base font-medium">Descuento</FormLabel>
+                  <FormControl>
+                    <Select value={field.value || "sin-descuento"} onValueChange={field.onChange}>
+                      <SelectTrigger className="h-9 sm:h-11 text-sm sm:text-base">
+                        <SelectValue placeholder="Seleccionar descuento" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="sin-descuento" className="text-sm sm:text-base py-1.5 sm:py-2">
+                          Sin descuento
+                        </SelectItem>
+                        <SelectItem value="gringo" className="text-sm sm:text-base py-1.5 sm:py-2">
+                          Gringo (20%)
+                        </SelectItem>
+                        <SelectItem value="patricia" className="text-sm sm:text-base py-1.5 sm:py-2">
+                          Patricia (20%)
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
 
+            {/* Checkbox de pago */}
             <FormField
               control={form.control}
               name="pago"

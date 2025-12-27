@@ -618,7 +618,7 @@ export default function CabanasPage() {
           cantPersonas: 1,
           celular: "",
           valorNoche: 0,
-          descuento: false,
+          descuento: "sin-descuento",
           pago: false,
           archivos: [],
           imagenes: [],

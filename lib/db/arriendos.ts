@@ -29,7 +29,7 @@ const convertDocToBooking = (doc: QueryDocumentSnapshot<DocumentData>): Booking 
     cantDias: Number(data.cantDias) || 0,
     cantPersonas: Number(data.cantPersonas) || 0,
     celular: data.celular || '',
-    descuento: Boolean(data.descuento),
+    descuento: data.descuento || "sin-descuento", // Mantener el valor original (string o convertir undefined/null a "sin-descuento")
     end: data.end instanceof Timestamp ? data.end.toDate() : new Date(data.end),
     start: data.start instanceof Timestamp ? data.start.toDate() : new Date(data.start),
     pago: Boolean(data.pago),

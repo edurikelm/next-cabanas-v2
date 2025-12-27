@@ -16,7 +16,18 @@ export interface BookingDetailProps {
 }
 
 export function BookingDetail({ open, onOpenChange, booking, onEdit, onDelete }: BookingDetailProps) {
+
   if (!booking) return null;
+
+  // Helper para verificar si tiene descuento
+  const tieneDescuento = 
+    booking.descuento === "gringo" || 
+    booking.descuento === "patricia";
+  
+  const tipoDescuento = 
+    booking.descuento === "gringo" ? "Gringo" : 
+    booking.descuento === "patricia" ? "Patricia" : 
+    null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -60,10 +71,49 @@ export function BookingDetail({ open, onOpenChange, booking, onEdit, onDelete }:
 
           <div className="flex items-center gap-2">
             <Wallet className="size-4" />
-            <div>{`$${booking.valorTotal} ($${booking.valorNoche} por noche)`}</div>
+            <div>
+              {tieneDescuento ? (
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="line-through text-muted-foreground">
+                      ${(booking.valorNoche * booking.cantDias).toLocaleString()}
+                    </span>
+                    <span className="px-2 py-0.5 bg-green-500 text-white rounded-full text-[10px] font-semibold">
+                      -20%
+                    </span>
+                  </div>
+                  <div className="font-semibold text-green-700 dark:text-green-400">
+                    ${booking.valorTotal.toLocaleString()} (${booking.valorNoche.toLocaleString()} por noche)
+                  </div>
+                  <div className="text-xs text-green-600 dark:text-green-400">
+                    Ahorro: ${((booking.valorNoche * booking.cantDias) - booking.valorTotal).toLocaleString()}
+                  </div>
+                </div>
+              ) : (
+                <div>${booking.valorTotal.toLocaleString()} (${booking.valorNoche.toLocaleString()} por noche)</div>
+              )}
+            </div>
           </div>
 
-          <div className="text-xs">Descuento: {booking.descuento ? "Sí" : "No"} · Pago: {booking.pago ? "Sí" : "No"}</div>
+          <div className="flex items-center gap-3 text-xs">
+            <div className="flex items-center gap-1.5">
+              <span className="font-medium">Descuento:</span>
+              {tieneDescuento ? (
+                <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded font-medium">
+                  {tipoDescuento} (20%)
+                </span>
+              ) : (
+                <span className="text-muted-foreground">No</span>
+              )}
+            </div>
+            <span className="text-muted-foreground">·</span>
+            <div className="flex items-center gap-1.5">
+              <span className="font-medium">Pago:</span>
+              <span className={booking.pago ? "text-green-600 dark:text-green-400" : "text-orange-600 dark:text-orange-400"}>
+                {booking.pago ? "Sí" : "No"}
+              </span>
+            </div>
+          </div>
         </section>
 
         <DialogFooter className="gap-2">

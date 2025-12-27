@@ -36,7 +36,7 @@ export const bookingFormSchema = z.object({
     .max(20)
     .regex(/^\+?[0-9\s-]{7,}$/i, "Teléfono inválido"),
   valorNoche: z.number().nonnegative("No puede ser negativo"),
-  descuento: z.boolean(),
+  descuento: z.enum(["sin-descuento", "gringo", "patricia"]),
   pago: z.boolean(),
   dateRange: z
     .object({ from: z.date({ message: "Selecciona inicio" }), to: z.date({ message: "Selecciona término" }) })

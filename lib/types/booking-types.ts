@@ -31,7 +31,7 @@ export interface Booking {
   cantDias: number;       // Nº de días (calculado desde start/end)
   cantPersonas: number;   // Nº de personas
   celular?: string;        // Teléfono de contacto
-  descuento: boolean;     // ¿Aplica descuento? (bandera)
+  descuento: "sin-descuento" | "gringo" | "patricia"; // Tipo de descuento aplicado
   end: Date;              // Fecha fin (inclusive, fin del día)
   start: Date;            // Fecha inicio (inicio del día)
   pago: boolean;          // ¿Pagado?
