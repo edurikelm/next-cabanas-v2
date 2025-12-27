@@ -459,19 +459,20 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                 <FormItem>
                   <FormLabel className="text-sm sm:text-base font-medium">Valor por noche</FormLabel>
                   <FormControl>
-                    <Input 
-                      type="number" 
-                      inputMode="decimal" 
-                      min={0} 
-                      step={1} 
-                      placeholder="50000" 
-                      value={field.value || ""}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        field.onChange(value === "" ? 0 : Number(value));
-                      }}
-                      className="h-9 sm:h-11 text-sm sm:text-base"
-                    />
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm sm:text-base flex items-center">$</span>
+                      <Input 
+                        type="text" 
+                        inputMode="numeric" 
+                        placeholder="50.000" 
+                        value={field.value ? field.value.toLocaleString('es-CL') : ""}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, ''); // Remover todo excepto dígitos
+                          field.onChange(value === "" ? 0 : Number(value));
+                        }}
+                        className="h-9 sm:h-11 text-sm sm:text-base pl-7"
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -485,7 +486,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                 {porcentajeDescuento > 0 && (
                   <div className="flex items-center gap-1.5 text-xs">
                     <span className="text-muted-foreground line-through">
-                      ${valorBase.toLocaleString()}
+                      ${valorBase.toLocaleString('es-CL')}
                     </span>
                     <span className="px-1.5 py-0.5 bg-green-500 text-white rounded-full font-semibold text-[10px]">
                       -{(porcentajeDescuento * 100).toFixed(0)}%
@@ -494,16 +495,19 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                 )}
               </div>
               <FormControl>
-                <Input 
-                  value={valorTotal.toLocaleString()} 
-                  disabled 
-                  readOnly
-                  className={`h-9 sm:h-11 text-sm sm:text-base font-semibold ${
-                    porcentajeDescuento > 0 
-                      ? 'bg-green-50 dark:bg-green-950/30 border-green-500 text-green-700 dark:text-green-400' 
-                      : 'bg-muted'
-                  }`}
-                />
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm sm:text-base font-semibold flex items-center">$</span>
+                  <Input 
+                    value={valorTotal.toLocaleString('es-CL')} 
+                    disabled 
+                    readOnly
+                    className={`h-9 sm:h-11 text-sm sm:text-base font-semibold pl-7 ${
+                      porcentajeDescuento > 0 
+                        ? 'bg-green-50 dark:bg-green-950/30 border-green-500 text-green-700 dark:text-green-400' 
+                        : 'bg-muted'
+                    }`}
+                  />
+                </div>
               </FormControl>
             </FormItem>
 
