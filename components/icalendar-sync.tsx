@@ -72,7 +72,7 @@ export function ICalendarSync() {
       cantDias: cantDias,
       cantPersonas: 2, // Valor por defecto ya que Airbnb no siempre proporciona esta info
       celular: airbnbRes.celular || '',
-      descuento: false,
+      descuento: "sin-descuento",
       end: endDate,
       start: startDate,
       pago: true, // Asumimos que reservas de Airbnb están pagadas

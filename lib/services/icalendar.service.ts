@@ -459,7 +459,7 @@ export class ICalendarService {
       cantDias: nights,
       cantPersonas: 2, // Default, puede ajustarse
       celular: airbnbReservation.celular,
-      descuento: false,
+      descuento: "sin-descuento",
       start: airbnbReservation.start,
       end: airbnbReservation.end,
       pago: true, // Asumimos que las reservas de Airbnb están pagadas
