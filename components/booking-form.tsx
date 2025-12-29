@@ -1,7 +1,7 @@
 // components/booking-form.tsx
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { startOfDay, endOfDay, differenceInCalendarDays } from "date-fns";
@@ -159,6 +159,34 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
   const esMensual = form.watch("esMensual") ?? false;
   const descuento = form.watch("descuento") ?? "sin-descuento";
   const cantDias = range?.from && range?.to ? Math.max(1, differenceInCalendarDays(range.to, range.from) + 1) : 0;
+  const cabanaSeleccionada = form.watch("cabana");
+  
+  // Calcular fechas ocupadas para la cabaña seleccionada
+  const fechasOcupadas = useMemo(() => {
+    if (!cabanaSeleccionada || !arriendos) return [];
+    
+    return arriendos
+      .filter(arriendo => {
+        // Filtrar arriendos de la misma cabaña
+        if (arriendo.cabana !== cabanaSeleccionada) return false;
+        
+        // Si estamos editando, excluir el arriendo actual
+        if (initial?.id && arriendo.id === initial.id) return false;
+        
+        return true;
+      })
+      .map(arriendo => ({
+        start: new Date(arriendo.start),
+        end: new Date(arriendo.end)
+      }));
+  }, [cabanaSeleccionada, arriendos, initial?.id]);
+  
+  // Función para deshabilitar fechas ocupadas
+  const isDateDisabled = (date: Date) => {
+    return fechasOcupadas.some(({ start, end }) => {
+      return date >= start && date <= end;
+    });
+  };
   
   // Calcular valor total con descuento si aplica
   const valorBase = Math.max(0, (valorNoche || 0) * (cantDias || 0));
@@ -455,9 +483,18 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                 <FormItem>
                   <FormLabel className="text-sm sm:text-base font-medium">Fechas Inicio - Termino</FormLabel>
                   <FormControl>
-                    <DateRangePicker value={field.value as DateRange | undefined} onChange={field.onChange} />
+                    <DateRangePicker 
+                      value={field.value as DateRange | undefined} 
+                      onChange={field.onChange}
+                      disabled={cabanaSeleccionada ? isDateDisabled : undefined}
+                    />
                   </FormControl>
                   <FormMessage />
+                  {cabanaSeleccionada && fechasOcupadas.length > 0 && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Las fechas en gris están ocupadas para esta cabaña
+                    </p>
+                  )}
                 </FormItem>
               )}
             />
