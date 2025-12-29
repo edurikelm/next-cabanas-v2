@@ -158,7 +158,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
   const valorNoche = form.watch("valorNoche") ?? 0;
   const esMensual = form.watch("esMensual") ?? false;
   const descuento = form.watch("descuento") ?? "sin-descuento";
-  const cantDias = range?.from && range?.to ? Math.max(1, differenceInCalendarDays(endOfDay(range.to), startOfDay(range.from))) : 0;
+  const cantDias = range?.from && range?.to ? Math.max(1, differenceInCalendarDays(range.to, range.from) + 1) : 0;
   
   // Calcular valor total con descuento si aplica
   const valorBase = Math.max(0, (valorNoche || 0) * (cantDias || 0));
@@ -171,7 +171,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
 
     const start = startOfDay(from);
     const end = endOfDay(to);
-    const cantDias = Math.max(1, differenceInCalendarDays(end, start));
+    const cantDias = Math.max(1, differenceInCalendarDays(to, from) + 1);
 
     try {
       let finalBookingId: string;
@@ -299,7 +299,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                         Arriendo Mensual
                       </FormLabel>
                       <p className="text-sm text-muted-foreground leading-snug">
-                        Marcar si este es un arriendo por mes (habilitará campos adicionales)
+                        (habilitará campos adicionales)
                       </p>
                     </div>
                   </div>
@@ -425,13 +425,23 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                 <FormItem>
                   <FormLabel className="text-sm sm:text-base font-medium">Celular</FormLabel>
                   <FormControl>
-                    <Input 
-                      inputMode="tel" 
-                      placeholder="+56 9 1234 5678" 
-                      value={field.value || ""} 
-                      onChange={field.onChange}
-                      className="h-9 sm:h-11 text-sm sm:text-base"
-                    />
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm sm:text-base flex items-center pointer-events-none">
+                        +56 9
+                      </span>
+                      <Input 
+                        inputMode="tel" 
+                        placeholder="1234 5678" 
+                        value={field.value?.replace(/^\+56 9/, '').trim() || ""}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, ''); // Solo dígitos
+                          const limited = value.slice(0, 8); // Máximo 8 dígitos
+                          field.onChange(limited ? `+56 9 ${limited}` : '');
+                        }}
+                        maxLength={9}
+                        className="h-9 sm:h-11 text-sm sm:text-base pl-16"
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -442,8 +452,8 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
               control={form.control}
               name="dateRange"
               render={({ field }) => (
-                <FormItem className="xl:col-span-2">
-                  <FormLabel className="text-sm sm:text-base font-medium">Fechas (Check-in / Check-out)</FormLabel>
+                <FormItem>
+                  <FormLabel className="text-sm sm:text-base font-medium">Fechas Inicio - Termino</FormLabel>
                   <FormControl>
                     <DateRangePicker value={field.value as DateRange | undefined} onChange={field.onChange} />
                   </FormControl>
@@ -451,6 +461,18 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                 </FormItem>
               )}
             />
+
+            <FormItem>
+              <FormLabel className="text-sm sm:text-base font-medium">Noches</FormLabel>
+              <FormControl>
+                <Input 
+                  value={cantDias > 0 ? cantDias : "0"}
+                  disabled 
+                  readOnly
+                  className="h-9 sm:h-11 text-sm sm:text-base font-semibold bg-muted text-center"
+                />
+              </FormControl>
+            </FormItem>
 
             <FormField
               control={form.control}
