@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Home, Users, PhoneCall, DollarSign, MapPin, Settings, Plus, Edit, Trash2, Eye, FileText, Image, Download, ExternalLink, User, Phone, Calendar, MessageSquare, Pencil } from "lucide-react";
+import { Home, Users, PhoneCall, DollarSign, MapPin, Settings, Plus, Edit, Trash2, Eye, FileText, Image, Download, ExternalLink, User, Phone, Calendar, MessageSquare, Pencil, MessageCircleXIcon, MessageSquareText } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -241,10 +241,10 @@ export default function CabanasPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
-              Arriendos Diarios Activos
+              Arriendos Activos
             </CardTitle>
             <CardDescription>
-              {arriendosActuales.length} {arriendosActuales.length === 1 ? 'arriendo diario activo' : 'arriendos diarios activos'} hoy
+              {arriendosActuales.length} {arriendosActuales.length === 1 ? 'arriendo activo' : 'arriendos activos'} hoy
             </CardDescription>
           </CardHeader>
         <CardContent>
@@ -274,7 +274,7 @@ export default function CabanasPage() {
                 const diasRestantes = Math.ceil((fin.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
                 
                 return (
-                  <div key={arriendo.id} className="flex flex-col lg:flex-row lg:items-center gap-2 p-2 border rounded-lg hover:shadow-sm transition-shadow">
+                  <div key={arriendo.id} className="flex flex-col lg:flex-row lg:items-center gap-2 p-2 border rounded-lg hover:shadow-sm transition-shadow bg-muted">
                     {/* Info principal */}
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-1 min-w-0">
                       {/* Primera fila móvil: Cabaña + Arrendatario */}
@@ -330,7 +330,7 @@ export default function CabanasPage() {
                               window.open(`https://wa.me/56${phoneNumber}`, '_blank');
                             }}
                           >
-                            <MessageSquare className="h-3.5 w-3.5 sm:mr-1" />
+                            <MessageSquareText className="h-3.5 w-3.5 sm:mr-1" />
                           </Button>
                           <Button
                             size="sm"
@@ -359,7 +359,7 @@ export default function CabanasPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
-            Próximos Arriendos Diarios
+            Próximos Arriendos
           </CardTitle>
           <CardDescription>
             {arriendosProximos.length} {arriendosProximos.length === 1 ? 'arriendo próximo' : 'arriendos próximos'}
@@ -392,7 +392,7 @@ export default function CabanasPage() {
                 const diasHastaInicio = Math.ceil((inicio.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
                 
                 return (
-                  <div key={arriendo.id} className="flex flex-col lg:flex-row lg:items-center gap-2 p-2 border rounded-lg hover:shadow-sm transition-shadow">
+                  <div key={arriendo.id} className="flex flex-col lg:flex-row lg:items-center gap-2 p-2 border rounded-lg hover:shadow-sm transition-shadow bg-muted">
                     {/* Info principal */}
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-1 min-w-0">
                       {/* Primera fila móvil: Cabaña + Arrendatario */}
@@ -448,7 +448,7 @@ export default function CabanasPage() {
                               window.open(`https://wa.me/56${phoneNumber}`, '_blank');
                             }}
                           >
-                            <MessageSquare className="h-3.5 w-3.5 sm:mr-1" />
+                            <MessageSquareText className="h-3.5 w-3.5 sm:mr-1" />
                           </Button>
                           <Button
                             size="sm"
@@ -474,293 +474,137 @@ export default function CabanasPage() {
     </div>
 
       {/* Arriendos Mensuales */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-foreground">Cabañas Arrendadas Mensualmente</h2>
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="text-sm">
-              {arriendosMensuales.length} activas
-            </Badge>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Home className="h-5 w-5" />
+                Arriendos Mensuales
+              </CardTitle>
+              <CardDescription>
+                {arriendosMensuales.length} {arriendosMensuales.length === 1 ? 'arriendo mensual' : 'arriendos mensuales'}
+              </CardDescription>
+            </div>
             <Button 
               onClick={() => {
                 setEditing(null);
                 setNuevoArriendomMensual(true);
                 setFormOpen(true);
               }}
+              size="sm"
             >
-              <Plus className="h-4 w-4" />
-              Arriendo
+              <Plus className="h-4 w-4 mr-2" />
+              Nuevo Arriendo
             </Button>
           </div>
-        </div>
-
-        {loadingArriendos ? (
-          <div className="flex items-center justify-center h-32">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-2"></div>
-              <p className="text-sm text-gray-600">Cargando arriendos mensuales...</p>
+        </CardHeader>
+        <CardContent>
+          {loadingArriendos ? (
+            <div className="flex items-center justify-center h-32">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                <p className="text-sm text-gray-600">Cargando arriendos mensuales...</p>
+              </div>
             </div>
-          </div>
-        ) : errorArriendos ? (
-          <div className="text-center py-8">
-            <p className="text-red-600 mb-2">Error al cargar arriendos mensuales:</p>
-            <p className="text-sm text-gray-600">{errorArriendos}</p>
-          </div>
-        ) : arriendosMensuales.length === 0 ? (
-          <div className="text-center py-8">
-            <Home className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-600">No hay arriendos mensuales registrados</p>
-            <p className="text-sm text-gray-400 mt-1">Los arriendos mensuales aparecerán aquí</p>
-          </div>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {arriendosMensuales.map((arriendo) => {
-              const inicio = new Date(arriendo.start);
-              const fin = new Date(arriendo.end);
-              const enCurso = new Date() >= inicio && new Date() <= fin;
-              const hasArchivos = arriendo.archivos && arriendo.archivos.length > 0;
-              const hasImagenes = arriendo.imagenes && arriendo.imagenes.length > 0;
-              
-              return (
-                <Card key={arriendo.id} className="overflow-hidden bg-gradient-to-r from-green-50 to-green-50 dark:from-green-900/20 dark:to-green-900/20 rounded-lg border border-green-200 dark:border-green-800 gap-2">
-                  <CardHeader className="">
-                    <div className="flex items-start justify-center">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <Home className="h-4 w-4 text-muted-foreground shrink-0" />
-                        <CardTitle className="text-base text-green-600 truncate uppercase">{arriendo.cabana}</CardTitle>
+          ) : errorArriendos ? (
+            <div className="text-center py-8">
+              <p className="text-red-600 mb-2">Error al cargar arriendos mensuales:</p>
+              <p className="text-sm text-gray-600">{errorArriendos}</p>
+            </div>
+          ) : arriendosMensuales.length === 0 ? (
+            <div className="text-center py-8">
+              <Home className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-600">No hay arriendos mensuales registrados</p>
+              <p className="text-sm text-gray-400 mt-1">Los arriendos mensuales aparecerán aquí</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {arriendosMensuales.map((arriendo) => {
+                const inicio = new Date(arriendo.start);
+                const fin = new Date(arriendo.end);
+                const enCurso = new Date() >= inicio && new Date() <= fin;
+                
+                return (
+                  <div key={arriendo.id} className="flex flex-col lg:flex-row lg:items-center gap-2 p-2 border rounded-lg hover:shadow-sm transition-shadow bg-muted">
+                    {/* Info principal */}
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-1 min-w-0">
+                      {/* Primera fila móvil: Cabaña + Arrendatario */}
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <div className="font-semibold text-sm whitespace-nowrap">{arriendo.cabana}</div>
+                        <Separator orientation="vertical" className="h-5 hidden sm:block" />
+                        <div className="font-medium text-sm truncate">{arriendo.title}</div>
+                      </div>
+                      
+                      {/* Segunda fila móvil: Resto de info */}
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <div className="flex items-center gap-1 whitespace-nowrap">
+                          <Calendar className="h-3.5 w-3.5" />
+                          <span className="text-xs">{format(inicio, 'dd MMM yyyy', { locale: es })}</span>
+                        </div>
+                        <Separator orientation="vertical" className="h-5 hidden sm:block" />
+                        <div className="flex items-center gap-1 whitespace-nowrap">
+                          <DollarSign className="h-3.5 w-3.5" />
+                          <span className="text-xs font-semibold">${arriendo.valorTotal.toLocaleString()}/mes</span>
+                        </div>
+                        <Separator orientation="vertical" className="h-5 hidden sm:block" />
+                        <Badge variant={arriendo.pago ? "outline" : "destructive"} className="text-[10px] h-5 px-1.5 whitespace-nowrap">
+                          {arriendo.pago ? '✓' : '⚠'}
+                        </Badge>
+                        <Separator orientation="vertical" className="h-5 hidden sm:block" />
+                        <Badge variant={enCurso ? "default" : "secondary"} className="text-[10px] h-5 px-1.5 whitespace-nowrap">
+                          {enCurso ? 'Activo' : 'Inactivo'}
+                        </Badge>
                       </div>
                     </div>
-                  </CardHeader>
-                  <Separator />
-                  <CardContent className="space-y-2.5">
-                    {/* Contact info in compact grid */}
-                    <div className="grid grid-cols-2 gap-x-3 text-sm">
-                      <div className="flex items-center gap-1.5">
-                        <User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                        <span className="font-medium truncate">{arriendo.title}</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <Phone className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                        <span className="font-semibold text-xs truncate">
-                          {arriendo.celular ? `+56 9 ${arriendo.celular}` : 'Sin teléfono'}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Dates and price in compact layout */}
-                    <div className="grid grid-cols-2 gap-x-3 text-sm">
-                      <div className="flex items-center gap-1.5 text-muted-foreground">
-                        <Calendar className="h-3.5 w-3.5 shrink-0" />
-                        <span className="truncate">
-                          {format(inicio, 'dd MMM yyy', { locale: es })}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1 text-foreground shrink-0">
-                        <span className="text-muted-foreground">Mes:</span>
-                        <span className="text-sm font-semibold">${(arriendo.valorTotal).toLocaleString()}</span>
-                      </div>
-                    </div>
-
-                    <Separator className="my-2" />
-
-                    {/* Comments section - compact */}
-                    {arriendo.comentarios && (
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-1.5 text-xs font-medium text-foreground">
-                          <MessageSquare className="h-3.5 w-3.5" />
-                          <span>Comentarios</span>
-                        </div>
-                        <div className="bg-green-200 dark:bg-green-100 border rounded p-2 mt-2">
-                          <p className="text-xs text-green-900 leading-snug line-clamp-2">{arriendo.comentarios}</p>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Documents section - compact badges */}
-                    {hasArchivos && (
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-1.5 text-xs font-medium text-foreground">
-                          <FileText className="h-3.5 w-3.5" />
-                          <span>Documentos ({arriendo.archivos!.length})</span>
-                        </div>
-                        <div className="flex flex-wrap gap-1 bg-green-200 dark:bg-green-100 border rounded p-2 mt-2">
-                          {arriendo.archivos!.map((archivo, index) => (
-                            <Dialog key={archivo.id}>
-                              <DialogTrigger asChild>
-                                <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5 font-normal cursor-pointer bg-muted">
-                                  {archivo.nombre.length > 20 ? archivo.nombre.substring(0, 20) + "..." : archivo.nombre}
-                                </Badge>
-                              </DialogTrigger>
-                              <DialogContent className="max-w-full">
-                                <DialogHeader>
-                                  <DialogTitle>{archivo.nombre}</DialogTitle>
-                                </DialogHeader>
-                                <div className="flex-1 flex justify-center items-center h-[70vh]">
-                                  <iframe
-                                    src={archivo.url}
-                                    className="w-full h-full border rounded"
-                                    title={archivo.nombre}
-                                    
-                                  />
-                                </div>
-                                <div className="flex justify-between items-center pt-4 border-t">
-                                  <div className="flex gap-2">
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => {
-                                        const mensaje = `Hola ${arriendo.title}, te envío el documento: ${archivo.nombre} relacionado con tu arriendo de ${arriendo.cabana}. ${archivo.url}`;
-                                        const whatsappUrl = `https://wa.me/569${arriendo.celular}?text=${encodeURIComponent(mensaje)}`;
-                                        window.open(whatsappUrl, '_blank');
-                                      }}
-                                      className="gap-2"
-                                    >
-                                      <span className="text-green-600">📱</span>
-                                      Enviar por WhatsApp
-                                    </Button>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => {
-                                        const subject = `Documento: ${archivo.nombre} - Arriendo ${arriendo.cabana}`;
-                                        const body = `Estimado/a ${arriendo.title},\n\nAdjunto encontrarás el documento "${archivo.nombre}" relacionado con tu arriendo de la cabaña ${arriendo.cabana}.\n\nPuedes acceder al documento en el siguiente enlace:\n${archivo.url}\n\nSaludos cordiales.`;
-                                        const mailtoUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-                                        window.open(mailtoUrl, '_blank');
-                                      }}
-                                      className="gap-2"
-                                    >
-                                      <span>📧</span>
-                                      Enviar por Email
-                                    </Button>
-                                  </div>
-                                  <div className="flex gap-2">
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => window.open(archivo.url, '_blank')}
-                                    >
-                                      <ExternalLink className="h-4 w-4 mr-2" />
-                                      Abrir en nueva pestaña
-                                    </Button>
-                                    <Button
-                                      size="sm"
-                                      onClick={() => {
-                                        const link = document.createElement('a');
-                                        link.href = archivo.url;
-                                        link.download = archivo.nombre;
-                                        link.target = '_blank';
-                                        document.body.appendChild(link);
-                                        link.click();
-                                        document.body.removeChild(link);
-                                      }}
-                                    >
-                                      <Download className="h-4 w-4 mr-2" />
-                                      Descargar
-                                    </Button>
-                                  </div>
-                                </div>
-                              </DialogContent>
-                            </Dialog>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Images section - compact thumbnails */}
-                    {hasImagenes && (
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-1.5 text-xs font-medium text-foreground">
-                          <Image className="h-3.5 w-3.5" />
-                          <span>Imágenes ({arriendo.imagenes!.length})</span>
-                        </div>
-                        <div className="flex flex-wrap gap-1.5 bg-green-200 dark:bg-green-100 border rounded p-2 mt-2">
-                          {arriendo.imagenes!.map((imagen, index) => (
-                            <Dialog key={imagen.id}>
-                              <DialogTrigger asChild>
-                                <div className="h-14 w-14 overflow-hidden rounded border border-border bg-muted shrink-0 cursor-pointer hover:ring-2 hover:ring-primary transition-all">
-                                  <img
-                                    src={imagen.urlThumbnail || imagen.url || "/placeholder.svg"}
-                                    alt={`Imagen ${index + 1}`}
-                                    className="h-full w-full object-cover"
-                                  />
-                                </div>
-                              </DialogTrigger>
-                              <DialogContent className="max-w-4xl">
-                                <DialogHeader>
-                                  <DialogTitle>{imagen.nombre}</DialogTitle>
-                                  <DialogDescription>
-                                    Tamaño: {(imagen.tamaño / 1024 / 1024).toFixed(2)} MB
-                                  </DialogDescription>
-                                </DialogHeader>
-                                <div className="flex justify-center">
-                                  <img
-                                    src={imagen.url}
-                                    alt={imagen.nombre}
-                                    className="max-w-full max-h-[70vh] object-contain"
-                                  />
-                                </div>
-                                <div className="flex justify-end">
-                                  <Button onClick={() => window.open(imagen.url, '_blank')}>
-                                    <ExternalLink className="h-4 w-4 mr-2" />
-                                    Abrir en nueva pestaña
-                                  </Button>
-                                </div>
-                              </DialogContent>
-                            </Dialog>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    <Separator className="my-2" />
-
-                    {/* Action buttons - compact */}
-                    <div className="flex gap-2 pt-1">
+                    
+                    {/* Botones de acción */}
+                    <div className="flex gap-1.5 shrink-0">
                       <Button
-                        variant="default"
                         size="sm"
+                        variant="outline"
+                        className="h-7 text-xs px-2 flex-1 sm:flex-none"
                         onClick={() => {
-                          setEditing(arriendo);
-                          setNuevoArriendomMensual(false);
-                          setFormOpen(true);
+                          setArriendoDetalle(arriendo);
+                          setDetalleOpen(true);
                         }}
-                        className="gap-1.5 h-8 flex-1 text-xs bg-yellow-500"
                       >
-                        <Pencil className="h-3.5 w-3.5" />
-                        Editar
+                        <Eye className="h-3.5 w-3.5 sm:mr-1" />
                       </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={async () => {
-                          if (confirm(`¿Está seguro que desea eliminar el arriendo "${arriendo.title}"?`)) {
-                            try {
-                              setEliminando(arriendo.id);
-                              await eliminar(arriendo.id);
-                              await recargarArriendos();
-                              recargar();
-                            } catch (error) {
-                              console.error('Error al eliminar arriendo:', error);
-                              alert('Error al eliminar el arriendo. Inténtelo nuevamente.');
-                            } finally {
-                              setEliminando(null);
-                            }
-                          }
-                        }}
-                        disabled={eliminando === arriendo.id}
-                        className="gap-1.5 h-8 flex-1 text-xs"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                        Eliminar
-                      </Button>
+                      {arriendo.celular && (
+                        <>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 text-xs px-2 flex-1 sm:flex-none"
+                            onClick={() => {
+                              const phoneNumber = arriendo.celular?.replace(/\D/g, '');
+                              window.open(`https://wa.me/56${phoneNumber}`, '_blank');
+                            }}
+                          >
+                            <MessageSquare className="h-3.5 w-3.5 sm:mr-1" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 text-xs px-2 flex-1 sm:flex-none"
+                            onClick={() => {
+                              const phoneNumber = arriendo.celular?.replace(/\D/g, '');
+                              window.open(`tel:+56${phoneNumber}`, '_self');
+                            }}
+                          >
+                            <PhoneCall className="h-3.5 w-3.5 sm:mr-1" />
+                          </Button>
+                        </>
+                      )}
                     </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        )}
-      </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Modal de detalle */}
       <BookingDetail
