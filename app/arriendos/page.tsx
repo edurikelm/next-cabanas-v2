@@ -267,84 +267,101 @@ export default function CabanasPage() {
               <p className="text-sm text-gray-400 mt-1">Las cabañas están disponibles para arriendos diarios</p>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {arriendosActuales.map((arriendo) => {
                 const inicio = new Date(arriendo.start);
                 const fin = new Date(arriendo.end);
                 const diasRestantes = Math.ceil((fin.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
                 
                 return (
-                  <div key={arriendo.id} className="flex flex-col lg:flex-row lg:items-center gap-2 p-2 border rounded-lg hover:shadow-sm transition-shadow bg-muted">
-                    {/* Info principal */}
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-1 min-w-0">
-                      {/* Primera fila móvil: Cabaña + Arrendatario */}
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <div className="font-semibold text-sm whitespace-nowrap">{arriendo.cabana}</div>
-                        <Separator orientation="vertical" className="h-5 hidden sm:block" />
-                        <div className="font-medium text-sm truncate">{arriendo.title}</div>
+                  <div key={arriendo.id} className="group border rounded-xl p-4 hover:shadow-md transition-all bg-gradient-to-br from-background to-muted/30">
+                    {/* Header: Cabaña y Badges */}
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="p-2 rounded-lg bg-primary/10">
+                          <Home className="h-4 w-4 text-primary" />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-base">{arriendo.cabana}</h3>
+                          <p className="text-sm text-muted-foreground">{arriendo.title}</p>
+                        </div>
                       </div>
-                      
-                      {/* Segunda fila móvil: Resto de info */}
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <div className="flex items-center gap-1 whitespace-nowrap">
-                          <Calendar className="h-3.5 w-3.5" />
-                          <span className="text-xs">{format(inicio, 'dd MMM', { locale: es })} - {format(fin, 'dd MMM', { locale: es })}</span>
-                        </div>
-                        <Separator orientation="vertical" className="h-5 hidden sm:block" />
-                        <div className="flex items-center gap-1 whitespace-nowrap">
-                          <DollarSign className="h-3.5 w-3.5" />
-                          <span className="text-xs font-semibold">${arriendo.valorTotal.toLocaleString()}</span>
-                        </div>
-                        <Separator orientation="vertical" className="h-5 hidden sm:block" />
-                        <Badge variant={arriendo.pago ? "outline" : "destructive"} className="text-[10px] h-5 px-1.5 whitespace-nowrap">
-                          {arriendo.pago ? '✓' : '⚠'}
-                        </Badge>
-                        <Separator orientation="vertical" className="h-5 hidden sm:block" />
-                        <Badge variant={diasRestantes <= 1 ? "destructive" : diasRestantes <= 3 ? "default" : "secondary"} className="text-[10px] h-5 px-1.5 whitespace-nowrap">
-                          {diasRestantes <= 0 ? 'Hoy' : `${diasRestantes}d`}
+                      <div className="flex gap-1.5">
+                        <Badge 
+                          variant={diasRestantes <= 1 ? "destructive" : diasRestantes <= 3 ? "default" : "secondary"} 
+                          className="text-xs font-semibold"
+                        >
+                          {diasRestantes <= 0 ? 'Último día' : `${diasRestantes}d restantes`}
                         </Badge>
                       </div>
                     </div>
-                    
-                    {/* Botones de acción */}
-                    <div className="flex gap-1.5 shrink-0">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-7 text-xs px-2 flex-1 sm:flex-none"
-                        onClick={() => {
-                          setArriendoDetalle(arriendo);
-                          setDetalleOpen(true);
-                        }}
+
+                    {/* Info Grid */}
+                    <div className="grid grid-cols-2 gap-3 mb-3">
+                      <div className="flex items-center gap-2 text-sm">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <div>
+                          <p className="text-xs text-muted-foreground">Fechas</p>
+                          <p className="font-medium">{format(inicio, 'dd MMM', { locale: es })} — {format(fin, 'dd MMM', { locale: es })}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <DollarSign className="h-4 w-4 text-muted-foreground" />
+                        <div>
+                          <p className="text-xs text-muted-foreground">Total</p>
+                          <p className="font-bold text-primary">${arriendo.valorTotal.toLocaleString('es-CL')}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Footer: Estado de pago y acciones */}
+                    <div className="flex items-center justify-between pt-3 border-t">
+                      <Badge 
+                        variant={arriendo.pago ? "outline" : "destructive"} 
+                        className="text-xs"
                       >
-                        <Eye className="h-3.5 w-3.5 sm:mr-1" />
-                      </Button>
-                      {arriendo.celular && (
-                        <>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-7 text-xs px-2 flex-1 sm:flex-none"
-                            onClick={() => {
-                              const phoneNumber = arriendo.celular?.replace(/\D/g, '');
-                              window.open(`https://wa.me/56${phoneNumber}`, '_blank');
-                            }}
-                          >
-                            <MessageSquareText className="h-3.5 w-3.5 sm:mr-1" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-7 text-xs px-2 flex-1 sm:flex-none"
-                            onClick={() => {
-                              const phoneNumber = arriendo.celular?.replace(/\D/g, '');
-                              window.open(`tel:+56${phoneNumber}`, '_self');
-                            }}
-                          >
-                            <PhoneCall className="h-3.5 w-3.5 sm:mr-1" />
-                          </Button>
-                        </>
-                      )}
+                        {arriendo.pago ? '✓ Pagado' : '⚠ Pendiente'}
+                      </Badge>
+                      
+                      <div className="flex gap-1.5">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 w-8 p-0"
+                          onClick={() => {
+                            setArriendoDetalle(arriendo);
+                            setDetalleOpen(true);
+                          }}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        {arriendo.celular && (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
+                              onClick={() => {
+                                const phoneNumber = arriendo.celular?.replace(/\D/g, '');
+                                window.open(`https://wa.me/56${phoneNumber}`, '_blank');
+                              }}
+                            >
+                              <MessageSquareText className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 p-0"
+                              onClick={() => {
+                                const phoneNumber = arriendo.celular?.replace(/\D/g, '');
+                                window.open(`tel:+56${phoneNumber}`, '_self');
+                              }}
+                            >
+                              <PhoneCall className="h-4 w-4" />
+                            </Button>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
@@ -385,84 +402,96 @@ export default function CabanasPage() {
               <p className="text-sm text-gray-400 mt-1">Los próximos arriendos aparecerán aquí</p>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {arriendosProximos.map((arriendo) => {
                 const inicio = new Date(arriendo.start);
                 const fin = new Date(arriendo.end);
                 const diasHastaInicio = Math.ceil((inicio.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
                 
                 return (
-                  <div key={arriendo.id} className="flex flex-col lg:flex-row lg:items-center gap-2 p-2 border rounded-lg hover:shadow-sm transition-shadow bg-muted">
-                    {/* Info principal */}
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-1 min-w-0">
-                      {/* Primera fila móvil: Cabaña + Arrendatario */}
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <div className="font-semibold text-sm whitespace-nowrap">{arriendo.cabana}</div>
-                        <Separator orientation="vertical" className="h-5 hidden sm:block" />
-                        <div className="font-medium text-sm truncate">{arriendo.title}</div>
+                  <div key={arriendo.id} className="group border rounded-xl p-4 hover:shadow-md transition-all bg-gradient-to-br from-background to-muted/30">
+                    {/* Header: Cabaña y Badges */}
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                          <Home className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-base">{arriendo.cabana}</h3>
+                          <p className="text-sm text-muted-foreground">{arriendo.title}</p>
+                        </div>
                       </div>
-                      
-                      {/* Segunda fila móvil: Resto de info */}
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <div className="flex items-center gap-1 whitespace-nowrap">
-                          <Calendar className="h-3.5 w-3.5" />
-                          <span className="text-xs">{format(inicio, 'dd MMM', { locale: es })} - {format(fin, 'dd MMM', { locale: es })}</span>
+                      <Badge variant="secondary" className="text-xs font-semibold">
+                        {diasHastaInicio === 1 ? 'Mañana' : `En ${diasHastaInicio}d`}
+                      </Badge>
+                    </div>
+
+                    {/* Info Grid */}
+                    <div className="grid grid-cols-2 gap-3 mb-3">
+                      <div className="flex items-center gap-2 text-sm">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <div>
+                          <p className="text-xs text-muted-foreground">Fechas</p>
+                          <p className="font-medium">{format(inicio, 'dd MMM', { locale: es })} — {format(fin, 'dd MMM', { locale: es })}</p>
                         </div>
-                        <Separator orientation="vertical" className="h-5 hidden sm:block" />
-                        <div className="flex items-center gap-1 whitespace-nowrap">
-                          <DollarSign className="h-3.5 w-3.5" />
-                          <span className="text-xs font-semibold">${arriendo.valorTotal.toLocaleString()}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <DollarSign className="h-4 w-4 text-muted-foreground" />
+                        <div>
+                          <p className="text-xs text-muted-foreground">Total</p>
+                          <p className="font-bold text-primary">${arriendo.valorTotal.toLocaleString('es-CL')}</p>
                         </div>
-                        <Separator orientation="vertical" className="h-5 hidden sm:block" />
-                        <Badge variant={arriendo.pago ? "outline" : "destructive"} className="text-[10px] h-5 px-1.5 whitespace-nowrap">
-                          {arriendo.pago ? '✓' : '⚠'}
-                        </Badge>
-                        <Separator orientation="vertical" className="h-5 hidden sm:block" />
-                        <Badge variant="secondary" className="text-[10px] h-5 px-1.5 whitespace-nowrap">
-                          {diasHastaInicio === 1 ? 'Mañana' : `En ${diasHastaInicio}d`}
-                        </Badge>
                       </div>
                     </div>
-                    
-                    {/* Botones de acción */}
-                    <div className="flex gap-1.5 shrink-0">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-7 text-xs px-2 flex-1 sm:flex-none"
-                        onClick={() => {
-                          setArriendoDetalle(arriendo);
-                          setDetalleOpen(true);
-                        }}
+
+                    {/* Footer: Estado de pago y acciones */}
+                    <div className="flex items-center justify-between pt-3 border-t">
+                      <Badge 
+                        variant={arriendo.pago ? "outline" : "destructive"} 
+                        className="text-xs"
                       >
-                        <Eye className="h-3.5 w-3.5 sm:mr-1" />
-                      </Button>
-                      {arriendo.celular && (
-                        <>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-7 text-xs px-2 flex-1 sm:flex-none"
-                            onClick={() => {
-                              const phoneNumber = arriendo.celular?.replace(/\D/g, '');
-                              window.open(`https://wa.me/56${phoneNumber}`, '_blank');
-                            }}
-                          >
-                            <MessageSquareText className="h-3.5 w-3.5 sm:mr-1" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-7 text-xs px-2 flex-1 sm:flex-none"
-                            onClick={() => {
-                              const phoneNumber = arriendo.celular?.replace(/\D/g, '');
-                              window.open(`tel:+56${phoneNumber}`, '_self');
-                            }}
-                          >
-                            <PhoneCall className="h-3.5 w-3.5 sm:mr-1" />
-                          </Button>
-                        </>
-                      )}
+                        {arriendo.pago ? '✓ Pagado' : '⚠ Pendiente'}
+                      </Badge>
+                      
+                      <div className="flex gap-1.5">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 w-8 p-0"
+                          onClick={() => {
+                            setArriendoDetalle(arriendo);
+                            setDetalleOpen(true);
+                          }}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        {arriendo.celular && (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
+                              onClick={() => {
+                                const phoneNumber = arriendo.celular?.replace(/\D/g, '');
+                                window.open(`https://wa.me/56${phoneNumber}`, '_blank');
+                              }}
+                            >
+                              <MessageSquareText className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 p-0"
+                              onClick={() => {
+                                const phoneNumber = arriendo.celular?.replace(/\D/g, '');
+                                window.open(`tel:+56${phoneNumber}`, '_self');
+                              }}
+                            >
+                              <PhoneCall className="h-4 w-4" />
+                            </Button>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
@@ -519,84 +548,102 @@ export default function CabanasPage() {
               <p className="text-sm text-gray-400 mt-1">Los arriendos mensuales aparecerán aquí</p>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {arriendosMensuales.map((arriendo) => {
                 const inicio = new Date(arriendo.start);
                 const fin = new Date(arriendo.end);
                 const enCurso = new Date() >= inicio && new Date() <= fin;
                 
                 return (
-                  <div key={arriendo.id} className="flex flex-col lg:flex-row lg:items-center gap-2 p-2 border rounded-lg hover:shadow-sm transition-shadow bg-muted">
-                    {/* Info principal */}
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-1 min-w-0">
-                      {/* Primera fila móvil: Cabaña + Arrendatario */}
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <div className="font-semibold text-sm whitespace-nowrap">{arriendo.cabana}</div>
-                        <Separator orientation="vertical" className="h-5 hidden sm:block" />
-                        <div className="font-medium text-sm truncate">{arriendo.title}</div>
+                  <div key={arriendo.id} className="group border rounded-xl p-4 hover:shadow-md transition-all bg-gradient-to-br from-background to-blue-50/30 dark:to-blue-950/10">
+                    {/* Header: Cabaña y Badges */}
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                          <Home className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-bold text-base">{arriendo.cabana}</h3>
+                            <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Mensual</Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground">{arriendo.title}</p>
+                        </div>
                       </div>
-                      
-                      {/* Segunda fila móvil: Resto de info */}
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <div className="flex items-center gap-1 whitespace-nowrap">
-                          <Calendar className="h-3.5 w-3.5" />
-                          <span className="text-xs">{format(inicio, 'dd MMM yyyy', { locale: es })}</span>
+                      <Badge 
+                        variant={enCurso ? "default" : "secondary"} 
+                        className="text-xs font-semibold"
+                      >
+                        {enCurso ? '✓ Activo' : 'Inactivo'}
+                      </Badge>
+                    </div>
+
+                    {/* Info Grid */}
+                    <div className="grid grid-cols-2 gap-3 mb-3">
+                      <div className="flex items-center gap-2 text-sm">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <div>
+                          <p className="text-xs text-muted-foreground">Inicio</p>
+                          <p className="font-medium">{format(inicio, 'dd MMM yyyy', { locale: es })}</p>
                         </div>
-                        <Separator orientation="vertical" className="h-5 hidden sm:block" />
-                        <div className="flex items-center gap-1 whitespace-nowrap">
-                          <DollarSign className="h-3.5 w-3.5" />
-                          <span className="text-xs font-semibold">${arriendo.valorTotal.toLocaleString()}/mes</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <DollarSign className="h-4 w-4 text-muted-foreground" />
+                        <div>
+                          <p className="text-xs text-muted-foreground">Valor mensual</p>
+                          <p className="font-bold text-primary">${arriendo.valorTotal.toLocaleString('es-CL')}</p>
                         </div>
-                        <Separator orientation="vertical" className="h-5 hidden sm:block" />
-                        <Badge variant={arriendo.pago ? "outline" : "destructive"} className="text-[10px] h-5 px-1.5 whitespace-nowrap">
-                          {arriendo.pago ? '✓' : '⚠'}
-                        </Badge>
-                        <Separator orientation="vertical" className="h-5 hidden sm:block" />
-                        <Badge variant={enCurso ? "default" : "secondary"} className="text-[10px] h-5 px-1.5 whitespace-nowrap">
-                          {enCurso ? 'Activo' : 'Inactivo'}
-                        </Badge>
                       </div>
                     </div>
-                    
-                    {/* Botones de acción */}
-                    <div className="flex gap-1.5 shrink-0">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-7 text-xs px-2 flex-1 sm:flex-none"
-                        onClick={() => {
-                          setArriendoDetalle(arriendo);
-                          setDetalleOpen(true);
-                        }}
+
+                    {/* Footer: Estado de pago y acciones */}
+                    <div className="flex items-center justify-between pt-3 border-t">
+                      <Badge 
+                        variant={arriendo.pago ? "outline" : "destructive"} 
+                        className="text-xs"
                       >
-                        <Eye className="h-3.5 w-3.5 sm:mr-1" />
-                      </Button>
-                      {arriendo.celular && (
-                        <>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-7 text-xs px-2 flex-1 sm:flex-none"
-                            onClick={() => {
-                              const phoneNumber = arriendo.celular?.replace(/\D/g, '');
-                              window.open(`https://wa.me/56${phoneNumber}`, '_blank');
-                            }}
-                          >
-                            <MessageSquare className="h-3.5 w-3.5 sm:mr-1" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-7 text-xs px-2 flex-1 sm:flex-none"
-                            onClick={() => {
-                              const phoneNumber = arriendo.celular?.replace(/\D/g, '');
-                              window.open(`tel:+56${phoneNumber}`, '_self');
-                            }}
-                          >
-                            <PhoneCall className="h-3.5 w-3.5 sm:mr-1" />
-                          </Button>
-                        </>
-                      )}
+                        {arriendo.pago ? '✓ Pagado' : '⚠ Pendiente'}
+                      </Badge>
+                      
+                      <div className="flex gap-1.5">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 w-8 p-0"
+                          onClick={() => {
+                            setArriendoDetalle(arriendo);
+                            setDetalleOpen(true);
+                          }}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        {arriendo.celular && (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
+                              onClick={() => {
+                                const phoneNumber = arriendo.celular?.replace(/\D/g, '');
+                                window.open(`https://wa.me/56${phoneNumber}`, '_blank');
+                              }}
+                            >
+                              <MessageSquare className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 p-0"
+                              onClick={() => {
+                                const phoneNumber = arriendo.celular?.replace(/\D/g, '');
+                                window.open(`tel:+56${phoneNumber}`, '_self');
+                              }}
+                            >
+                              <PhoneCall className="h-4 w-4" />
+                            </Button>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );

@@ -161,6 +161,9 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
   const cantDias = range?.from && range?.to ? Math.max(1, differenceInCalendarDays(range.to, range.from) + 1) : 0;
   const cabanaSeleccionada = form.watch("cabana");
   
+  // Calcular meses para arriendos mensuales
+  const cantMeses = range?.from && range?.to ? Math.max(1, Math.round(cantDias / 30)) : 0;
+  
   // Calcular fechas ocupadas para la cabaña seleccionada
   const fechasOcupadas = useMemo(() => {
     if (!cabanaSeleccionada || !arriendos) return [];
@@ -189,7 +192,10 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
   };
   
   // Calcular valor total con descuento si aplica
-  const valorBase = Math.max(0, (valorNoche || 0) * (cantDias || 0));
+  // Si es mensual, multiplicar por meses; si no, por días
+  const valorBase = esMensual 
+    ? Math.max(0, (valorNoche || 0) * (cantMeses || 0))
+    : Math.max(0, (valorNoche || 0) * (cantDias || 0));
   const porcentajeDescuento = descuento === "gringo" || descuento === "patricia" ? 0.20 : 0;
   const valorTotal = Math.round(valorBase * (1 - porcentajeDescuento));
 
@@ -339,7 +345,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
               control={form.control}
               name="title"
               render={({ field }) => (
-                <FormItem className="xl:col-span-2">
+                <FormItem className="xl:col-span-2 relative pb-5">
                   <FormLabel className="text-sm sm:text-base font-medium">Título</FormLabel>
                   <FormControl>
                     <Input 
@@ -349,7 +355,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                       className="h-9 sm:h-11 text-sm sm:text-base"
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="absolute left-0 -bottom-0 text-xs" />
                 </FormItem>
               )}
             />
@@ -358,7 +364,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
               control={form.control}
               name="cabana"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="relative pb-5">
                   <FormLabel className="text-sm sm:text-base font-medium">Cabaña</FormLabel>
                   <FormControl>
                     <Select value={field.value || ""} onValueChange={field.onChange}>
@@ -396,7 +402,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                       </SelectContent>
                     </Select>
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="absolute left-0 -bottom-0 text-xs" />
                 </FormItem>
               )}
             />
@@ -405,7 +411,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
               control={form.control}
               name="ubicacion"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="relative pb-5">
                   <FormLabel className="text-sm sm:text-base font-medium">Ubicación</FormLabel>
                   <FormControl>
                     <Input 
@@ -415,7 +421,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                       className="h-9 sm:h-11 text-sm sm:text-base"
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="absolute left-0 -bottom-0 text-xs" />
                 </FormItem>
               )}
             />
@@ -424,7 +430,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
               control={form.control}
               name="cantPersonas"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="relative pb-5">
                   <FormLabel className="text-sm sm:text-base font-medium">Personas</FormLabel>
                   <FormControl>
                     <Input 
@@ -441,7 +447,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                       className="h-9 sm:h-11 text-sm sm:text-base"
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="absolute left-0 -bottom-0 text-xs" />
                 </FormItem>
               )}
             />
@@ -450,7 +456,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
               control={form.control}
               name="celular"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="relative pb-5">
                   <FormLabel className="text-sm sm:text-base font-medium">Celular</FormLabel>
                   <FormControl>
                     <div className="relative">
@@ -471,7 +477,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                       />
                     </div>
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="absolute left-0 -bottom-0 text-xs" />
                 </FormItem>
               )}
             />
@@ -480,18 +486,19 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
               control={form.control}
               name="dateRange"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="relative">
                   <FormLabel className="text-sm sm:text-base font-medium">Fechas Inicio - Termino</FormLabel>
                   <FormControl>
                     <DateRangePicker 
                       value={field.value as DateRange | undefined} 
                       onChange={field.onChange}
                       disabled={cabanaSeleccionada ? isDateDisabled : undefined}
+                      className="max-w-full"
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="absolute left-0 -bottom-0 text-xs" />
                   {cabanaSeleccionada && fechasOcupadas.length > 0 && (
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="text-xs text-muted-foreground absolute left-0 -bottom-4">
                       Las fechas en gris están ocupadas para esta cabaña
                     </p>
                   )}
@@ -499,11 +506,13 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
               )}
             />
 
-            <FormItem>
-              <FormLabel className="text-sm sm:text-base font-medium">Noches</FormLabel>
+            <FormItem className="relative">
+              <FormLabel className="text-sm sm:text-base font-medium">
+                {esMensual ? 'Meses' : 'Noches'}
+              </FormLabel>
               <FormControl>
                 <Input 
-                  value={cantDias > 0 ? cantDias : "0"}
+                  value={esMensual ? (cantMeses > 0 ? cantMeses : "0") : (cantDias > 0 ? cantDias : "0")}
                   disabled 
                   readOnly
                   className="h-9 sm:h-11 text-sm sm:text-base font-semibold bg-muted text-center"
@@ -515,15 +524,17 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
               control={form.control}
               name="valorNoche"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm sm:text-base font-medium">Valor por noche</FormLabel>
+                <FormItem className="relative pb-5">
+                  <FormLabel className="text-sm sm:text-base font-medium">
+                    {esMensual ? 'Valor mensual' : 'Valor por noche'}
+                  </FormLabel>
                   <FormControl>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm sm:text-base flex items-center">$</span>
                       <Input 
                         type="text" 
                         inputMode="numeric" 
-                        placeholder="50.000" 
+                        placeholder={esMensual ? "400.000" : "50.000"}
                         value={field.value ? field.value.toLocaleString('es-CL') : ""}
                         onChange={(e) => {
                           const value = e.target.value.replace(/\D/g, ''); // Remover todo excepto dígitos
@@ -533,13 +544,13 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                       />
                     </div>
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="absolute left-0 -bottom-0 text-xs" />
                 </FormItem>
               )}
             />
 
             {/* Campo derivado solo de lectura */}
-            <FormItem>
+            <FormItem className="relative pb-5">
               <div className="flex items-center justify-between mb-2">
                 <FormLabel className="text-sm sm:text-base font-medium">Total</FormLabel>
                 {porcentajeDescuento > 0 && (
@@ -575,7 +586,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
               control={form.control}
               name="descuento"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="relative pb-5">
                   <FormLabel className="text-sm sm:text-base font-medium">Descuento</FormLabel>
                   <FormControl>
                     <Select value={field.value || "sin-descuento"} onValueChange={field.onChange}>
@@ -595,7 +606,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                       </SelectContent>
                     </Select>
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="absolute left-0 -bottom-0 text-xs" />
                 </FormItem>
               )}
             />
@@ -605,7 +616,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
               control={form.control}
               name="pago"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="relative pb-5">
                   <div className="flex flex-row items-center gap-3 p-3 border-2 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
                     onClick={() => field.onChange(!field.value)}
                   >

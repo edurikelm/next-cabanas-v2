@@ -47,7 +47,7 @@ export function DateRangePicker({ value, onChange, placeholder = "Seleccionar fe
       <PopoverTrigger asChild>
         <Button variant="outline" className={btnClass}>
           <CalendarIcon className="mr-2 h-4 w-4 flex-shrink-0" />
-          <span className="truncate">{label}</span>
+          <span className="truncate overflow-hidden text-ellipsis block">{label}</span>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="p-0 w-auto" align="start" side="bottom" sideOffset={4}>
