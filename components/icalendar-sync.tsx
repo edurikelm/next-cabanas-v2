@@ -77,6 +77,7 @@ export function ICalendarSync() {
       start: startDate,
       pago: true, // Asumimos que reservas de Airbnb están pagadas
       ubicacion: airbnbRes.cabana,
+      esAirbnb: true,
       valorNoche: airbnbRes.valorNoche,
       valorTotal: airbnbRes.valorTotal,
       esMensual: false, // Reservas de Airbnb son típicamente por días, no mensuales

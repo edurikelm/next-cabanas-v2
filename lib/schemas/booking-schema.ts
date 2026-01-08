@@ -38,6 +38,7 @@ export const bookingFormSchema = z.object({
   valorNoche: z.number().nonnegative("No puede ser negativo"),
   descuento: z.enum(["sin-descuento", "gringo", "patricia"]),
   pago: z.boolean(),
+  esAirbnb: z.boolean(),
   dateRange: z
     .object({ from: z.date({ message: "Selecciona inicio" }), to: z.date({ message: "Selecciona término" }) })
     .refine((v) => !!v.from && !!v.to, { message: "Selecciona un rango completo", path: ["from"] })

@@ -274,7 +274,7 @@ export default function CabanasPage() {
                 const diasRestantes = Math.ceil((fin.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
                 
                 return (
-                  <div key={arriendo.id} className="group border rounded-xl p-4 hover:shadow-md transition-all bg-gradient-to-br from-background to-muted/30">
+                  <div key={arriendo.id} className="group border rounded-xl p-4 hover:shadow-md transition-all bg-gradient-to-br from-background to-blue-50/30 dark:to-blue-950/10">
                     {/* Header: Cabaña y Badges */}
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-2">
@@ -282,7 +282,14 @@ export default function CabanasPage() {
                           <Home className="h-4 w-4 text-primary" />
                         </div>
                         <div>
-                          <h3 className="font-bold text-base">{arriendo.cabana}</h3>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-bold text-base">{arriendo.cabana}</h3>
+                            {arriendo.esAirbnb && (
+                              <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-pink-50 dark:bg-pink-950/30 border-pink-300 dark:border-pink-700 text-pink-700 dark:text-pink-400">
+                                Airbnb
+                              </Badge>
+                            )}
+                          </div>
                           <p className="text-sm text-muted-foreground">{arriendo.title}</p>
                         </div>
                       </div>
@@ -409,7 +416,7 @@ export default function CabanasPage() {
                 const diasHastaInicio = Math.ceil((inicio.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
                 
                 return (
-                  <div key={arriendo.id} className="group border rounded-xl p-4 hover:shadow-md transition-all bg-gradient-to-br from-background to-muted/30">
+                  <div key={arriendo.id} className="group border rounded-xl p-4 hover:shadow-transition-all bg-gradient-to-br from-background to-blue-50/30 dark:to-blue-950/10">
                     {/* Header: Cabaña y Badges */}
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-2">
@@ -417,7 +424,14 @@ export default function CabanasPage() {
                           <Home className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                         </div>
                         <div>
-                          <h3 className="font-bold text-base">{arriendo.cabana}</h3>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-bold text-base">{arriendo.cabana}</h3>
+                            {arriendo.esAirbnb && (
+                              <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-pink-50 border-pink-300 dark:border-pink-700 text-pink-700 dark:text-pink-400">
+                                Airbnb
+                              </Badge>
+                            )}
+                          </div>
                           <p className="text-sm text-muted-foreground">{arriendo.title}</p>
                         </div>
                       </div>
@@ -566,6 +580,11 @@ export default function CabanasPage() {
                           <div className="flex items-center gap-2">
                             <h3 className="font-bold text-base">{arriendo.cabana}</h3>
                             <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Mensual</Badge>
+                            {arriendo.esAirbnb && (
+                              <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-pink-50 dark:bg-pink-950/30 border-pink-300 dark:border-pink-700 text-pink-700 dark:text-pink-400">
+                                Airbnb
+                              </Badge>
+                            )}
                           </div>
                           <p className="text-sm text-muted-foreground">{arriendo.title}</p>
                         </div>

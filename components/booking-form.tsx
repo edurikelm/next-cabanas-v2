@@ -80,6 +80,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
       valorNoche: initial?.valorNoche ?? 0,
       descuento: initial?.descuento ?? "sin-descuento",
       pago: initial?.pago ?? false,
+      esAirbnb: initial?.esAirbnb ?? false,
       dateRange: initialRange,
       esMensual: initial?.esMensual ?? false,
       archivos: initial?.archivos ?? [],
@@ -134,6 +135,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
           valorNoche: initial?.valorNoche ?? 0,
           descuento: initial?.descuento ?? "sin-descuento",
           pago: initial?.pago ?? false,
+          esAirbnb: initial?.esAirbnb ?? false,
           dateRange: newInitialRange,
           esMensual: initial?.esMensual ?? false,
           archivos: initial?.archivos ?? [],
@@ -219,6 +221,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
         celular: values.celular || '',
         descuento: values.descuento,
         pago: values.pago,
+        esAirbnb: values.esAirbnb,
         start,
         end,
         cantDias,
@@ -311,7 +314,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(submit)} className="booking-form grid grid-cols-1 xl:grid-cols-2 gap-3 sm:gap-4">
+          <form onSubmit={form.handleSubmit(submit)} className="booking-form grid grid-cols-1 xl:grid-cols-2 sm:gap-2">
             {/* Checkbox para Arriendo Mensual */}
             <FormField
               control={form.control}
@@ -345,7 +348,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
               control={form.control}
               name="title"
               render={({ field }) => (
-                <FormItem className="xl:col-span-2 relative pb-5">
+                <FormItem className="xl:col-span-2 relative">
                   <FormLabel className="text-sm sm:text-base font-medium">Título</FormLabel>
                   <FormControl>
                     <Input 
@@ -364,7 +367,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
               control={form.control}
               name="cabana"
               render={({ field }) => (
-                <FormItem className="relative pb-5">
+                <FormItem className="relative">
                   <FormLabel className="text-sm sm:text-base font-medium">Cabaña</FormLabel>
                   <FormControl>
                     <Select value={field.value || ""} onValueChange={field.onChange}>
@@ -411,7 +414,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
               control={form.control}
               name="ubicacion"
               render={({ field }) => (
-                <FormItem className="relative pb-5">
+                <FormItem className="relative">
                   <FormLabel className="text-sm sm:text-base font-medium">Ubicación</FormLabel>
                   <FormControl>
                     <Input 
@@ -430,7 +433,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
               control={form.control}
               name="cantPersonas"
               render={({ field }) => (
-                <FormItem className="relative pb-5">
+                <FormItem className="relative">
                   <FormLabel className="text-sm sm:text-base font-medium">Personas</FormLabel>
                   <FormControl>
                     <Input 
@@ -456,7 +459,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
               control={form.control}
               name="celular"
               render={({ field }) => (
-                <FormItem className="relative pb-5">
+                <FormItem className="relative">
                   <FormLabel className="text-sm sm:text-base font-medium">Celular</FormLabel>
                   <FormControl>
                     <div className="relative">
@@ -524,7 +527,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
               control={form.control}
               name="valorNoche"
               render={({ field }) => (
-                <FormItem className="relative pb-5">
+                <FormItem className="relative">
                   <FormLabel className="text-sm sm:text-base font-medium">
                     {esMensual ? 'Valor mensual' : 'Valor por noche'}
                   </FormLabel>
@@ -550,7 +553,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
             />
 
             {/* Campo derivado solo de lectura */}
-            <FormItem className="relative pb-5">
+            <FormItem className="relative">
               <div className="flex items-center justify-between mb-2">
                 <FormLabel className="text-sm sm:text-base font-medium">Total</FormLabel>
                 {porcentajeDescuento > 0 && (
@@ -586,7 +589,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
               control={form.control}
               name="descuento"
               render={({ field }) => (
-                <FormItem className="relative pb-5">
+                <FormItem className="relative">
                   <FormLabel className="text-sm sm:text-base font-medium">Descuento</FormLabel>
                   <FormControl>
                     <Select value={field.value || "sin-descuento"} onValueChange={field.onChange}>
@@ -611,13 +614,15 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
               )}
             />
 
+            <div className="flex justify-center align-bottom gap-3">
+
             {/* Checkbox de pago */}
             <FormField
               control={form.control}
               name="pago"
               render={({ field }) => (
-                <FormItem className="relative pb-5">
-                  <div className="flex flex-row items-center gap-3 p-3 border-2 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                <FormItem className="relative">
+                  <div className="flex flex-row items-center gap-3 cursor-pointer"
                     onClick={() => field.onChange(!field.value)}
                   >
                     <FormControl>
@@ -631,6 +636,28 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                 </FormItem>
               )}
             />
+
+            {/* Checkbox de Airbnb */}
+            <FormField
+              control={form.control}
+              name="esAirbnb"
+              render={({ field }) => (
+                <FormItem className="relative">
+                  <div className="flex flex-row items-center gap-3 cursor-pointer"
+                    onClick={() => field.onChange(!field.value)}
+                  >
+                    <FormControl>
+                      <Checkbox 
+                        checked={!!field.value} 
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormLabel className="text-sm sm:text-base font-medium cursor-pointer flex-1 leading-none">Arriendo por Airbnb</FormLabel>
+                  </div>
+                </FormItem>
+              )}
+            />
+            </div>
 
             {/* Campos condicionales para arriendos mensuales */}
             {esMensual && (

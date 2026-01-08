@@ -463,6 +463,7 @@ export class ICalendarService {
       start: airbnbReservation.start,
       end: airbnbReservation.end,
       pago: true, // Asumimos que las reservas de Airbnb están pagadas
+      esAirbnb: true, // Marcamos como reserva de Airbnb
       ubicacion: mappedCabanaName,
       valorNoche: airbnbReservation.valorNoche,
       valorTotal: airbnbReservation.valorTotal,
