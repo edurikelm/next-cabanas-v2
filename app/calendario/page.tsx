@@ -1,7 +1,7 @@
 // app/calendario/page.tsx
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Calendar, Views } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { localizer } from "@/lib/date";
@@ -30,6 +30,21 @@ export default function CalendarioPage() {
   const [selectedCabana, setSelectedCabana] = useState<string>("todas");
   const [viewMode, setViewMode] = useState<'calendar' | 'timeline'>('calendar');
   const [timelineStartDate, setTimelineStartDate] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }));
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detectar cambios en el tamaño de la pantalla
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    // Verificar al montar
+    checkMobile();
+    
+    // Escuchar cambios de tamaño
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Lista de cabañas disponibles para el filtro
   const cabanas = useMemo(() => {
@@ -104,7 +119,9 @@ export default function CalendarioPage() {
   // Generar días para la vista timeline
   const timelineDays = useMemo(() => {
     const days = [];
-    const end = endOfWeek(addDays(timelineStartDate, 6), { weekStartsOn: 1 });
+    // En mobile mostrar solo 3 días, en desktop 7 días
+    const diasAMostrar = isMobile ? 3 : 7;
+    const end = addDays(timelineStartDate, diasAMostrar - 1);
     let current = timelineStartDate;
     
     while (current <= end) {
@@ -113,7 +130,7 @@ export default function CalendarioPage() {
     }
     
     return days;
-  }, [timelineStartDate]);
+  }, [timelineStartDate, isMobile]);
 
   // Función para obtener el color de una cabaña
   const getCabanaColor = (cabana: string) => {
@@ -249,7 +266,7 @@ export default function CalendarioPage() {
             <Button onClick={() => { setEditing(null); setFormOpen(true); }} size="sm" className="flex-1 sm:flex-none">
               <Plus className="h-4 w-4 mr-1 sm:mr-0" />
               <span className="sm:hidden">Nuevo</span>
-              <span className="hidden sm:inline">Arriendo</span>
+              <span className="hidden sm:inline">Nuevo</span>
             </Button>
           </div>
         </div>
@@ -315,21 +332,23 @@ export default function CalendarioPage() {
       {viewMode === 'timeline' && (
         <div className="rounded-2xl border bg-muted overflow-hidden">
           {/* Navegación de fechas */}
-          <div className="flex items-center justify-between p-4 border-b bg-muted">
+          <div className="flex items-center justify-between p-3 sm:p-4 border-b bg-muted">
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setTimelineStartDate(addDays(timelineStartDate, -7))}
+              onClick={() => setTimelineStartDate(addDays(timelineStartDate, isMobile ? -3 : -7))}
+              className="h-8 w-8 p-0"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <div className="font-semibold">
-              {format(timelineStartDate, 'MMMM yyyy', { locale: es })}
+            <div className="font-semibold text-sm sm:text-base">
+              {format(timelineStartDate, isMobile ? 'MMM yyyy' : 'MMMM yyyy', { locale: es })}
             </div>
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setTimelineStartDate(addDays(timelineStartDate, 7))}
+              onClick={() => setTimelineStartDate(addDays(timelineStartDate, isMobile ? 3 : 7))}
+              className="h-8 w-8 p-0"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -337,23 +356,27 @@ export default function CalendarioPage() {
 
           {/* Timeline Grid */}
           <div className="overflow-x-auto">
-            <div className="min-w-[800px]">
+            <div className={isMobile ? "" : "min-w-[800px]"}>
               {/* Header con días */}
-              <div className="grid grid-cols-[200px_repeat(7,1fr)] border-b bg-white">
-                <div className="p-3 font-semibold border-r sticky left-0 bg-white dark:text-black z-10">
+              <div className={`grid border-b bg-white ${
+                isMobile 
+                  ? 'grid-cols-[100px_repeat(3,1fr)]' 
+                  : 'grid-cols-[200px_repeat(7,1fr)]'
+              }`}>
+                <div className="p-2 sm:p-3 font-semibold text-xs sm:text-sm border-r sticky left-0 bg-white dark:text-black z-10">
                   Cabañas
                 </div>
                 {timelineDays.map((day, index) => (
                   <div
                     key={index}
-                    className={`p-2 text-center text-sm border-r ${
+                    className={`p-1 sm:p-2 text-center text-xs sm:text-sm border-r ${
                       isSameDay(day, new Date())
                         ? 'bg-gray-200 font-semibold '
                         : ''
                     }`}
                   >
                     <div className="font-medium dark:text-black">{format(day, 'EEE', { locale: es })}</div>
-                    <div className="text-xs text-muted-foreground dark:text-black">{format(day, 'd')}</div>
+                    <div className="text-[10px] sm:text-xs text-muted-foreground dark:text-black">{format(day, 'd')}</div>
                   </div>
                 ))}
               </div>
@@ -367,22 +390,29 @@ export default function CalendarioPage() {
                   )
                   .map((cabana) => {
                     const arriendosCabana = arriendosFiltrados.filter(a => a.cabana === cabana);
+                    const numDias = timelineDays.length;
                     
                     return (
-                      <div key={cabana} className="grid grid-cols-[200px_repeat(7,1fr)] min-h-[80px]">
+                      <div key={cabana} className={`grid min-h-[60px] sm:min-h-[80px] ${
+                        isMobile 
+                          ? 'grid-cols-[100px_repeat(3,1fr)]' 
+                          : 'grid-cols-[200px_repeat(7,1fr)]'
+                      }`}>
                         {/* Nombre de cabaña */}
-                        <div className="p-3 font-medium border-r sticky left-0 bg-white z-10 flex items-center">
-                          <div className="flex items-center gap-2">
+                        <div className="p-2 sm:p-3 font-medium text-xs sm:text-sm border-r sticky left-0 bg-white z-10 flex items-center">
+                          <div className="flex items-center gap-1 sm:gap-2">
                             <div
-                              className="w-3 h-3 rounded-full"
+                              className="w-2 h-2 sm:w-3 sm:h-3 rounded-full flex-shrink-0"
                               style={{ backgroundColor: getCabanaColor(cabana) }}
                             />
-                            <span className="text-sm truncate">{cabana}</span>
+                            <span className="truncate">{cabana}</span>
                           </div>
                         </div>
 
                         {/* Celdas de días */}
-                        <div className="col-span-7 relative grid grid-cols-7">
+                        <div className={`relative grid ${
+                          isMobile ? 'col-span-3 grid-cols-3' : 'col-span-7 grid-cols-7'
+                        }`}>
                           {timelineDays.map((day, dayIndex) => (
                             <div
                               key={dayIndex}
@@ -418,25 +448,29 @@ export default function CalendarioPage() {
                                 }}
                                 className="absolute cursor-pointer hover:opacity-90 transition-opacity"
                                 style={{
-                                  left: `${(startDayIndex / 7) * 100}%`,
-                                  width: `calc(${(position.width / 7) * 100}% - 4px)`,
-                                  top: '8px',
-                                  height: 'calc(100% - 16px)',
+                                  left: `${(startDayIndex / numDias) * 100}%`,
+                                  width: `calc(${(position.width / numDias) * 100}% - ${isMobile ? '2px' : '4px'})`,
+                                  top: isMobile ? '4px' : '8px',
+                                  height: isMobile ? 'calc(100% - 8px)' : 'calc(100% - 16px)',
                                   backgroundColor,
-                                  borderRadius: '6px',
-                                  padding: '8px',
+                                  borderRadius: isMobile ? '4px' : '6px',
+                                  padding: isMobile ? '4px' : '8px',
                                   color: 'white',
-                                  fontSize: '12px',
-                                  marginLeft: '2px',
+                                  fontSize: isMobile ? '10px' : '12px',
+                                  marginLeft: isMobile ? '1px' : '2px',
                                   overflow: 'hidden',
                                 }}
                               >
-                                <div className="font-semibold truncate">{arriendo.title}</div>
-                                <div className="text-xs opacity-90 truncate">
-                                  {arriendo.cantDias} {arriendo.cantDias === 1 ? 'noche' : 'noches'}
-                                </div>
-                                {arriendo.pago && (
-                                  <div className="text-xs mt-1 opacity-90">✓ Pagado</div>
+                                <div className="font-semibold truncate leading-tight">{arriendo.title}</div>
+                                {!isMobile && (
+                                  <>
+                                    <div className="text-xs opacity-90 truncate">
+                                      {arriendo.cantDias} {arriendo.cantDias === 1 ? 'noche' : 'noches'}
+                                    </div>
+                                    {arriendo.pago && (
+                                      <div className="text-xs mt-1 opacity-90">✓ Pagado</div>
+                                    )}
+                                  </>
                                 )}
                               </div>
                             );

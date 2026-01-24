@@ -5,17 +5,23 @@ import { useCabanasDisponibles } from './hooks/useCabanas';
 
 // Hook para obtener solo las cabañas disponibles
 export function useAvailableCabanas() {
-  const { data: cabanas, loading, error, recargar } = useCabanasDisponibles();
-  
-  // Retornar solo los nombres de las cabañas disponibles para compatibilidad
-  const cabanasNames = cabanas?.map(cabana => cabana.nombre) || [];
+  // Lista estática de cabañas
+  const cabanasNames = [
+    "Regional Uno",
+    "Regional Dos", 
+    "Regional Tres",
+    "Regional Cuatro",
+    "Teja Uno",
+    "Teja Dos",
+    "Teja Tres"
+  ];
   
   return {
     cabanas: cabanasNames,
-    cabanasComplete: cabanas, // Datos completos si se necesitan
-    loading,
-    error,
-    recargar // Agregar función de recarga
+    cabanasComplete: [], 
+    loading: false,
+    error: null,
+    recargar: () => {}
   };
 }
 

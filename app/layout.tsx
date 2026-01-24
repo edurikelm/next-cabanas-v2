@@ -27,21 +27,6 @@ export default function RootLayout({
         >
           {/* Header principal */}
           <Header />
-          
-          {/* Topbar móvil para navegación */}
-          <div className="md:hidden sticky top-16 z-40 border-b bg-sidebar/70 backdrop-blur">
-            <div className="flex items-center gap-3 p-3">
-              <MobileNav />
-              <div>
-                <h1 className="text-base font-semibold leading-none text-sidebar-foreground">
-                  Arriendos
-                </h1>
-                <p className="text-xs text-sidebar-foreground/70">
-                  Cabañas dashboard
-                </p>
-              </div>
-            </div>
-          </div>
 
           <div className="flex">
             {/* Sidebar sólo en md+ */}

@@ -6,7 +6,7 @@ export interface Cabana {
   nombre: string;
   arrendatario: string;
   detalles: string;
-  periodo: string; // "mensual" o "diario"
+  esMensual: string; // "mensual" o "diario"
   estado: string;
   fechaContrato: Date;
   valor: number;
@@ -17,7 +17,7 @@ export interface CabanaFormValues {
   nombre: string;
   arrendatario: string;
   detalles: string;
-  periodo: string; // "mensual" o "diario"
+  esMensual: string; // "mensual" o "diario"
   estado: string;
   fechaContrato?: Date;
   valor: number;

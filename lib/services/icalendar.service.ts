@@ -76,6 +76,13 @@ export class ICalendarService {
         return null;
       }
 
+      // Filtrar solo eventos que contengan "Reserved" (reservas confirmadas)
+      const text = `${event.summary || ''} ${event.description || ''}`;
+      if (!text.toLowerCase().includes('reserved')) {
+        console.log(`Evento ignorado (no contiene "Reserved"): ${event.summary}`);
+        return null;
+      }
+
       // Extraer información del huésped desde el summary o description
       const guestInfo = this.extractGuestInfo(event.summary, event.description);
       
@@ -100,8 +107,12 @@ export class ICalendarService {
       // Calcular duración y precios
       const nights = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
       
-      // Precios estimados (Airbnb no siempre incluye precios en iCal)
-      const estimatedPricePerNight = this.estimatePriceFromDescription(event.description);
+      // Precios - buscar en description primero, luego estimar
+      const totalPrice = this.estimatePriceFromDescription(event.description);
+      const pricePerNight = totalPrice > 0 ? Math.round(totalPrice / nights) : 0;
+
+      // Log para debug
+      console.log(`Reserva procesada: ${guestInfo.nombre} | Cabaña: ${cabanaInfo.nombre} | Total: $${totalPrice} | Noches: ${nights}`);
 
       const reservation: AirbnbReservation = {
         id: `airbnb-${event.uid}`,
@@ -111,9 +122,9 @@ export class ICalendarService {
         email: guestInfo.email,
         start: startDate,
         end: endDate,
-        valorNoche: estimatedPricePerNight,
-        valorTotal: estimatedPricePerNight * nights,
-        observaciones: `Reserva Airbnb - ${nights} noche${nights > 1 ? 's' : ''}\n${event.description || ''}`,
+        valorNoche: pricePerNight,
+        valorTotal: totalPrice,
+        observaciones: this.buildObservaciones(event, nights, totalPrice),
         fuente: 'airbnb',
         airbnbId: event.uid,
         sincronizadoEn: new Date()
@@ -127,6 +138,27 @@ export class ICalendarService {
   }
 
   /**
+   * Construye las observaciones de la reserva
+   */
+  private static buildObservaciones(event: ICalEvent, nights: number, totalPrice: number): string {
+    const parts: string[] = [];
+    
+    parts.push(`Reserva Airbnb - ${nights} noche${nights > 1 ? 's' : ''}`);
+    
+    if (totalPrice > 0) {
+      parts.push(`Valor total: $${totalPrice.toLocaleString()}`);
+    } else {
+      parts.push('⚠️ No se pudo detectar el precio desde el archivo iCalendar');
+    }
+    
+    if (event.description) {
+      parts.push(`\nDetalles:\n${event.description}`);
+    }
+    
+    return parts.join('\n');
+  }
+
+  /**
    * Extrae información del huésped del summary o description
    */
   private static extractGuestInfo(summary?: string, description?: string) {
@@ -136,21 +168,53 @@ export class ICalendarService {
 
     const text = `${summary || ''} ${description || ''}`;
     
-    // Buscar patrones comunes en reservas de Airbnb
-    // Ejemplo: "Reserved for John Doe"
-    const nameMatch = text.match(/(?:Reserved for|Reservado para)\s+([^(\n]+)/i);
-    if (nameMatch) {
-      info.nombre = nameMatch[1].trim();
+    // Buscar patrones comunes en reservas de Airbnb para el nombre
+    const namePatterns = [
+      /(?:Reserved for|Reservado para|Reservation for|Reserva para)\s+([A-Za-zÀ-ÿ\s]{2,50})(?:\s*\(|$|\n)/i,
+      /(?:Guest|Huésped|Cliente):\s*([A-Za-zÀ-ÿ\s]{2,50})(?:\s*\(|$|\n|,)/i,
+      /^([A-Z][a-zÀ-ÿ]+(?:\s+[A-Z][a-zÀ-ÿ]+)+)(?:\s*-|\s*\(|$)/m,
+      /ATTENDEE;[^:]*CN=([^;:]+)/i,
+      /NAME:([A-Za-zÀ-ÿ\s]{2,50})(?:\n|$)/i,
+    ];
+
+    for (const pattern of namePatterns) {
+      const match = text.match(pattern);
+      if (match && match[1]) {
+        const nombre = match[1].trim();
+        // Validar que no sea un nombre genérico o muy corto
+        if (nombre.length > 2 && !nombre.toLowerCase().includes('airbnb') && !nombre.toLowerCase().includes('reserved')) {
+          info.nombre = nombre;
+          break;
+        }
+      }
     }
 
-    // Buscar teléfono
-    const phoneMatch = text.match(/(?:Phone|Tel|Teléfono):\s*([+\d\s-()]+)/i);
-    if (phoneMatch) {
-      info.telefono = phoneMatch[1].trim();
+    // Si el summary parece ser solo un nombre (sin otras palabras clave)
+    if (info.nombre === 'Huésped Airbnb' && summary) {
+      const summaryClean = summary.trim();
+      // Verificar si es un nombre válido (2-3 palabras, primera letra mayúscula)
+      if (/^[A-Z][a-zÀ-ÿ]+(?:\s+[A-Z][a-zÀ-ÿ]+){1,2}$/.test(summaryClean)) {
+        info.nombre = summaryClean;
+      }
     }
 
-    // Buscar email
-    const emailMatch = text.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
+    // Buscar teléfono con patrones mejorados
+    const phonePatterns = [
+      /(?:Phone|Tel|Teléfono|Celular|Mobile|Móvil):\s*([+\d\s\-()]{8,20})/i,
+      /(?:Phone|Tel):\s*(\+?\d[\d\s\-()]{7,19})/i,
+      /\b(\+?\d{1,4}[\s\-]?\(?\d{1,4}\)?[\s\-]?\d{3,4}[\s\-]?\d{3,4})\b/,
+    ];
+
+    for (const pattern of phonePatterns) {
+      const match = text.match(pattern);
+      if (match && match[1]) {
+        info.telefono = match[1].trim();
+        break;
+      }
+    }
+
+    // Buscar email con patrón mejorado
+    const emailMatch = text.match(/\b([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\b/);
     if (emailMatch) {
       info.email = emailMatch[1];
     }
@@ -407,18 +471,52 @@ export class ICalendarService {
   private static estimatePriceFromDescription(description?: string): number {
     if (!description) return 0;
 
-    // Buscar patrones de precio en la descripción
+    // Buscar patrones de precio en la descripción con mejores regex
     const pricePatterns = [
-      /\$\s*(\d+(?:,\d{3})*)/,  // $85,000
-      /CLP\s*(\d+(?:,\d{3})*)/i, // CLP 85000
-      /(\d+(?:,\d{3})*)\s*pesos?/i, // 85000 pesos
+      // Patrones con símbolo de moneda
+      /\$\s*(\d+(?:[.,]\d{3})*(?:[.,]\d{2})?)/g,  // $85,000 o $85.000 o $85,000.00
+      /USD\s*(\d+(?:[.,]\d{3})*(?:[.,]\d{2})?)/gi, // USD 85000
+      /CLP\s*(\d+(?:[.,]\d{3})*(?:[.,]\d{2})?)/gi, // CLP 85000
+      /ARS\s*(\d+(?:[.,]\d{3})*(?:[.,]\d{2})?)/gi, // ARS (pesos argentinos)
+      /MXN\s*(\d+(?:[.,]\d{3})*(?:[.,]\d{2})?)/gi, // MXN (pesos mexicanos)
+      
+      // Patrones con palabras
+      /(?:total|precio|price|cost|costo)[:\s]*\$?\s*(\d+(?:[.,]\d{3})*(?:[.,]\d{2})?)/gi,
+      /(\d+(?:[.,]\d{3})*)\s*(?:pesos|dollars?|dólares)/gi,
+      
+      // Patrones de Airbnb específicos
+      /(?:Payout|Payment|Pago)[:\s]*\$?\s*(\d+(?:[.,]\d{3})*(?:[.,]\d{2})?)/gi,
+      /(?:Earning|Ganancia)[:\s]*\$?\s*(\d+(?:[.,]\d{3})*(?:[.,]\d{2})?)/gi,
+      
+      // Patrón genérico para números grandes (probablemente precios)
+      /\b(\d{4,})(?:\.\d{2})?\b/g,
     ];
 
+    const foundPrices: number[] = [];
+
     for (const pattern of pricePatterns) {
-      const match = description.match(pattern);
-      if (match) {
-        return parseInt(match[1].replace(/,/g, ''));
+      const matches = description.matchAll(pattern);
+      for (const match of matches) {
+        if (match[1]) {
+          // Limpiar el número (eliminar puntos/comas de miles, convertir coma decimal a punto)
+          let numStr = match[1].replace(/[.,](?=\d{3})/g, ''); // Eliminar separadores de miles
+          numStr = numStr.replace(',', '.'); // Convertir coma decimal a punto
+          
+          const num = parseFloat(numStr);
+          
+          // Validar que sea un precio razonable (entre 1000 y 10,000,000)
+          if (!isNaN(num) && num >= 1000 && num <= 10000000) {
+            foundPrices.push(num);
+          }
+        }
       }
+    }
+
+    // Si encontramos precios, retornar el más alto (probablemente el total)
+    if (foundPrices.length > 0) {
+      const maxPrice = Math.max(...foundPrices);
+      console.log(`Precio extraído: $${maxPrice.toLocaleString()} de: "${description.substring(0, 100)}..."`);
+      return maxPrice;
     }
 
     return 0; // Sin precio detectado

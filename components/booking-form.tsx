@@ -41,27 +41,8 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
   const archivosUploaderRef = useRef<FileUploaderRef>(null);
   const imagenesUploaderRef = useRef<FileUploaderRef>(null);
   
-  // Filtrar cabañas que no tienen arriendos mensuales activos
-  const cabanasDisponibles = cabanas.filter((cabana) => {
-    if (!arriendos) return true; // Si no hay arriendos cargados, mostrar todas las cabañas
-    
-    // Verificar si hay arriendos mensuales activos para esta cabaña
-    const tieneArriendoMensualActivo = arriendos.some((arriendo) => {
-      if (!arriendo.esMensual || arriendo.cabana !== cabana) return false;
-      
-      const hoy = new Date();
-      const inicio = new Date(arriendo.start);
-      const fin = new Date(arriendo.end);
-      
-      // Si estamos editando un arriendo existente, excluirlo del filtro
-      if (initial?.id && arriendo.id === initial.id) return false;
-      
-      // Verificar si el arriendo mensual está activo (en curso)
-      return hoy >= inicio && hoy <= fin;
-    });
-    
-    return !tieneArriendoMensualActivo;
-  });
+  // Mostrar todas las cabañas sin filtros
+  const cabanasDisponibles = cabanas;
   
   // Asegurar que initialRange tenga una estructura válida
   const initialRange: DateRange = initial?.start && initial?.end 
@@ -80,9 +61,9 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
       valorNoche: initial?.valorNoche ?? 0,
       descuento: initial?.descuento ?? "sin-descuento",
       pago: initial?.pago ?? false,
-      esAirbnb: initial?.esAirbnb ?? false,
       dateRange: initialRange,
       esMensual: initial?.esMensual ?? false,
+      esAirbnb: initial?.esAirbnb ?? false,
       archivos: initial?.archivos ?? [],
       imagenes: initial?.imagenes ?? [],
       comentarios: initial?.comentarios ?? "",
@@ -108,6 +89,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
       pago: initial?.pago ?? false,
       dateRange: newInitialRange,
       esMensual: initial?.esMensual ?? false,
+      esAirbnb: initial?.esAirbnb ?? false,
       archivos: initial?.archivos ?? [],
       imagenes: initial?.imagenes ?? [],
       comentarios: initial?.comentarios ?? "",

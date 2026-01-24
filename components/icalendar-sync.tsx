@@ -325,6 +325,26 @@ export function ICalendarSync() {
               </Badge>
             </div>
 
+            {/* Resumen de extracción de datos */}
+            {(() => {
+              const sinPrecio = previewData.reservations.filter((r: AirbnbReservation) => !r.valorTotal || r.valorTotal === 0).length;
+              const conPrecio = previewData.totalReservations - sinPrecio;
+              
+              return sinPrecio > 0 && (
+                <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                  <div className="text-sm text-amber-800">
+                    <p className="font-medium">Información de precios</p>
+                    <p className="mt-1">
+                      {conPrecio > 0 && `✓ ${conPrecio} reserva${conPrecio > 1 ? 's' : ''} con precio detectado`}
+                      {conPrecio > 0 && sinPrecio > 0 && ' • '}
+                      {sinPrecio > 0 && `⚠ ${sinPrecio} reserva${sinPrecio > 1 ? 's' : ''} sin precio (Airbnb no siempre incluye precios en archivos iCalendar)`}
+                    </p>
+                  </div>
+                </div>
+              );
+            })()}
+
             <Card>
               <CardHeader>
                 <CardTitle>Archivo: {previewData.filename}</CardTitle>
@@ -333,19 +353,25 @@ export function ICalendarSync() {
                 <div className="max-h-60 overflow-y-auto space-y-2">
                   {previewData.reservations.map((reservation: AirbnbReservation, index: number) => (
                     <div key={index} className="flex justify-between items-center p-2 bg-muted rounded">
-                      <div>
+                      <div className="flex-1">
                         <p className="font-medium">{reservation.cliente}</p>
                         <p className="text-sm text-muted-foreground">
                           {reservation.cabana || 'Sin cabaña asignada'}
                         </p>
+                        {!reservation.valorTotal && (
+                          <p className="text-xs text-amber-600 flex items-center gap-1 mt-1">
+                            <AlertCircle className="w-3 h-3" />
+                            Sin precio detectado
+                          </p>
+                        )}
                       </div>
                       <div className="text-right">
                         <p className="text-sm">
                           {format(new Date(reservation.start), 'dd MMM', { locale: es })} - {' '}
                           {format(new Date(reservation.end), 'dd MMM yyyy', { locale: es })}
                         </p>
-                        <Badge variant="outline" className="text-xs">
-                          ${reservation.valorTotal?.toLocaleString()}
+                        <Badge variant={reservation.valorTotal ? "outline" : "secondary"} className="text-xs">
+                          {reservation.valorTotal ? `$${reservation.valorTotal.toLocaleString()}` : 'Sin precio'}
                         </Badge>
                       </div>
                     </div>

@@ -39,7 +39,7 @@ export function useCabanas() {
           nombre: data.nombre || '',
           arrendatario: data.arrendatario || '',
           detalles: data.detalles || '',
-          periodo: data.periodo || '',
+          esMensual: data.esMensual || '',
           estado: data.estado || '',
           fechaContrato: data.fechaContrato?.toDate() || new Date(),
           valor: data.valor || 0,
@@ -85,13 +85,8 @@ export function useCabanasDisponibles() {
       setError(null);
       
       const cabañasRef = collection(db, COLLECTION_NAME);
-      // Filtrar solo las cabañas con estado 'disponible'
-      // Nota: orderBy removido temporalmente hasta crear el índice compuesto
-      const q = query(
-        cabañasRef, 
-        where('estado', '==', 'disponible')
-      );
-      const snapshot = await getDocs(q);
+      // Cargar todas las cabañas sin filtros
+      const snapshot = await getDocs(cabañasRef);
       
       const cabanas: Cabana[] = snapshot.docs.map(doc => {
         const data = doc.data();
@@ -100,7 +95,7 @@ export function useCabanasDisponibles() {
           nombre: data.nombre || '',
           arrendatario: data.arrendatario || '',
           detalles: data.detalles || '',
-          periodo: data.periodo || '',
+          esMensual: data.esMensual || '',
           estado: data.estado || '',
           fechaContrato: data.fechaContrato?.toDate() || new Date(),
           valor: data.valor || 0,
