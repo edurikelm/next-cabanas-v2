@@ -227,9 +227,46 @@ export function BookingDetail({ open, onOpenChange, booking, onEdit, onDelete }:
                     ${booking.valorTotal.toLocaleString('es-CL')}
                   </p>
                 </div>
+              )}              
+              {/* Mostrar monto abonado si existe */}
+              {booking.montoAbonado && booking.montoAbonado > 0 && (
+                <div className="flex items-center justify-between p-2 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
+                  <div className="flex items-center gap-2">
+                    <Wallet className="size-4 text-blue-600 dark:text-blue-400" />
+                    <span className="text-xs text-blue-700 dark:text-blue-400 font-medium">Monto abonado</span>
+                  </div>
+                  <span className="text-sm font-semibold text-blue-700 dark:text-blue-400">
+                    ${booking.montoAbonado.toLocaleString('es-CL')}
+                  </span>
+                </div>
               )}
-            </div>
+              
+              {/* Mostrar saldo pendiente si hay abono */}
+              {booking.montoAbonado && booking.montoAbonado > 0 && booking.montoAbonado < booking.valorTotal && (
+                <div className="flex items-center justify-between p-2 rounded-lg bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800">
+                  <div className="flex items-center gap-2">
+                    <Wallet className="size-4 text-orange-600 dark:text-orange-400" />
+                    <span className="text-xs text-orange-700 dark:text-orange-400 font-medium">Saldo pendiente</span>
+                  </div>
+                  <span className="text-sm font-semibold text-orange-700 dark:text-orange-400">
+                    ${(booking.valorTotal - booking.montoAbonado).toLocaleString('es-CL')}
+                  </span>
+                </div>
+              )}            </div>
           </div>
+
+          {/* Notas del arriendo */}
+          {booking.notas && (
+            <div className="border rounded-lg p-3">
+              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                <MessageCircle className="size-3.5" />
+                Notas del Arriendo
+              </h3>
+              <p className="text-sm text-foreground whitespace-pre-wrap break-words bg-muted/30 p-2.5 rounded-md">
+                {booking.notas}
+              </p>
+            </div>
+          )}
         </div>
 
         <Separator className="my-3" />

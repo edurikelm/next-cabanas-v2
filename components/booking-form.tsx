@@ -61,7 +61,9 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
       valorNoche: initial?.valorNoche ?? 0,
       descuento: initial?.descuento ?? "sin-descuento",
       pago: initial?.pago ?? false,
+      montoAbonado: initial?.montoAbonado ?? 0,
       dateRange: initialRange,
+      notas: initial?.notas ?? "",
       esMensual: initial?.esMensual ?? false,
       esAirbnb: initial?.esAirbnb ?? false,
       archivos: initial?.archivos ?? [],
@@ -87,7 +89,9 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
       valorNoche: initial?.valorNoche ?? 0,
       descuento: initial?.descuento ?? "sin-descuento",
       pago: initial?.pago ?? false,
+      montoAbonado: initial?.montoAbonado ?? 0,
       dateRange: newInitialRange,
+      notas: initial?.notas ?? "",
       esMensual: initial?.esMensual ?? false,
       esAirbnb: initial?.esAirbnb ?? false,
       archivos: initial?.archivos ?? [],
@@ -117,8 +121,10 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
           valorNoche: initial?.valorNoche ?? 0,
           descuento: initial?.descuento ?? "sin-descuento",
           pago: initial?.pago ?? false,
+          montoAbonado: initial?.montoAbonado ?? 0,
           esAirbnb: initial?.esAirbnb ?? false,
           dateRange: newInitialRange,
+          notas: initial?.notas ?? "",
           esMensual: initial?.esMensual ?? false,
           archivos: initial?.archivos ?? [],
           imagenes: initial?.imagenes ?? [],
@@ -203,12 +209,14 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
         celular: values.celular || '',
         descuento: values.descuento,
         pago: values.pago,
+        montoAbonado: values.montoAbonado || 0,
         esAirbnb: values.esAirbnb,
         start,
         end,
         cantDias,
         valorNoche: values.valorNoche,
         valorTotal,
+        notas: values.notas || "",
         esMensual: values.esMensual,
         archivos: values.archivos || [],
         imagenes: values.imagenes || [],
@@ -296,13 +304,13 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(submit)} className="booking-form grid grid-cols-1 xl:grid-cols-2 sm:gap-2">
+          <form onSubmit={form.handleSubmit(submit)} className="booking-form space-y-6">
             {/* Checkbox para Arriendo Mensual */}
             <FormField
               control={form.control}
               name="esMensual"
               render={({ field }) => (
-                <FormItem className="xl:col-span-2">
+                <FormItem>
                   <div className="flex flex-row items-start gap-3 p-4 border-2 rounded-lg bg-blue-50/50 dark:bg-blue-950/20 hover:bg-blue-100/50 dark:hover:bg-blue-950/30 transition-colors cursor-pointer"
                     onClick={() => field.onChange(!field.value)}
                   >
@@ -325,398 +333,475 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                 </FormItem>
               )}
             />
-            
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem className="xl:col-span-2 relative">
-                  <FormLabel className="text-sm sm:text-base font-medium">Título</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="Ej: Eduardo - Cabaña del Bosque" 
-                      value={field.value || ""} 
-                      onChange={field.onChange}
-                      className="h-9 sm:h-11 text-sm sm:text-base"
-                    />
-                  </FormControl>
-                  <FormMessage className="absolute left-0 -bottom-0 text-xs" />
-                </FormItem>
-              )}
-            />
 
-            <FormField
-              control={form.control}
-              name="cabana"
-              render={({ field }) => (
-                <FormItem className="relative">
-                  <FormLabel className="text-sm sm:text-base font-medium">Cabaña</FormLabel>
-                  <FormControl>
-                    <Select value={field.value || ""} onValueChange={field.onChange}>
-                      <SelectTrigger className="h-9 sm:h-11 text-sm sm:text-base">
-                        <SelectValue 
-                          placeholder={
-                            cabanasLoading 
-                              ? "Cargando cabañas..." 
-                              : cabanasError 
-                                ? "Error cargando cabañas" 
-                                : cabanasDisponibles.length === 0
-                                  ? "No hay cabañas disponibles"
-                                  : "Seleccionar cabaña disponible"
-                          } 
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {!cabanasLoading && !cabanasError && cabanasDisponibles
-                          .sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }))
-                          .map((cabana) => (
-                          <SelectItem key={cabana} value={cabana} className="text-sm sm:text-base py-1.5 sm:py-2">
-                            {cabana}
-                          </SelectItem>
-                        ))}
-                        {!cabanasLoading && !cabanasError && cabanasDisponibles.length === 0 && (
-                          <div className="px-3 py-2 text-sm text-orange-600">
-                            No hay cabañas disponibles - Todas tienen arriendos mensuales registrados
-                          </div>
-                        )}
-                        {cabanasError && (
-                          <div className="px-3 py-2 text-sm text-red-600">
-                            Error al cargar cabañas
-                          </div>
-                        )}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage className="absolute left-0 -bottom-0 text-xs" />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="ubicacion"
-              render={({ field }) => (
-                <FormItem className="relative">
-                  <FormLabel className="text-sm sm:text-base font-medium">Ubicación</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="Ej: Pucón" 
-                      value={field.value || ""} 
-                      onChange={field.onChange}
-                      className="h-9 sm:h-11 text-sm sm:text-base"
-                    />
-                  </FormControl>
-                  <FormMessage className="absolute left-0 -bottom-0 text-xs" />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="cantPersonas"
-              render={({ field }) => (
-                <FormItem className="relative">
-                  <FormLabel className="text-sm sm:text-base font-medium">Personas</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="number" 
-                      inputMode="numeric" 
-                      min={1} 
-                      step={1} 
-                      placeholder="2" 
-                      value={field.value === 0 ? "" : field.value || ""}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        field.onChange(value === "" ? 0 : Number(value));
-                      }}
-                      className="h-9 sm:h-11 text-sm sm:text-base"
-                    />
-                  </FormControl>
-                  <FormMessage className="absolute left-0 -bottom-0 text-xs" />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="celular"
-              render={({ field }) => (
-                <FormItem className="relative">
-                  <FormLabel className="text-sm sm:text-base font-medium">Celular</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm sm:text-base flex items-center pointer-events-none">
-                        +56 9
-                      </span>
+            {/* Sección: Información General */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                Información General
+              </h3>
+              
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem className="relative">
+                    <FormLabel className="text-sm sm:text-base font-medium">Título / Nombre del Huésped</FormLabel>
+                    <FormControl>
                       <Input 
-                        inputMode="tel" 
-                        placeholder="1234 5678" 
-                        value={field.value?.replace(/^\+56 9/, '').trim() || ""}
-                        onChange={(e) => {
-                          const value = e.target.value.replace(/\D/g, ''); // Solo dígitos
-                          const limited = value.slice(0, 8); // Máximo 8 dígitos
-                          field.onChange(limited ? `+56 9 ${limited}` : '');
-                        }}
-                        maxLength={9}
-                        className="h-9 sm:h-11 text-sm sm:text-base pl-16"
+                        placeholder="Ej: Eduardo - Cabaña del Bosque" 
+                        value={field.value || ""} 
+                        onChange={field.onChange}
+                        className="h-9 sm:h-11 text-sm sm:text-base"
                       />
-                    </div>
-                  </FormControl>
-                  <FormMessage className="absolute left-0 -bottom-0 text-xs" />
-                </FormItem>
-              )}
-            />
+                    </FormControl>
+                    <FormMessage className="absolute left-0 -bottom-0 text-xs" />
+                  </FormItem>
+                )}
+              />
 
-            <Controller
-              control={form.control}
-              name="dateRange"
-              render={({ field }) => (
-                <FormItem className="relative">
-                  <FormLabel className="text-sm sm:text-base font-medium">Fechas Inicio - Termino</FormLabel>
-                  <FormControl>
-                    <DateRangePicker 
-                      value={field.value as DateRange | undefined} 
-                      onChange={field.onChange}
-                      disabled={cabanaSeleccionada ? isDateDisabled : undefined}
-                      className="max-w-full"
-                    />
-                  </FormControl>
-                  <FormMessage className="absolute left-0 -bottom-0 text-xs" />
-                  {cabanaSeleccionada && fechasOcupadas.length > 0 && (
-                    <p className="text-xs text-muted-foreground absolute left-0 -bottom-4">
-                      Las fechas en gris están ocupadas para esta cabaña
-                    </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="cabana"
+                  render={({ field }) => (
+                    <FormItem className="relative">
+                      <FormLabel className="text-sm sm:text-base font-medium">Cabaña</FormLabel>
+                      <FormControl>
+                        <Select value={field.value || ""} onValueChange={field.onChange}>
+                          <SelectTrigger className="h-9 sm:h-11 text-sm sm:text-base">
+                            <SelectValue 
+                              placeholder={
+                                cabanasLoading 
+                                  ? "Cargando cabañas..." 
+                                  : cabanasError 
+                                    ? "Error cargando cabañas" 
+                                    : cabanasDisponibles.length === 0
+                                      ? "No hay cabañas disponibles"
+                                      : "Seleccionar cabaña"
+                              } 
+                            />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {!cabanasLoading && !cabanasError && cabanasDisponibles
+                              .sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }))
+                              .map((cabana) => (
+                              <SelectItem key={cabana} value={cabana} className="text-sm sm:text-base py-1.5 sm:py-2">
+                                {cabana}
+                              </SelectItem>
+                            ))}
+                            {!cabanasLoading && !cabanasError && cabanasDisponibles.length === 0 && (
+                              <div className="px-3 py-2 text-sm text-orange-600">
+                                No hay cabañas disponibles
+                              </div>
+                            )}
+                            {cabanasError && (
+                              <div className="px-3 py-2 text-sm text-red-600">
+                                Error al cargar cabañas
+                              </div>
+                            )}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage className="absolute left-0 -bottom-0 text-xs" />
+                    </FormItem>
                   )}
-                </FormItem>
-              )}
-            />
-
-            <FormItem className="relative">
-              <FormLabel className="text-sm sm:text-base font-medium">
-                {esMensual ? 'Meses' : 'Noches'}
-              </FormLabel>
-              <FormControl>
-                <Input 
-                  value={esMensual ? (cantMeses > 0 ? cantMeses : "0") : (cantDias > 0 ? cantDias : "0")}
-                  disabled 
-                  readOnly
-                  className="h-9 sm:h-11 text-sm sm:text-base font-semibold bg-muted text-center"
                 />
-              </FormControl>
-            </FormItem>
 
-            <FormField
-              control={form.control}
-              name="valorNoche"
-              render={({ field }) => (
+                <FormField
+                  control={form.control}
+                  name="ubicacion"
+                  render={({ field }) => (
+                    <FormItem className="relative">
+                      <FormLabel className="text-sm sm:text-base font-medium">Ubicación</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Ej: Pucón" 
+                          value={field.value || ""} 
+                          onChange={field.onChange}
+                          className="h-9 sm:h-11 text-sm sm:text-base"
+                        />
+                      </FormControl>
+                      <FormMessage className="absolute left-0 -bottom-0 text-xs" />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="cantPersonas"
+                  render={({ field }) => (
+                    <FormItem className="relative">
+                      <FormLabel className="text-sm sm:text-base font-medium">Cantidad de Personas</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          inputMode="numeric" 
+                          min={1} 
+                          step={1} 
+                          placeholder="2" 
+                          value={field.value === 0 ? "" : field.value || ""}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            field.onChange(value === "" ? 0 : Number(value));
+                          }}
+                          className="h-9 sm:h-11 text-sm sm:text-base"
+                        />
+                      </FormControl>
+                      <FormMessage className="absolute left-0 -bottom-0 text-xs" />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="celular"
+                  render={({ field }) => (
+                    <FormItem className="relative">
+                      <FormLabel className="text-sm sm:text-base font-medium">Celular</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm sm:text-base flex items-center pointer-events-none">
+                            +56 9
+                          </span>
+                          <Input 
+                            inputMode="tel" 
+                            placeholder="1234 5678" 
+                            value={field.value?.replace(/^\+56 9/, '').trim() || ""}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/\D/g, '');
+                              const limited = value.slice(0, 8);
+                              field.onChange(limited ? `+56 9 ${limited}` : '');
+                            }}
+                            maxLength={9}
+                            className="h-9 sm:h-11 text-sm sm:text-base pl-16"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage className="absolute left-0 -bottom-0 text-xs" />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Sección: Fechas y Duración */}
+            <div className="space-y-4">
+              <span className="flex">
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                  Fechas y Duración
+                </h3>
+                
+              </span>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Controller
+                  control={form.control}
+                  name="dateRange"
+                  render={({ field }) => (
+                    <FormItem className="relative">
+                      <FormLabel className="text-sm sm:text-base font-medium">Fechas (Inicio - Término)
+                        {cabanaSeleccionada && fechasOcupadas.length > 0 && (
+                          <p className="text-xs text-amber-200 mt-1">
+                            Las fechas en gris están ocupadas
+                          </p>
+                        )}    
+                      </FormLabel>
+                      <FormControl>
+                        <DateRangePicker 
+                          value={field.value as DateRange | undefined} 
+                          onChange={field.onChange}
+                          disabled={cabanaSeleccionada ? isDateDisabled : undefined}
+                          className="max-w-full"
+                        />
+                      </FormControl>
+                      <FormMessage className="absolute left-0 -bottom-0 text-xs" />
+                    </FormItem>
+                  )}
+                />
+
                 <FormItem className="relative">
                   <FormLabel className="text-sm sm:text-base font-medium">
-                    {esMensual ? 'Valor mensual' : 'Valor por noche'}
+                    {esMensual ? 'Cantidad de Meses' : 'Cantidad de Noches'}
                   </FormLabel>
                   <FormControl>
+                    <Input 
+                      value={esMensual ? (cantMeses > 0 ? cantMeses : "0") : (cantDias > 0 ? cantDias : "0")}
+                      disabled 
+                      readOnly
+                      className="h-9 sm:h-11 text-sm sm:text-base font-semibold bg-muted text-center"
+                    />
+                  </FormControl>
+                </FormItem>
+              </div>
+            </div>
+
+            {/* Sección: Información de Pago */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                Información de Pago
+              </h3>
+              
+              {/* Fila 1: Valor por Noche | Valor Total */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="valorNoche"
+                  render={({ field }) => (
+                    <FormItem className="relative">
+                      <FormLabel className="text-sm sm:text-base font-medium">
+                        {esMensual ? 'Valor Mensual' : 'Valor por Noche'}
+                      </FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm sm:text-base flex items-center">$</span>
+                          <Input 
+                            type="text" 
+                            inputMode="numeric" 
+                            placeholder={esMensual ? "400.000" : "50.000"}
+                            value={field.value ? field.value.toLocaleString('es-CL') : ""}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/\D/g, '');
+                              field.onChange(value === "" ? 0 : Number(value));
+                            }}
+                            className="h-9 sm:h-11 text-sm sm:text-base pl-7"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage className="absolute left-0 -bottom-0 text-xs" />
+                    </FormItem>
+                  )}
+                />
+
+                <FormItem className="relative">
+                  <div className="flex items-center justify-between">
+                    <FormLabel className="text-sm sm:text-base font-medium">Valor Total</FormLabel>
+                    {porcentajeDescuento > 0 && (
+                      <div className="flex items-center gap-1.5 text-xs">
+                        <span className="text-muted-foreground line-through">
+                          ${valorBase.toLocaleString('es-CL')}
+                        </span>
+                        <span className="px-1.5 py-0.5 bg-green-500 text-white rounded-full font-semibold text-[10px]">
+                          -{(porcentajeDescuento * 100).toFixed(0)}%
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <FormControl>
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm sm:text-base flex items-center">$</span>
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm sm:text-base font-semibold flex items-center">$</span>
                       <Input 
-                        type="text" 
-                        inputMode="numeric" 
-                        placeholder={esMensual ? "400.000" : "50.000"}
-                        value={field.value ? field.value.toLocaleString('es-CL') : ""}
-                        onChange={(e) => {
-                          const value = e.target.value.replace(/\D/g, ''); // Remover todo excepto dígitos
-                          field.onChange(value === "" ? 0 : Number(value));
-                        }}
-                        className="h-9 sm:h-11 text-sm sm:text-base pl-7"
+                        value={valorTotal.toLocaleString('es-CL')} 
+                        disabled 
+                        readOnly
+                        className={`h-9 sm:h-11 text-sm sm:text-base font-semibold pl-7 ${
+                          porcentajeDescuento > 0 
+                            ? 'bg-green-50 dark:bg-green-950/30 border-green-500 text-green-700 dark:text-green-400' 
+                            : 'bg-muted'
+                        }`}
                       />
                     </div>
                   </FormControl>
-                  <FormMessage className="absolute left-0 -bottom-0 text-xs" />
                 </FormItem>
-              )}
-            />
-
-            {/* Campo derivado solo de lectura */}
-            <FormItem className="relative">
-              <div className="flex items-center justify-between mb-2">
-                <FormLabel className="text-sm sm:text-base font-medium">Total</FormLabel>
-                {porcentajeDescuento > 0 && (
-                  <div className="flex items-center gap-1.5 text-xs">
-                    <span className="text-muted-foreground line-through">
-                      ${valorBase.toLocaleString('es-CL')}
-                    </span>
-                    <span className="px-1.5 py-0.5 bg-green-500 text-white rounded-full font-semibold text-[10px]">
-                      -{(porcentajeDescuento * 100).toFixed(0)}%
-                    </span>
-                  </div>
-                )}
               </div>
-              <FormControl>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm sm:text-base font-semibold flex items-center">$</span>
-                  <Input 
-                    value={valorTotal.toLocaleString('es-CL')} 
-                    disabled 
-                    readOnly
-                    className={`h-9 sm:h-11 text-sm sm:text-base font-semibold pl-7 ${
-                      porcentajeDescuento > 0 
-                        ? 'bg-green-50 dark:bg-green-950/30 border-green-500 text-green-700 dark:text-green-400' 
-                        : 'bg-muted'
-                    }`}
-                  />
-                </div>
-              </FormControl>
-            </FormItem>
 
-            {/* Select de descuento */}
-            <FormField
-              control={form.control}
-              name="descuento"
-              render={({ field }) => (
-                <FormItem className="relative">
-                  <FormLabel className="text-sm sm:text-base font-medium">Descuento</FormLabel>
-                  <FormControl>
-                    <Select value={field.value || "sin-descuento"} onValueChange={field.onChange}>
-                      <SelectTrigger className="h-9 sm:h-11 text-sm sm:text-base">
-                        <SelectValue placeholder="Seleccionar descuento" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="sin-descuento" className="text-sm sm:text-base py-1.5 sm:py-2">
-                          Sin descuento
-                        </SelectItem>
-                        <SelectItem value="gringo" className="text-sm sm:text-base py-1.5 sm:py-2">
-                          Gringo (20%)
-                        </SelectItem>
-                        <SelectItem value="patricia" className="text-sm sm:text-base py-1.5 sm:py-2">
-                          Patricia (20%)
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage className="absolute left-0 -bottom-0 text-xs" />
-                </FormItem>
-              )}
-            />
+              {/* Fila 2: Monto Abonado | Descuento */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="montoAbonado"
+                  render={({ field }) => (
+                    <FormItem className="relative">
+                      <FormLabel className="text-sm sm:text-base font-medium">Monto Abonado</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm sm:text-base flex items-center">$</span>
+                          <Input 
+                            type="text" 
+                            inputMode="numeric" 
+                            placeholder="0"
+                            value={field.value ? field.value.toLocaleString('es-CL') : ""}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/\D/g, '');
+                              field.onChange(value === "" ? 0 : Number(value));
+                            }}
+                            className="h-9 sm:h-11 text-sm sm:text-base pl-7"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage className="absolute left-0 -bottom-0 text-xs" />
+                    </FormItem>
+                  )}
+                />
 
-            <div className="flex justify-center align-bottom gap-3">
+                <FormField
+                  control={form.control}
+                  name="descuento"
+                  render={({ field }) => (
+                    <FormItem className="relative">
+                      <FormLabel className="text-sm sm:text-base font-medium">Descuento</FormLabel>
+                      <FormControl>
+                        <Select value={field.value || "sin-descuento"} onValueChange={field.onChange}>
+                          <SelectTrigger className="h-9 sm:h-11 text-sm sm:text-base">
+                            <SelectValue placeholder="Seleccionar descuento" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="sin-descuento" className="text-sm sm:text-base py-1.5 sm:py-2">
+                              Sin descuento
+                            </SelectItem>
+                            <SelectItem value="gringo" className="text-sm sm:text-base py-1.5 sm:py-2">
+                              Gringo (20%)
+                            </SelectItem>
+                            <SelectItem value="patricia" className="text-sm sm:text-base py-1.5 sm:py-2">
+                              Ruta Valdiviana (20%)
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage className="absolute left-0 -bottom-0 text-xs" />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-            {/* Checkbox de pago */}
-            <FormField
-              control={form.control}
-              name="pago"
-              render={({ field }) => (
-                <FormItem className="relative">
-                  <div className="flex flex-row items-center gap-3 cursor-pointer"
-                    onClick={() => field.onChange(!field.value)}
-                  >
+              <div className="flex flex-wrap gap-6 p-4 border rounded-lg bg-muted/30"
+              >
+                <FormField
+                  control={form.control}
+                  name="pago"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex flex-row items-center gap-3 cursor-pointer"
+                        onClick={() => field.onChange(!field.value)}
+                      >
+                        <FormControl>
+                          <Checkbox 
+                            checked={!!field.value} 
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormLabel className="text-sm sm:text-base font-medium cursor-pointer leading-none">
+                          Pago realizado
+                        </FormLabel>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="esAirbnb"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex flex-row items-center gap-3 cursor-pointer"
+                        onClick={() => field.onChange(!field.value)}
+                      >
+                        <FormControl>
+                          <Checkbox 
+                            checked={!!field.value} 
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormLabel className="text-sm sm:text-base font-medium cursor-pointer leading-none">
+                          Arriendo por Airbnb
+                        </FormLabel>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Campo de notas opcional */}
+            <div>
+              <FormField
+                control={form.control}
+                name="notas"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm sm:text-base font-medium">Notas del Arriendo</FormLabel>
                     <FormControl>
-                      <Checkbox 
-                        checked={!!field.value} 
-                        onCheckedChange={field.onChange}
+                      <Textarea 
+                        {...field}
+                        value={field.value || ''}
+                        placeholder="Agrega cualquier nota o información adicional sobre este arriendo..."
+                        className="min-h-[60px] sm:min-h-[80px] text-sm sm:text-base resize-y"
                       />
                     </FormControl>
-                    <FormLabel className="text-sm sm:text-base font-medium cursor-pointer flex-1 leading-none">Pago realizado</FormLabel>
-                  </div>
-                </FormItem>
-              )}
-            />
-
-            {/* Checkbox de Airbnb */}
-            <FormField
-              control={form.control}
-              name="esAirbnb"
-              render={({ field }) => (
-                <FormItem className="relative">
-                  <div className="flex flex-row items-center gap-3 cursor-pointer"
-                    onClick={() => field.onChange(!field.value)}
-                  >
-                    <FormControl>
-                      <Checkbox 
-                        checked={!!field.value} 
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormLabel className="text-sm sm:text-base font-medium cursor-pointer flex-1 leading-none">Arriendo por Airbnb</FormLabel>
-                  </div>
-                </FormItem>
-              )}
-            />
+                    <FormMessage className="text-xs" />
+                  </FormItem>
+                )}
+              />
             </div>
 
             {/* Campos condicionales para arriendos mensuales */}
             {esMensual && (
-              <>
-                {/* Separador visual */}
-                <div className="xl:col-span-2 border-t pt-2 sm:pt-4 mt-2 sm:mt-4">
-                  <h3 className="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 text-blue-700 dark:text-blue-400 flex items-center gap-2">
-                    📋 Información Adicional
-                    <span className="text-xs font-normal text-muted-foreground hidden sm:inline">(Arriendo Mensual)</span>
-                  </h3>
-                </div>
+              <div className="space-y-4 pt-4 border-t-2">
+                <h3 className="text-sm sm:text-lg font-semibold text-blue-700 dark:text-blue-400 flex items-center gap-2">
+                  📋 Información Adicional del Arriendo Mensual
+                </h3>
 
                 {/* Subida de archivos */}
-                <div className="xl:col-span-2">
-                  <FormField
-                    control={form.control}
-                    name="archivos"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FileUploader
-                          ref={archivosUploaderRef}
-                          bookingId={initial?.id || 'temp'}
-                          tipo="archivos"
-                          archivosExistentes={field.value || []}
-                          onArchivosChange={field.onChange}
-                          maxArchivos={5}
-                        />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                <FormField
+                  control={form.control}
+                  name="archivos"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FileUploader
+                        ref={archivosUploaderRef}
+                        bookingId={initial?.id || 'temp'}
+                        tipo="archivos"
+                        archivosExistentes={field.value || []}
+                        onArchivosChange={field.onChange}
+                        maxArchivos={5}
+                      />
+                    </FormItem>
+                  )}
+                />
 
                 {/* Subida de imágenes */}
-                <div className="xl:col-span-2">
-                  <FormField
-                    control={form.control}
-                    name="imagenes"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FileUploader
-                          ref={imagenesUploaderRef}
-                          bookingId={initial?.id || 'temp'}
-                          tipo="imagenes"
-                          archivosExistentes={field.value || []}
-                          onArchivosChange={field.onChange}
-                          maxArchivos={5}
-                        />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                <FormField
+                  control={form.control}
+                  name="imagenes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FileUploader
+                        ref={imagenesUploaderRef}
+                        bookingId={initial?.id || 'temp'}
+                        tipo="imagenes"
+                        archivosExistentes={field.value || []}
+                        onArchivosChange={field.onChange}
+                        maxArchivos={5}
+                      />
+                    </FormItem>
+                  )}
+                />
 
                 {/* Campo de comentarios */}
-                <div className="xl:col-span-2">
-                  <FormField
-                    control={form.control}
-                    name="comentarios"
-                    render={({ field }) => (
-                      <FormItem>
-                        <ComentariosField
-                          value={field.value || ''}
-                          onChange={field.onChange}
-                          placeholder="Agregar observaciones sobre el arriendo mensual..."
-                        />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </>
+                <FormField
+                  control={form.control}
+                  name="comentarios"
+                  render={({ field }) => (
+                    <FormItem>
+                      <ComentariosField
+                        value={field.value || ''}
+                        onChange={field.onChange}
+                        placeholder="Agregar observaciones sobre el arriendo mensual..."
+                      />
+                    </FormItem>
+                  )}
+                />
+              </div>
             )}
 
-            <div className="xl:col-span-2 flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-3 sm:pt-4 border-t">
+            {/* Botones de acción */}
+            <div className="flex flex-col sm:flex-row justify-end gap-3 pt-6 border-t">
               <Button 
                 type="button" 
                 variant="outline" 
                 onClick={() => onOpenChange(false)}
-                className="w-full sm:w-auto h-9 sm:h-11 text-sm sm:text-base font-medium"
+                className="w-full sm:w-auto h-10 sm:h-11 text-sm sm:text-base font-medium"
               >
                 Cancelar
               </Button>
@@ -742,7 +827,7 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                         celular: values.celular,
                         fechaInicio: values.dateRange.from,
                         fechaFin: values.dateRange.to,
-                        valorMensual: values.valorNoche, // En arriendos mensuales, valorNoche representa el valor mensual
+                        valorMensual: values.valorNoche,
                         comentarios: values.comentarios || undefined,
                       };
 
@@ -752,18 +837,18 @@ export function BookingForm({ open, onOpenChange, onSubmit, onReload, initial }:
                       alert('Error al generar el contrato. Por favor, intenta nuevamente.');
                     }
                   }}
-                  className="w-full sm:w-auto h-9 sm:h-11 text-sm sm:text-base font-medium"
+                  className="w-full sm:w-auto h-10 sm:h-11 text-sm sm:text-base font-medium"
                 >
-                  Generar contrato
+                  📄 Generar Contrato
                 </Button>
               )}
               
               <Button 
                 type="submit" 
                 disabled={operationLoading}
-                className="w-full sm:w-auto h-9 sm:h-11 text-sm sm:text-base font-medium min-w-[120px] sm:min-w-[140px]"
+                className="w-full sm:w-auto h-10 sm:h-11 text-sm sm:text-base font-medium min-w-[140px]"
               >
-                {operationLoading ? 'Guardando...' : (initial?.id ? "Guardar cambios" : "Agregar")}
+                {operationLoading ? '⏳ Guardando...' : (initial?.id ? "💾 Guardar Cambios" : "Guardar")}
               </Button>
             </div>
           </form>

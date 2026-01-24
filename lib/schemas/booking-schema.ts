@@ -38,6 +38,7 @@ export const bookingFormSchema = z.object({
   valorNoche: z.number().nonnegative("No puede ser negativo"),
   descuento: z.enum(["sin-descuento", "gringo", "patricia"]),
   pago: z.boolean(),
+  montoAbonado: z.number().nonnegative("No puede ser negativo").optional(),
   esAirbnb: z.boolean(),
   dateRange: z
     .object({ from: z.date({ message: "Selecciona inicio" }), to: z.date({ message: "Selecciona término" }) })
@@ -46,6 +47,9 @@ export const bookingFormSchema = z.object({
   
   // Campo principal para identificar si es arriendo mensual
   esMensual: z.boolean(),
+  
+  // Campo de notas opcional para cualquier tipo de arriendo
+  notas: z.string().max(500, "Máximo 500 caracteres").optional(),
   
   // Campos opcionales que solo aparecen si esMensual es true
   archivos: z.array(archivoAdjuntoSchema).optional(),

@@ -37,6 +37,8 @@ const convertDocToBooking = (doc: QueryDocumentSnapshot<DocumentData>): Booking 
     ubicacion: data.ubicacion || '',
     valorNoche: Number(data.valorNoche) || 0,
     valorTotal: Number(data.valorTotal) || 0,
+    montoAbonado: data.montoAbonado !== undefined ? Number(data.montoAbonado) : undefined,
+    notas: data.notas || undefined,
     
     // Nuevos campos opcionales
     esMensual: Boolean(data.esMensual),
@@ -96,6 +98,8 @@ const convertBookingToDoc = (booking: Omit<Booking, 'id'>): DocumentData => {
     ubicacion: booking.ubicacion || '',
     valorNoche: booking.valorNoche,
     valorTotal: booking.valorTotal,
+    ...(booking.montoAbonado !== undefined && { montoAbonado: booking.montoAbonado }),
+    ...(booking.notas && { notas: booking.notas }),
     fechaCreacion: serverTimestamp(),
     
     // Nuevos campos opcionales

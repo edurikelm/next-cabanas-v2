@@ -39,6 +39,8 @@ export interface Booking {
   ubicacion?: string;      // Ubicación / sector de la cabaña
   valorNoche: number;     // Tarifa por noche
   valorTotal: number;     // Total = valorNoche * cantDias (puedes modificar la lógica si hay descuento)
+  montoAbonado?: number;  // Monto abonado o pago parcial
+  notas?: string;         // Notas opcionales del arriendo
   
   // Nuevos campos opcionales
   esMensual: boolean;      // Indica si es arriendo mensual (determina si aparecen campos extra)
