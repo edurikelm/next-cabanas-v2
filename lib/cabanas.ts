@@ -8,9 +8,7 @@ export function useAvailableCabanas() {
   // Lista estática de cabañas
   const cabanasNames = [
     "Regional Uno",
-    "Regional Dos", 
     "Regional Tres",
-    "Regional Cuatro",
     "Teja Uno",
     "Teja Dos",
     "Teja Tres"
